@@ -1,16 +1,14 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using Game;
 
 namespace Game.Utils
 {
     public class CustomLogger
     {
-        //TODO: use config
-        private static readonly LogLevel minLevel = LogLevel.Debug;
-        private static readonly bool logPrefix = true;
-        private static readonly bool logMethod = true;
+        public static LogLevel MinLevel { get; set; } = LogLevel.Debug;
+        public static bool LogPrefix { get; set; } = true;
+        public static bool LogMethod { get; set; } = true;
 
         /// <summary>
         /// Log a localized message
@@ -41,31 +39,44 @@ namespace Game.Utils
         /// </summary>
         public static void LogRaw(LogLevel level, string message)
         {
-            if((int)level < (int)minLevel) {
+            if((int)level < (int)MinLevel) {
                 //Level too low
                 return;
             }
             StringBuilder messageBuilder = new StringBuilder();
-            if (logPrefix) {
+            if (LogPrefix) {
                 messageBuilder.Append(level.ToString().ToUpper());
-                if (logMethod) {
+                if (LogMethod) {
                     messageBuilder.Append(" - ");
                 } else {
                     messageBuilder.Append(": ");
                 }
             }
-            if (logMethod) {
+            if (LogMethod) {
                 StackTrace trace = new StackTrace();
-                StackFrame frame = trace.GetFrame(1);
-                messageBuilder.Append(frame.GetMethod().ReflectedType.Name);
+                StackFrame frame = null;
+                for (int i = 1; i < trace.FrameCount && frame == null; i++) {
+                    if(trace.GetFrame(i).GetMethod().ReflectedType.Name != "CustomLogger") {
+                        frame = trace.GetFrame(i);
+                    }
+                }
+                messageBuilder.Append(frame != null ? frame.GetMethod().ReflectedType.Name : "UnknownClass");
                 messageBuilder.Append(" -> ");
-                messageBuilder.Append(ParseMethodName(frame.GetMethod()));
+                messageBuilder.Append(frame != null ? ParseMethodName(frame.GetMethod()) : "UnknownMethod");
                 messageBuilder.Append(": ");
             }
 
             messageBuilder.Append(message);
 
             WriteLog(messageBuilder.ToString());
+        }
+
+        /// <summary>
+        /// Log a raw string
+        /// </summary>
+        public static void LogRaw(string message)
+        {
+            WriteLog(message);
         }
 
         /// <summary>

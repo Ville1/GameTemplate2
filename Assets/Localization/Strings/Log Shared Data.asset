@@ -23,6 +23,34 @@ MonoBehaviour:
     m_Key: AttemptingToCreateMultipleInstances
     m_Metadata:
       m_Items: []
+  - m_Id: 13950554304512
+    m_Key: ConfigLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14085459898368
+    m_Key: ConfigSaved
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14458371272704
+    m_Key: FailedToSaveConfig
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26871770476544
+    m_Key: FailedToLoadConfig
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27818890457088
+    m_Key: ListenerIsAlreadyRegistered
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27884086718464
+    m_Key: ListenerIsNotRegistered
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30051015159808
+    m_Key: LoggerSettingsLoaded
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

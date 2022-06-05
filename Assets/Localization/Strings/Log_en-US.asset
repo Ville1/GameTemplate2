@@ -26,6 +26,35 @@ MonoBehaviour:
     m_Localized: Attempting to create multiple instances
     m_Metadata:
       m_Items: []
+  - m_Id: 13950554304512
+    m_Localized: 'Config loaded: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14085459898368
+    m_Localized: 'Config saved: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14458371272704
+    m_Localized: 'Failed to save config. Exception: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26871770476544
+    m_Localized: 'Failed to load config file. Using and saving default config. Exception:
+      {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27818890457088
+    m_Localized: Listener is already registered
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27884086718464
+    m_Localized: Listener is not registered
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30051015159808
+    m_Localized: Logger settings loaded
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
