@@ -31,7 +31,7 @@ namespace Game
             CustomLogger.MinLevel = ConfigManager.Config.LogLevel;
             CustomLogger.LogPrefix = ConfigManager.Config.LogPrefix;
             CustomLogger.LogMethod = ConfigManager.Config.LogMethod;
-            CustomLogger.LogRaw(Localization.Log.Get("LoggerSettingsLoaded"));
+            CustomLogger.LogRaw("LOGGER - " + Localization.Log.Get("LoggerSettingsLoaded"));
         }
 
         /// <summary>
