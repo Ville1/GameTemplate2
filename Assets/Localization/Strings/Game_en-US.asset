@@ -19,7 +19,19 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 14085877760
-    m_Localized: Test value
+    m_Localized: New game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 806843896393728
+    m_Localized: Load
+    m_Metadata:
+      m_Items: []
+  - m_Id: 806933096656896
+    m_Localized: Save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 806959453663232
+    m_Localized: Quit
     m_Metadata:
       m_Items: []
   references:

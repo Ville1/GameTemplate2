@@ -51,6 +51,14 @@ MonoBehaviour:
     m_Key: LoggerSettingsLoaded
     m_Metadata:
       m_Items: []
+  - m_Id: 809246934790144
+    m_Key: FailedToGenerateGameObjectName
+    m_Metadata:
+      m_Items: []
+  - m_Id: 812276488957952
+    m_Key: UIElementError
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

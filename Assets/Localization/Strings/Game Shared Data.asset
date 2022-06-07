@@ -16,7 +16,19 @@ MonoBehaviour:
   m_TableCollectionNameGuidString: 368e06ac29cedf947a7586a7c5c1cca3
   m_Entries:
   - m_Id: 14085877760
-    m_Key: TestKey
+    m_Key: NewGame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 806843896393728
+    m_Key: Load
+    m_Metadata:
+      m_Items: []
+  - m_Id: 806933096656896
+    m_Key: Save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 806959453663232
+    m_Key: Quit
     m_Metadata:
       m_Items: []
   m_Metadata:
