@@ -51,8 +51,10 @@ MonoBehaviour:
     m_Localized: Listener is not registered
     m_Metadata:
       m_Items: []
-  - m_Id: 30051015159808
-    m_Localized: Logger settings loaded
+  - m_Id: 1196501792813056
+    m_Localized: When using StartSaving(), TSaveData-class should have at least one
+      non-static public field with DataPropertyAttribute and type which implements
+      ISaveData-interface
     m_Metadata:
       m_Items: []
   - m_Id: 809246934790144
@@ -61,6 +63,88 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 812276488957952
     m_Localized: 'UI element error: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1193334774525952
+    m_Localized: Call StartSaving() at least once before calling Update()
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1211570060619776
+    m_Localized: 'Saveable is missing: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1547867438542848
+    m_Localized: All prefabs loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1548108556496896
+    m_Localized: 'Prefab loaded: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1548456574676992
+    m_Localized: Loading prefabs...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1549345309945856
+    m_Localized: There are multiple prefabs with name "{0}" only the first one is
+      loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1549875503525888
+    m_Localized: Prefab with name "{0}" not found
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1562824381132800
+    m_Localized: Logger settings loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1590215581200384
+    m_Localized: 'Object is destroyed: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1862752068268032
+    m_Localized: Invalid parameter(s)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868509077663744
+    m_Localized: Loading textures...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868718499262464
+    m_Localized: There are multiple textures with name  "{0}" only the first one
+      is loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868879828971520
+    m_Localized: '{0} loaded: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868957486510080
+    m_Localized: All textures loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870014488866816
+    m_Localized: 'Loading textures ({0}) from: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1872350691028992
+    m_Localized: TextureManager can't load texture with name "{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1876330146000896
+    m_Localized: No textures
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1876376665026560
+    m_Localized: Texture "{0}/{1}" not found
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1887213903507456
+    m_Localized: 'Object is prototype: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1895388128047104
+    m_Localized: Object2D does not have a sprite
     m_Metadata:
       m_Items: []
   references:

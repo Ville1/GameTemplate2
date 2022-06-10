@@ -1,5 +1,5 @@
 {
-	"LogLevel": 2,
-	"LogPrefix": false,
+	"LogLevel": 0,
+	"LogPrefix": true,
 	"LogMethod": true
 }

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Game.UI
 {
-    public class MainMenu : PanelBase
+    public class MainMenu : WindowBase
     {
         public static MainMenu Instance;
 
@@ -29,10 +29,10 @@ namespace Game.UI
             //Create buttons
             //Localized string key, action delegate
             Dictionary<string, CustomButton.OnClick> buttonActions = new Dictionary<string, CustomButton.OnClick>() {
-                { "NewGame", () => { CustomLogger.DebugRaw("New game"); } },
-                { "Load", () => { CustomLogger.DebugRaw("Load game"); } },
-                { "Save", () => { CustomLogger.DebugRaw("Save game"); } },
-                { "Quit", () => { CustomLogger.DebugRaw("Quit game"); } }
+                { "NewGame", () => { NewGame(); } },
+                { "Load", () => { Load(); } },
+                { "Save", () => { Save(); } },
+                { "Quit", () => { Quit(); } }
             };
 
             float buttonSpacing = 30.0f;
@@ -59,5 +59,25 @@ namespace Game.UI
         /// </summary>
         protected override void Update()
         { }
+
+        private static void NewGame()
+        {
+            Main.Instance.NewGame();
+        }
+
+        private static void Load()
+        {
+            CustomLogger.DebugRaw("Load game");
+        }
+
+        private static void Save()
+        {
+            Main.Instance.NewGame();
+        }
+
+        private static void Quit()
+        {
+            CustomLogger.DebugRaw("Quit game");
+        }
     }
 }

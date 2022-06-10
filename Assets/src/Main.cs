@@ -1,6 +1,8 @@
 using Game.Utils;
 using Game.Utils.Config;
+using Game.Maps;
 using UnityEngine;
+using Game.UI;
 
 namespace Game
 {
@@ -9,6 +11,8 @@ namespace Game
         public static Main Instance;
 
         public State State { get; private set; }
+        public Map WorldMap { get; private set; }
+        public float CurrentFrameRate { get; private set; }
 
         /// <summary>
         /// Initializiation
@@ -32,12 +36,31 @@ namespace Game
             CustomLogger.LogPrefix = ConfigManager.Config.LogPrefix;
             CustomLogger.LogMethod = ConfigManager.Config.LogMethod;
             CustomLogger.LogRaw("LOGGER - " + Localization.Log.Get("LoggerSettingsLoaded"));
+
+            //Show main menu
+            MainMenu.Instance.Active = true;
         }
 
         /// <summary>
         /// Per frame update
         /// </summary>
         private void Update()
-        { }
+        {
+            CurrentFrameRate = 1.0f / Time.deltaTime;
+        }
+
+        public void NewGame()
+        {
+            State = State.GeneratingMap;
+            ProgressBar.Instance.Show("Generation map...");
+            WorldMap = Map.Instantiate("WorldMap", 100, 100);
+            WorldMap.StartGeneration(() => { EndMapGeneration(); });
+        }
+
+        private void EndMapGeneration()
+        {
+            State = State.Running;
+            ProgressBar.Instance.Active = false;
+        }
     }
 }

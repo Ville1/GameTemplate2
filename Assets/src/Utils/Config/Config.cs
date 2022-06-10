@@ -5,6 +5,7 @@ namespace Game.Utils.Config
         public LogLevel LogLevel;
         public bool LogPrefix;
         public bool LogMethod;
+        public string SaveFolder;
 
         public static Config Default
         {

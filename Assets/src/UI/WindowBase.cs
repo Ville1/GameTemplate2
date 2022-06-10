@@ -1,16 +1,22 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game.UI
 {
-    public class PanelBase : MonoBehaviour
+    public class WindowBase : MonoBehaviour
     {
+        public enum Tag { ProgressBar }
+
         public GameObject Panel;
+        public List<Tag> Tags { get; private set; } = new List<Tag>();
 
         /// <summary>
         /// Initializiation
         /// </summary>
         protected virtual void Start()
-        { }
+        {
+            UIManager.Instance.Windows.Add(this);
+        }
 
         /// <summary>
         /// Per frame update
@@ -18,7 +24,7 @@ namespace Game.UI
         protected virtual void Update()
         { }
 
-        public bool Active
+        public virtual bool Active
         {
             get {
                 return Panel.activeSelf;

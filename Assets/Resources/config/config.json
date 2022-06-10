@@ -1,5 +1,6 @@
 {
 	"LogLevel": 0,
 	"LogPrefix": true,
-	"LogMethod": true
+	"LogMethod": true,
+	"SaveFolder": "C:/Users/Ville/GameTemplateSaves"
 }

@@ -7,7 +7,7 @@ namespace Game.Utils.Config
 {
     public class ConfigManager : MonoBehaviour
     {
-        private static readonly string FILE_PATH = "/Resources/config/config.json";
+        private static readonly string FILE_PATH = "/Resources/Config/config.json";
 
         public static Config Config { get; private set; }
         public static bool LoadFailed { get; private set; }
@@ -34,7 +34,7 @@ namespace Game.Utils.Config
                 return;
             }
             listeners.Add(listener);
-            listener.UpdateSettings();
+            listener.ReadConfig();
         }
 
         public static void UnregisterListener(IConfigListener listener)
@@ -52,6 +52,9 @@ namespace Game.Utils.Config
             try {
                 File.WriteAllText(Application.dataPath + FILE_PATH, JsonUtility.ToJson(Config, true));
                 CustomLogger.Debug("ConfigSaved", FILE_PATH);
+                foreach(IConfigListener listener in listeners) {
+                    listener.ReadConfig();
+                }
             } catch (Exception exception) {
                 CustomLogger.Error("FailedToSaveConfig", exception.Message);
             }

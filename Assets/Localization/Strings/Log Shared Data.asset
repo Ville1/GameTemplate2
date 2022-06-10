@@ -47,16 +47,96 @@ MonoBehaviour:
     m_Key: ListenerIsNotRegistered
     m_Metadata:
       m_Items: []
-  - m_Id: 30051015159808
-    m_Key: LoggerSettingsLoaded
-    m_Metadata:
-      m_Items: []
   - m_Id: 809246934790144
     m_Key: FailedToGenerateGameObjectName
     m_Metadata:
       m_Items: []
   - m_Id: 812276488957952
     m_Key: UIElementError
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1193334774525952
+    m_Key: CallStartSavingBeforeUpdate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1196501792813056
+    m_Key: InvalidSaveDataClass
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1211570060619776
+    m_Key: SaveableIsMissing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1547867438542848
+    m_Key: AllPrefabsLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1548108556496896
+    m_Key: PrefabLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1548456574676992
+    m_Key: LoadingPrefabs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1549345309945856
+    m_Key: DuplicatedPrefab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1549875503525888
+    m_Key: PrefabNotFound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1562824381132800
+    m_Key: LoggerSettingsLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1590215581200384
+    m_Key: ObjectIsDestroyed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1862752068268032
+    m_Key: InvalidMethodParameters
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868509077663744
+    m_Key: LoadingTextures
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868718499262464
+    m_Key: DuplicatedTexture
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868879828971520
+    m_Key: TextureLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1868957486510080
+    m_Key: AllTexturesLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870014488866816
+    m_Key: LoadingTexturesFromDirectory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1872350691028992
+    m_Key: UnsupportedTextureName
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1876330146000896
+    m_Key: NoTextures
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1876376665026560
+    m_Key: TextureNotFound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1887213903507456
+    m_Key: ObjectIsPrototype
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1895388128047104
+    m_Key: Object2DNoSprite
     m_Metadata:
       m_Items: []
   m_Metadata:
