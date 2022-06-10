@@ -13,11 +13,11 @@ namespace Game
         public bool IsPrototype { get { return gameObject == null; } }
 
         protected GameObject gameObject = null;
+        protected UpdateListener updateListener = null;
         private string prefabName = null;
         private string name = null;
         private string spriteName = null;
         private TextureDirectory spriteDirectory = TextureDirectory.Sprites;
-        private UpdateListener updateListener = null;
         private bool isDestroyed = false;
         private bool spriteDirectoryChanged = false;
 
@@ -111,6 +111,8 @@ namespace Game
             }
         }
 
+        public virtual void Update() { }
+
         public void Destroy()
         {
             if (isDestroyed) {
@@ -148,6 +150,7 @@ namespace Game
             if (updateListener == null) {
                 updateListener = gameObject.AddComponent<UpdateListener>();
             }
+            updateListener.Object2D = this;
 
             //Get RectTransform, or add if missing
             RectTransform = gameObject.GetComponent<RectTransform>();

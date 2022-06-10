@@ -1,16 +1,24 @@
 using UnityEngine;
 
-public class UpdateListener : MonoBehaviour
+namespace Game
 {
-    private void Start()
-    { }
-
-
-    /// <summary>
-    /// Per frame update
-    /// </summary>
-    private void Update()
+    public class UpdateListener : MonoBehaviour
     {
-        
+        public Object2D Object2D { get; set; }
+
+        private void Start()
+        { }
+
+
+        /// <summary>
+        /// Per frame update
+        /// </summary>
+        private void Update()
+        {
+            if(Object2D != null) {
+                Object2D.Update();
+            }
+        }
     }
+
 }

@@ -39,6 +39,12 @@ namespace Game.Maps
             Name = name;
         }
 
+        public override void Update()
+        {
+            base.Update();
+            //Utils.CustomLogger.DebugRaw(ToString() + ": \"Hello, im spamming the log! :)\"");
+        }
+
         public override string ToString()
         {
             return IsPrototype ? string.Format("{0} Tile", Name) : string.Format("{0} Tile ({1},{2})", Name, X, Y);
