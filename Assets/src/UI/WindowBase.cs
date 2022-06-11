@@ -9,6 +9,7 @@ namespace Game.UI
 
         public GameObject Panel;
         public List<Tag> Tags { get; private set; } = new List<Tag>();
+        public bool BlockKeyboardInputs { get; protected set; } = false;
 
         /// <summary>
         /// Initializiation
@@ -60,5 +61,8 @@ namespace Game.UI
                 RectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, value);
             }
         }
+
+        public virtual void HandleWindowEvent(WindowEvent windowEvent)
+        { }
     }
 }

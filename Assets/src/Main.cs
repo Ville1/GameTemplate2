@@ -57,6 +57,11 @@ namespace Game
             WorldMap.StartGeneration(() => { EndMapGeneration(); });
         }
 
+        public void SaveGame()
+        {
+
+        }
+
         private void EndMapGeneration()
         {
             State = State.Running;

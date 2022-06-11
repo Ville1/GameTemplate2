@@ -20,6 +20,7 @@ namespace Game.UI
         /// </summary>
         protected override void Start()
         {
+            base.Start();
             if (Instance != null) {
                 CustomLogger.Error("AttemptingToCreateMultipleInstances");
                 return;
@@ -27,13 +28,16 @@ namespace Game.UI
             Instance = this;
             Active = false;
             Tags.Add(Tag.ProgressBar);
+            BlockKeyboardInputs = true;
         }
 
         /// <summary>
         /// Per frame update
         /// </summary>
         protected override void Update()
-        { }
+        {
+            base.Update();
+        }
 
         public override bool Active
         {

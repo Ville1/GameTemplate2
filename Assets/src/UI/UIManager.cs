@@ -12,6 +12,7 @@ namespace Game.UI {
         /// List of all windows in the game. This should only be used to access windows, and should not be manipulated outside WindowBase.Start().
         /// </summary>
         public List<WindowBase> Windows { get; private set; } = new List<WindowBase>();
+        public bool KeyboardInputsBlocked { get { return Windows.Any(window => window.Active && window.BlockKeyboardInputs); } }
 
         /// <summary>
         /// Initializiation
@@ -58,6 +59,15 @@ namespace Game.UI {
             foreach (WindowBase windows in Windows) {
                 if((include.Count == 0 || windows.Tags.Any(tag => include.Contains(tag))) && (exclude.Count == 0 || !windows.Tags.Any(tag => exclude.Contains(tag))))
                 windows.Active = false;
+            }
+        }
+
+        public void HandleWindowEventKeydown(WindowEvent windowEvent)
+        {
+            foreach(WindowBase window in Windows) {
+                if(!KeyboardInputsBlocked || (window.Active && window.BlockKeyboardInputs)) {
+                    window.HandleWindowEvent(windowEvent);
+                }
             }
         }
     }
