@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Utils
 {
@@ -28,6 +30,11 @@ namespace Game.Utils
         public static string ToPercentage(this decimal number)
         {
             return Math.Round(number * 100.0m) + "%";
+        }
+
+        public static List<TItem> Copy<TItem>(this List<TItem> list)
+        {
+            return list.Select(item => item).ToList();
         }
     }
 }

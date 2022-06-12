@@ -1,4 +1,6 @@
+using Game.Input;
 using Game.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game
@@ -6,46 +8,53 @@ namespace Game
     /// <summary>
     /// TODO: allow spriteless objects
     /// </summary>
-    public class Object2D
+    public class Object2D : IClickListener
     {
+        public GameObject GameObject { get { return gameObject; } }
         public RectTransform RectTransform { get; private set; }
         public SpriteRenderer Renderer { get; private set; }
+        public BoxCollider Collider { get; private set; }
         public bool IsPrototype { get { return gameObject == null; } }
+        public MouseEventData MouseEventData { get { return clickListenerData; } }
+        public bool IsClickable { get { return clickListenerData != null; } }
 
-        protected GameObject gameObject = null;
-        protected UpdateListener updateListener = null;
+        protected Object2DListener updateListener = null;
+        private GameObject gameObject = null;
         private string prefabName = null;
         private string name = null;
         private string spriteName = null;
         private TextureDirectory spriteDirectory = TextureDirectory.Sprites;
         private bool isDestroyed = false;
         private bool spriteDirectoryChanged = false;
+        protected MouseEventData clickListenerData;
 
         /// <summary>
         /// GameObject constructor
         /// </summary>
         public Object2D(Object2D prototype, string objectName, bool active, Vector3 position, Transform parent)
         {
-            Initialize(prototype.prefabName, objectName, active, position, parent, prototype.spriteName, prototype.spriteDirectory);
+            Initialize(prototype.prefabName, objectName, active, position, parent, prototype.spriteName, prototype.spriteDirectory, prototype.clickListenerData);
         }
 
         /// <summary>
         /// GameObject constructor
         /// </summary>
-        public Object2D(string prefabName, string objectName, bool active, Vector3 position, Transform parent, string spriteName, TextureDirectory spriteDirectory)
+        public Object2D(string prefabName, string objectName, bool active, Vector3 position, Transform parent, string spriteName, TextureDirectory spriteDirectory,
+            MouseEventData clickListenerData = null)
         {
-            Initialize(prefabName, objectName, active, position, parent, spriteName, spriteDirectory);
+            Initialize(prefabName, objectName, active, position, parent, spriteName, spriteDirectory, clickListenerData);
         }
 
         /// <summary>
         /// Prototype constructor
         /// </summary>
-        public Object2D(string prefabName, string name, string spriteName, TextureDirectory spriteDirectory)
+        public Object2D(string prefabName, string name, string spriteName, TextureDirectory spriteDirectory, MouseEventData clickListenerData = null)
         {
             this.prefabName = prefabName;
             this.name = name;
             this.spriteName = spriteName;
             this.spriteDirectory = spriteDirectory;
+            this.clickListenerData = clickListenerData;
         }
 
         public virtual bool Active
@@ -111,6 +120,9 @@ namespace Game
             }
         }
 
+        public virtual void OnClick(MouseButton button)
+        { }
+
         public virtual void Update() { }
 
         public void Destroy()
@@ -128,12 +140,14 @@ namespace Game
             return gameObject.name;
         }
 
-        private void Initialize(string prefabName, string objectName, bool active, Vector3 position, Transform parent, string spriteName, TextureDirectory spriteDirectory)
+        private void Initialize(string prefabName, string objectName, bool active, Vector3 position, Transform parent, string spriteName, TextureDirectory spriteDirectory,
+            MouseEventData clickListenerData)
         {
             this.prefabName = prefabName;
             name = objectName;
             this.spriteName = spriteName;
             this.spriteDirectory = spriteDirectory;
+            this.clickListenerData = clickListenerData;
 
             //Instantiate GameObject
             gameObject = GameObject.Instantiate(
@@ -146,9 +160,9 @@ namespace Game
             gameObject.SetActive(active);
 
             //Get UpdateListener, or add if missing
-            updateListener = gameObject.GetComponent<UpdateListener>();
+            updateListener = gameObject.GetComponent<Object2DListener>();
             if (updateListener == null) {
-                updateListener = gameObject.AddComponent<UpdateListener>();
+                updateListener = gameObject.AddComponent<Object2DListener>();
             }
             updateListener.Object2D = this;
 
@@ -175,6 +189,14 @@ namespace Game
             }
 
             UpdateSprite();
+
+            if (IsClickable) {
+                //Get BoxCollider, or add if missing
+                Collider = gameObject.GetComponent<BoxCollider>();
+                if (Collider == null) {
+                    Collider = gameObject.AddComponent<BoxCollider>();
+                }
+            }
         }
 
         private void UpdateSprite()

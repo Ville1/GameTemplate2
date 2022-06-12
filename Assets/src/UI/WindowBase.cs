@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,8 @@ namespace Game.UI
 
         public GameObject Panel;
         public List<Tag> Tags { get; private set; } = new List<Tag>();
-        public bool BlockKeyboardInputs { get; protected set; } = false;
+        public List<KeyEventTag> AllowedKeyEvents { get; private set; } = new List<KeyEventTag>() { KeyEventTag.IgnoreUI };
+        public List<MouseEventTag> AllowedMouseEvents { get; private set; } = new List<MouseEventTag> { MouseEventTag.IgnoreUI };
 
         /// <summary>
         /// Initializiation
@@ -62,7 +64,37 @@ namespace Game.UI
             }
         }
 
-        public virtual void HandleWindowEvent(WindowEvent windowEvent)
-        { }
+        public bool BlockKeyboardInputs
+        {
+            get {
+                return AllowedKeyEvents != null;
+            }
+            set {
+                if (value) {
+                    AllowedKeyEvents = new List<KeyEventTag>() { KeyEventTag.IgnoreUI };
+                } else {
+                    AllowedKeyEvents = null;
+                }
+            }
+        }
+
+        public bool BlockMouseEvents
+        {
+            get {
+                return AllowedMouseEvents != null;
+            }
+            set {
+                if (value) {
+                    AllowedMouseEvents = new List<MouseEventTag>() { MouseEventTag.IgnoreUI };
+                } else {
+                    AllowedMouseEvents = null;
+                }
+            }
+        }
+
+        public virtual bool HandleWindowEvent(WindowEvent windowEvent)
+        {
+            return false;
+        }
     }
 }

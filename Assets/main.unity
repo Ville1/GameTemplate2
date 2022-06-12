@@ -498,6 +498,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Panel: {fileID: 1411984977}
   PrototypeButton: {fileID: 1913776231}
+  test: {fileID: 0}
 --- !u!1 &678827994
 GameObject:
   m_ObjectHideFlags: 0
@@ -674,6 +675,7 @@ GameObject:
   - component: {fileID: 1599735002}
   - component: {fileID: 1599735003}
   - component: {fileID: 1599735004}
+  - component: {fileID: 1599735005}
   m_Layer: 0
   m_Name: Global
   m_TagString: Untagged
@@ -767,6 +769,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2947d6b682f3f634fb400b400721ae27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1599735005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599734997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efe515cb191452340acabc4f2488c6a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1652242805

@@ -70,7 +70,7 @@ namespace Game.Input
 
         public void AddOnKeyUpEventListener(KeyCode key, OnKeyDownDelegate onKeyUp, int priority = 0, List<KeyEventTag> tags = null)
         {
-            if (!keyDownEvents.ContainsKey(key)) {
+            if (!keyUpEvents.ContainsKey(key)) {
                 keyUpEvents.Add(key, new KeyEventListener());
             }
             keyUpEvents[key].Add(new KeyEvent(onKeyUp, priority, tags));
@@ -83,15 +83,46 @@ namespace Game.Input
 
         public void AddKeyHeldEventListener(KeyCode key, OnKeyDownDelegate onKeyHeld, int priority = 0, List<KeyEventTag> tags = null)
         {
-            if (!keyDownEvents.ContainsKey(key)) {
+            if (!keyHeldEvents.ContainsKey(key)) {
                 keyHeldEvents.Add(key, new KeyEventListener());
             }
             keyHeldEvents[key].Add(new KeyEvent(onKeyHeld, priority, tags));
         }
 
-        public void RemoveEventListener()
+        /// <summary>
+        /// TODO: Test if these actually work. Does delegate equality check work here?
+        /// TODO: Clear this duplicated code?
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="onKeyDown"></param>
+        public void RemoveOnKeyDownEventListener(KeyCode key, OnKeyDownDelegate onKeyDown)
         {
+            if (keyDownEvents.ContainsKey(key)) {
+                keyDownEvents[key].Remove(onKeyDown);
+                if (keyDownEvents[key].Events.Count == 0) {
+                    keyDownEvents.Remove(key);
+                }
+            }
+        }
 
+        public void RemoveOnKeyUpEventListener(KeyCode key, OnKeyDownDelegate onKeyUp)
+        {
+            if (keyUpEvents.ContainsKey(key)) {
+                keyUpEvents[key].Remove(onKeyUp);
+                if (keyUpEvents[key].Events.Count == 0) {
+                    keyUpEvents.Remove(key);
+                }
+            }
+        }
+
+        public void RemoveOnKeyHeldEventListener(KeyCode key, OnKeyDownDelegate onKeyHeld)
+        {
+            if (keyHeldEvents.ContainsKey(key)) {
+                keyHeldEvents[key].Remove(onKeyHeld);
+                if (keyHeldEvents[key].Events.Count == 0) {
+                    keyHeldEvents.Remove(key);
+                }
+            }
         }
 
         private class KeyEventListener
@@ -101,7 +132,7 @@ namespace Game.Input
             public void Activate()
             {
                 foreach (KeyEvent keyEvent in Events) {
-                    if(keyEvent.Tags.Contains(KeyEventTag.UI) || !UIManager.Instance.KeyboardInputsBlocked) {
+                    if(UIManager.Instance.CanFire(keyEvent.Tags)) {
                         keyEvent.Listener();
                     }
                 }
@@ -111,6 +142,11 @@ namespace Game.Input
             {
                 Events.Add(keyEvent);
                 Events = Events.OrderByDescending(keyEvent => keyEvent.Priority).ToList();
+            }
+
+            public void Remove(OnKeyDownDelegate listener)
+            {
+                Events = Events.Where(keyEvent => keyEvent.Listener != listener).OrderByDescending(keyEvent => keyEvent.Priority).ToList();
             }
         }
 

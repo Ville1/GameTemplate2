@@ -12,7 +12,6 @@ namespace Game.UI {
         /// List of all windows in the game. This should only be used to access windows, and should not be manipulated outside WindowBase.Start().
         /// </summary>
         public List<WindowBase> Windows { get; private set; } = new List<WindowBase>();
-        public bool KeyboardInputsBlocked { get { return Windows.Any(window => window.Active && window.BlockKeyboardInputs); } }
 
         /// <summary>
         /// Initializiation
@@ -65,10 +64,23 @@ namespace Game.UI {
         public void HandleWindowEventKeydown(WindowEvent windowEvent)
         {
             foreach(WindowBase window in Windows) {
-                if(!KeyboardInputsBlocked || (window.Active && window.BlockKeyboardInputs)) {
-                    window.HandleWindowEvent(windowEvent);
+                //TODO: Im not completely sure about this
+                //Maybe this if could be simplified to be only:
+                //window.Active && window.HandleWindowEvent(windowEvent)
+                if ((CanFire(new List<KeyEventTag>()) || (window.Active && window.BlockKeyboardInputs)) && window.HandleWindowEvent(windowEvent)) {
+                    break;
                 }
             }
+        }
+
+        public bool CanFire(List<KeyEventTag> tags)
+        {
+            return !Windows.Any(window => window.Active && window.BlockKeyboardInputs && !window.AllowedKeyEvents.Any(allowed => tags.Contains(allowed)));
+        }
+
+        public bool CanFire(List<MouseEventTag> tags)
+        {
+            return !Windows.Any(window => window.Active && window.BlockMouseEvents && !window.AllowedMouseEvents.Any(allowed => tags.Contains(allowed)));
         }
     }
 }

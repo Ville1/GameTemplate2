@@ -1,3 +1,4 @@
+using Game.Input;
 using UnityEngine;
 
 namespace Game.Maps
@@ -28,15 +29,22 @@ namespace Game.Maps
             new Vector3(map.gameObject.transform.position.x + (x * 1.0f), map.gameObject.transform.position.y + (y * 1.0f), map.gameObject.transform.position.z),
             map.transform,
             null,
-            TextureDirectory.Terrain)
+            TextureDirectory.Terrain,
+            MouseEventData.Default)
         {
             Map = map;
             Coordinates = new Coordinates(x, y);
         }
 
-        public Tile(string name, string spriteName) : base("Tile", string.Format("TilePrototype_{0}", name), spriteName, TextureDirectory.Terrain)
+        public Tile(string name, string spriteName) : base("Tile", string.Format("TilePrototype_{0}", name), spriteName, TextureDirectory.Terrain, MouseEventData.Default)
         {
             Name = name;
+        }
+
+        public override void OnClick(MouseButton button)
+        {
+            base.OnClick(button);
+            Utils.CustomLogger.DebugRaw(ToString() + " -> " + button.ToString());
         }
 
         public override void Update()

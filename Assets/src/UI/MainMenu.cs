@@ -52,9 +52,6 @@ namespace Game.UI
 
             //Resize panel
             Height = buttons.Count * buttonSpacing + 5.0f;
-
-            //Block keyboard inputs
-            BlockKeyboardInputs = true;
         }
 
         /// <summary>
@@ -63,11 +60,12 @@ namespace Game.UI
         protected override void Update()
         { }
 
-        public override void HandleWindowEvent(WindowEvent windowEvent)
+        public override bool HandleWindowEvent(WindowEvent windowEvent)
         {
             if(windowEvent == WindowEvent.Close && Main.Instance.State != State.MainMenu) {
                 Active = !Active;
             }
+            return true;
         }
 
         private static void NewGame()

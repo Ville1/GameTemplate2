@@ -21,8 +21,8 @@ namespace Game.Input
 
             //TODO: Load from file
 
-            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Escape, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Close); }, KeyEventTag.UI);
-            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Return, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Accept); }, KeyEventTag.UI);
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Escape, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Close); }, KeyEventTag.IgnoreUI);
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Return, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Accept); }, KeyEventTag.IgnoreUI);
         }
 
         /// <summary>

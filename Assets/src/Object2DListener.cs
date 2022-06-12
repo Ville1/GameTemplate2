@@ -1,10 +1,12 @@
+using Game.Input;
 using UnityEngine;
 
 namespace Game
 {
-    public class UpdateListener : MonoBehaviour
+    public class Object2DListener : MonoBehaviour, IClickListenerComponent
     {
         public Object2D Object2D { get; set; }
+        public IClickListener Listener { get { return Object2D; } }
 
         private void Start()
         { }
@@ -20,5 +22,4 @@ namespace Game
             }
         }
     }
-
 }

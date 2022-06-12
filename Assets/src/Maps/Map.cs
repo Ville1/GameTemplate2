@@ -171,6 +171,7 @@ namespace Game.Maps
             if(endGenerationCallback != null) {
                 endGenerationCallback();
             }
+            Input.MouseManager.Instance.AddEventListerener(MouseButton.Middle, new Input.MouseEvent(Tiles[0][0], (GameObject target, MouseButton button) => { Utils.CustomLogger.DebugRaw("First tile middle click callback"); }, 1));
         }
 
         public static List<Tile> TilePrototypes
