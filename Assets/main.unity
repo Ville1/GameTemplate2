@@ -498,7 +498,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Panel: {fileID: 1411984977}
   PrototypeButton: {fileID: 1913776231}
-  test: {fileID: 0}
 --- !u!1 &678827994
 GameObject:
   m_ObjectHideFlags: 0

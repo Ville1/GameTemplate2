@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.UI;
 using UnityEngine;
 
 namespace Game.Maps
@@ -11,6 +12,9 @@ namespace Game.Maps
         public int Y { get { return Coordinates == null ? 0 : Coordinates.Y; } }
         public string Name { get; private set; }
 
+        private GameObject rectangleGameObject = null;
+        private bool rectangleNotFound = false;
+
         public Tile(Map map, int x, int y, Tile prototype) : base(
             prototype,
             string.Format("Tile_{0},{1}", x, y),
@@ -20,6 +24,9 @@ namespace Game.Maps
         {
             Map = map;
             Coordinates = new Coordinates(x, y);
+            Name = prototype.Name;
+            RectangleColor = null;
+            MouseEventData.Tags.Add(MouseEventTag.IgnoreUI);
         }
 
         public Tile(Map map, int x, int y) : base(
@@ -34,6 +41,9 @@ namespace Game.Maps
         {
             Map = map;
             Coordinates = new Coordinates(x, y);
+            Name = "Unnamed";
+            RectangleColor = null;
+            MouseEventData.Tags.Add(MouseEventTag.IgnoreUI);
         }
 
         public Tile(string name, string spriteName) : base("Tile", string.Format("TilePrototype_{0}", name), spriteName, TextureDirectory.Terrain, MouseEventData.Default)
@@ -41,10 +51,17 @@ namespace Game.Maps
             Name = name;
         }
 
+        public void ChangeTo(Tile prototype)
+        {
+            Name = prototype.Name;
+            Sprite = prototype.Sprite;
+        }
+
         public override void OnClick(MouseButton button)
         {
             base.OnClick(button);
-            Utils.CustomLogger.DebugRaw(ToString() + " -> " + button.ToString());
+            UIManager.Instance.CloseAllWindows();
+            //Utils.CustomLogger.DebugRaw(ToString() + " -> " + button.ToString());
         }
 
         public override void Update()
@@ -56,6 +73,39 @@ namespace Game.Maps
         public override string ToString()
         {
             return IsPrototype ? string.Format("{0} Tile", Name) : string.Format("{0} Tile ({1},{2})", Name, X, Y);
+        }
+
+        public Color? RectangleColor
+        {
+            get {
+                if (rectangleNotFound) {
+                    return null;
+                }
+                if(rectangleGameObject == null) {
+                    FindRectangle();
+                }
+                return rectangleGameObject.activeSelf ? rectangleGameObject.GetComponent<SpriteRenderer>().color : null;
+            }
+            set {
+                if (rectangleGameObject == null) {
+                    FindRectangle();
+                }
+                if (rectangleNotFound) {
+                    return;
+                }
+                if (value.HasValue) {
+                    rectangleGameObject.SetActive(true);
+                    rectangleGameObject.GetComponent<SpriteRenderer>().color = value.Value;
+                } else {
+                    rectangleGameObject.SetActive(false);
+                }
+            }
+        }
+
+        private void FindRectangle()
+        {
+            rectangleGameObject = GameObject.Find(string.Format("{0}/Rectangle", GameObject.name));
+            rectangleNotFound = rectangleGameObject == null;
         }
     }
 }

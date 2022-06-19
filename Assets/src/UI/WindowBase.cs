@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +5,13 @@ namespace Game.UI
 {
     public class WindowBase : MonoBehaviour
     {
-        public enum Tag { ProgressBar }
+        public enum Tag {
+            /// <summary>
+            /// Does not get closed with UIManager.CloseWindows if Main.Instance.State == State.MainMenu
+            /// </summary>
+            MainMenu,
+            ProgressBar
+        }
 
         public GameObject Panel;
         public List<Tag> Tags { get; private set; } = new List<Tag>();

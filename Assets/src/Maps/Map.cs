@@ -1,3 +1,4 @@
+using Game.Input;
 using Game.Saving;
 using Game.Saving.Data;
 using Game.UI;
@@ -30,6 +31,8 @@ namespace Game.Maps
         private int generationTilesPerFrame;
         private WeightedRandomizer<Tile> tileRandomizer;
         private static List<Tile> tilePrototypes;
+        private Tile draggedTile;
+        private Tile dragOverTile;
 
         /// <summary>
         /// Initializiation
@@ -145,6 +148,11 @@ namespace Game.Maps
             );
             Tiles[generationPositionY].Add(tile);
 
+            //Add event listeners
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile, Drag));
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
+
             //Move to next coordinates
             generationPositionX++;
             if (generationPositionX == Width) {
@@ -171,7 +179,50 @@ namespace Game.Maps
             if(endGenerationCallback != null) {
                 endGenerationCallback();
             }
-            Input.MouseManager.Instance.AddEventListerener(MouseButton.Middle, new Input.MouseEvent(Tiles[0][0], (GameObject target, MouseButton button) => { Utils.CustomLogger.DebugRaw("First tile middle click callback"); }, 1));
+
+            //Input.MouseManager.Instance.AddEventListerener(MouseButton.Middle, new Input.MouseEvent(Tiles[0][0], (GameObject target) => { Utils.CustomLogger.DebugRaw("First tile middle click callback"); }, 1));
+        }
+
+        private void StartDragging(Vector3 vector, IClickListener draggedObject, IClickListener targetObject)
+        {
+            draggedTile = draggedObject as Tile;
+            draggedTile.RectangleColor = Color.gray;
+        }
+
+        private void Drag(Vector3 vector, IClickListener draggedObject, IClickListener targetObject)
+        {
+            if(targetObject == null) {
+                if(dragOverTile != null) {
+                    dragOverTile.RectangleColor = null;
+                    dragOverTile = null;
+                }
+                return;
+            }
+            Tile targetTile = targetObject as Tile;
+            if(dragOverTile == targetTile || draggedTile == targetTile) {
+                return;
+            }
+            targetTile.RectangleColor = draggedTile.Name == targetTile.Name ? Color.yellow : Color.blue;
+            if(dragOverTile != null) {
+                dragOverTile.RectangleColor = null;
+            }
+            dragOverTile = targetTile;
+        }
+
+        private void EndDragging(Vector3 vector, IClickListener draggedObject, IClickListener targetObject)
+        {
+            if(dragOverTile != null) {
+                //Swap
+                string draggedName = draggedTile.Name;
+                string targetName = dragOverTile.Name;
+                dragOverTile.ChangeTo(TilePrototypes.First(tile => tile.Name == draggedName));
+                draggedTile.ChangeTo(TilePrototypes.First(tile => tile.Name == targetName));
+
+                dragOverTile.RectangleColor = null;
+                dragOverTile = null;
+            }
+            draggedTile.RectangleColor = null;
+            draggedTile = null;
         }
 
         public static List<Tile> TilePrototypes

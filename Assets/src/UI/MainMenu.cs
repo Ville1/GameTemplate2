@@ -25,6 +25,7 @@ namespace Game.UI
                 return;
             }
             Instance = this;
+            Tags.Add(Tag.MainMenu);
 
             //Create buttons
             //Localized string key, action delegate

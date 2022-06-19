@@ -53,7 +53,7 @@ namespace Game
         {
             State = State.GeneratingMap;
             ProgressBar.Instance.Show("Generation map...");
-            WorldMap = Map.Instantiate("WorldMap", 100, 100);
+            WorldMap = Map.Instantiate("WorldMap", 25, 25);
             WorldMap.StartGeneration(() => { EndMapGeneration(); });
         }
 

@@ -1,3 +1,4 @@
+using Game.Input;
 using Game.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,10 @@ namespace Game.UI {
                 return;
             }
             Instance = this;
+
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, new MouseNothingClickEvent(CloseAllWindows));
+            MouseManager.Instance.AddEventListerener(MouseButton.Middle, new MouseNothingClickEvent(CloseAllWindows));
+            MouseManager.Instance.AddEventListerener(MouseButton.Right, new MouseNothingClickEvent(CloseAllWindows));
         }
 
         /// <summary>
@@ -55,9 +60,12 @@ namespace Game.UI {
         {
             include = include ?? new List<WindowBase.Tag>();
             exclude = exclude ?? new List<WindowBase.Tag>();
-            foreach (WindowBase windows in Windows) {
-                if((include.Count == 0 || windows.Tags.Any(tag => include.Contains(tag))) && (exclude.Count == 0 || !windows.Tags.Any(tag => exclude.Contains(tag))))
-                windows.Active = false;
+            foreach (WindowBase window in Windows) {
+                if((Main.Instance.State != State.MainMenu || !window.Tags.Contains(WindowBase.Tag.MainMenu)) &&
+                    (include.Count == 0 || window.Tags.Any(tag => include.Contains(tag))) &&
+                    (exclude.Count == 0 || !window.Tags.Any(tag => exclude.Contains(tag)))) {
+                    window.Active = false;
+                }
             }
         }
 

@@ -11,6 +11,11 @@ namespace Game
         public Camera Camera;
 
         public float MovementSpeed { get; set; } = 10.0f;
+        /// <summary>
+        /// Multiplier
+        /// </summary>
+        public float DragSpeed { get; set; } = 1.0f;
+        public Camera CurrentCamera { get; private set; }
 
         /// <summary>
         /// Initializiation
@@ -22,11 +27,14 @@ namespace Game
                 return;
             }
             Instance = this;
+            CurrentCamera = Camera;
 
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.W, MoveUp, KeyEventTag.Camera);
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.A, MoveLeft, KeyEventTag.Camera);
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.S, MoveDown, KeyEventTag.Camera);
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.D, MoveRight, KeyEventTag.Camera);
+
+            MouseManager.Instance.AddEventListerener(MouseButton.Middle, MouseDragEventType.Move, new MouseDragEvent(Move));
         }
 
         /// <summary>
@@ -57,7 +65,13 @@ namespace Game
 
         public void Move(Direction direction)
         {
-            Camera.transform.Translate(Time.deltaTime * MovementSpeed * direction.Vector3);
+            CurrentCamera.transform.Translate(Time.deltaTime * MovementSpeed * direction.Vector3);
+        }
+
+        public void Move(Vector3 vector)
+        {
+            Vector2 vector2 = new Vector2(-1.0f * vector.x, -1.0f * vector.y);
+            CurrentCamera.transform.Translate(vector2);
         }
     }
 }
