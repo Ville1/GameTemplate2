@@ -10,21 +10,43 @@ namespace Game.UI
             /// Does not get closed with UIManager.CloseWindows if Main.Instance.State == State.MainMenu
             /// </summary>
             MainMenu,
+            /// <summary>
+            /// Does not get closed by WindowEvent.Close in default event handling (in virtual base.HandleWindowEvent)
+            /// </summary>
             ProgressBar,
-            Console
+            Console,
+            /// <summary>
+            /// Closes other windows then opened (if base.Active gets called)
+            /// </summary>
+            ClosesOthers
+        }
+
+        public enum WindowEventPriorityDefaults
+        {
+            VeryLow = -100000,
+            Low = -10000,
+            Normal = 0,
+            Hight = 10000,
+            VeryHight = 100000
         }
 
         public GameObject Panel;
         public List<Tag> Tags { get; private set; } = new List<Tag>();
         public List<KeyEventTag> AllowedKeyEvents { get; private set; } = new List<KeyEventTag>() { KeyEventTag.IgnoreUI };
         public List<MouseEventTag> AllowedMouseEvents { get; private set; } = new List<MouseEventTag> { MouseEventTag.IgnoreUI };
+        /// <summary>
+        /// Window's priority, when it comes to receiving WindowEvents. If multiple windows can be open at once, and stacked on top of one another,
+        /// top most ones should have higher priority than ones in the bottom. Otherwise can be left as 0.
+        /// </summary>
+        public int WindowEventPriority { get; protected set; } = 0;
 
         /// <summary>
         /// Initializiation
         /// </summary>
         protected virtual void Start()
         {
-            UIManager.Instance.Windows.Add(this);
+            UIManager.Instance.RegisterWindow(this);
+            Active = false;
         }
 
         /// <summary>
@@ -39,6 +61,9 @@ namespace Game.UI
                 return Panel.activeSelf;
             }
             set {
+                if (value && Tags.Contains(Tag.ClosesOthers) && UIManager.Instance != null) {
+                    UIManager.Instance.CloseAllWindows();
+                }
                 Panel.SetActive(value);
             }
         }
@@ -98,8 +123,16 @@ namespace Game.UI
             }
         }
 
+        /// <summary>
+        /// Return true, if window has "consumed" this event. (Prevents other windows for also having it fire)
+        /// This default nonoverriden functionality just closes window on WindowEvent.Close, thus closing the top most window
+        /// </summary>
         public virtual bool HandleWindowEvent(WindowEvent windowEvent)
         {
+            if(windowEvent == WindowEvent.Close && !Tags.Contains(Tag.ProgressBar)) {
+                Active = false;
+                return true;
+            }
             return false;
         }
     }

@@ -24,26 +24,27 @@ namespace Game.Input
         public OnClickDelegate Listener { get; private set; }
         public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
         public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
+        public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
         public MouseEventData EventData { get; private set; }
 
-        public MouseEvent(IClickListener target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null)
+        public MouseEvent(IClickListener target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             if (target == null || listener == null) {
                 throw new NullReferenceException();
             }
             Target = target.GameObject;
             Listener = listener;
-            EventData = new MouseEventData(priority, tags);
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
 
-        public MouseEvent(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null)
+        public MouseEvent(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             if(target == null || listener == null) {
                 throw new NullReferenceException();
             }
             Target = target;
             Listener = listener;
-            EventData = new MouseEventData(priority, tags);
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
 
         public override int GetHashCode()
@@ -65,16 +66,18 @@ namespace Game.Input
     {
         public int Priority { get; set; }
         public List<MouseEventTag> Tags { get; set; }
+        public bool IsBlockedByUI { get; private set; }
 
-        public MouseEventData(int priority, List<MouseEventTag> tags)
+        public MouseEventData(int priority, List<MouseEventTag> tags, bool isBlockedByUI)
         {
             Priority = priority;
             Tags = tags ?? new List<MouseEventTag>();
+            IsBlockedByUI = isBlockedByUI;
         }
 
         public static MouseEventData Default
         {
-            get { return new MouseEventData(0, new List<MouseEventTag>()); }
+            get { return new MouseEventData(0, new List<MouseEventTag>(), true); }
         }
     }
 
@@ -85,15 +88,16 @@ namespace Game.Input
         public OnClickDelegate Listener { get; private set; }
         public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
         public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
+        public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
         public MouseEventData EventData { get; private set; }
 
-        public MouseNothingClickEvent(OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null)
+        public MouseNothingClickEvent(OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             if (listener == null) {
                 throw new NullReferenceException();
             }
             Listener = listener;
-            EventData = new MouseEventData(priority, tags);
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
 
         public override int GetHashCode()
@@ -126,11 +130,12 @@ namespace Game.Input
         public OnDragDelegateClickable ClickableListener { get; private set; } = null;
         public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
         public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
+        public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
         public MouseEventData EventData { get; private set; }
         public TargetType Targeting { get { return GameObjectTarget == null ? TargetType.NoTarget : (ClickableTarget == null ? TargetType.GameObject : TargetType.ClickListener); } }
 
 
-        public MouseDragEvent(IClickListener target, OnDragDelegateClickable listener, int priority = 0, List<MouseEventTag> tags = null)
+        public MouseDragEvent(IClickListener target, OnDragDelegateClickable listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             if (target == null || listener == null) {
                 throw new NullReferenceException();
@@ -138,26 +143,26 @@ namespace Game.Input
             GameObjectTarget = target.GameObject;
             ClickableTarget = target;
             ClickableListener = listener;
-            EventData = new MouseEventData(priority, tags);
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
 
-        public MouseDragEvent(GameObject target, OnDragDelegateGameObject listener, int priority = 0, List<MouseEventTag> tags = null)
+        public MouseDragEvent(GameObject target, OnDragDelegateGameObject listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             if (target == null || listener == null) {
                 throw new NullReferenceException();
             }
             GameObjectTarget = target;
             GameObjectListener = listener;
-            EventData = new MouseEventData(priority, tags);
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
 
-        public MouseDragEvent(OnDragDelegateNoTarget listener, int priority = 0, List<MouseEventTag> tags = null)
+        public MouseDragEvent(OnDragDelegateNoTarget listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             if (listener == null) {
                 throw new NullReferenceException();
             }
             TargetlessListener = listener;
-            EventData = new MouseEventData(priority, tags);
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
 
         public override int GetHashCode()

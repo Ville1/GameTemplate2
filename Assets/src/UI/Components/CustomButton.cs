@@ -11,9 +11,11 @@ namespace Game.UI.Components
         public Button ButtonBase { get; private set; }
         public TMPro.TMP_Text TmpText { get; private set; }
 
+        /// <summary>
+        /// Instantiate a new button based on prototype
+        /// </summary>
         public CustomButton(Button prototype, GameObject parent, Vector2 positionDelta, string textKey, OnClick onClick)
         {
-            //Instantiate a new button based on prototype
             ButtonBase = GameObject.Instantiate(
                 prototype,
                 new Vector3(
@@ -44,18 +46,16 @@ namespace Game.UI.Components
                 ButtonBase.gameObject.name = name;
             }
 
-            //Set localized text
-            TmpText = ButtonBase.GetComponentInChildren<TMPro.TMP_Text>();
-            if(TmpText == null) {
-                CustomLogger.Error("UIElementError", "Text object not found");
-            } else {
-                TmpText.text = Localization.Game.Get(textKey);
-            }
+            InitializeTextAndEventListener(textKey, onClick);
+        }
 
-            //Set event listener
-            Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
-            buttonClickedEvent.AddListener(new UnityEngine.Events.UnityAction(onClick));
-            ButtonBase.onClick = buttonClickedEvent;
+        /// <summary>
+        /// Wrap a pre-existing button as a CustomButton
+        /// </summary>
+        public CustomButton(Button button, string textKey, OnClick onClick)
+        {
+            ButtonBase = button;
+            InitializeTextAndEventListener(textKey, onClick);
         }
 
         public string Text
@@ -107,9 +107,25 @@ namespace Game.UI.Components
             }
         }
 
-        public string ToString()
+        public override string ToString()
         {
             return ButtonBase.name;
+        }
+
+        private void InitializeTextAndEventListener(string textKey, OnClick onClick)
+        {
+            //Set localized text
+            TmpText = ButtonBase.GetComponentInChildren<TMPro.TMP_Text>();
+            if (TmpText == null) {
+                CustomLogger.Error("UIElementError", "Text object not found");
+            } else if (!string.IsNullOrEmpty(textKey)) {
+                TmpText.text = Localization.Game.Get(textKey);
+            }
+
+            //Set event listener
+            Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
+            buttonClickedEvent.AddListener(new UnityEngine.Events.UnityAction(onClick));
+            ButtonBase.onClick = buttonClickedEvent;
         }
     }
 }

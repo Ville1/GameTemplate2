@@ -26,7 +26,6 @@ namespace Game.UI
                 return;
             }
             Instance = this;
-            Active = false;
             Tags.Add(Tag.ProgressBar);
             BlockKeyboardInputs = true;
         }

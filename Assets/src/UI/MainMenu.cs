@@ -30,10 +30,10 @@ namespace Game.UI
             //Create buttons
             //Localized string key, action delegate
             Dictionary<string, CustomButton.OnClick> buttonActions = new Dictionary<string, CustomButton.OnClick>() {
-                { "NewGame", () => { NewGame(); } },
-                { "Load", () => { Load(); } },
-                { "Save", () => { Save(); } },
-                { "Quit", () => { Quit(); } }
+                { "NewGame", NewGame },
+                { "Load", Load },
+                { "Save", Save },
+                { "Quit", Quit }
             };
 
             float buttonSpacing = 30.0f;
@@ -53,6 +53,12 @@ namespace Game.UI
 
             //Resize panel
             Height = buttons.Count * buttonSpacing + 5.0f;
+
+            //Set event priority
+            WindowEventPriority = (int)WindowEventPriorityDefaults.VeryLow;
+
+            //Show on game start
+            Active = true;
         }
 
         /// <summary>
@@ -64,9 +70,10 @@ namespace Game.UI
         public override bool HandleWindowEvent(WindowEvent windowEvent)
         {
             if(windowEvent == WindowEvent.Close && Main.Instance.State != State.MainMenu) {
-                Active = false;
+                Active = !Active;
+                return true;
             }
-            return true;
+            return false;
         }
 
         private static void NewGame()
@@ -76,12 +83,12 @@ namespace Game.UI
 
         private static void Load()
         {
-            CustomLogger.DebugRaw("Load game");
+            SavesWindowManager.Instance.OpenLoadingWindow();
         }
 
         private static void Save()
         {
-            Main.Instance.NewGame();
+            SavesWindowManager.Instance.OpenSavingWindow();
         }
 
         private static void Quit()

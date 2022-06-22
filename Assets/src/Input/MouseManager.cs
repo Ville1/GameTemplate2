@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Game.Input
 {
@@ -41,6 +42,7 @@ namespace Game.Input
 
         /// <summary>
         /// Per frame update
+        /// TODO: Drag events don't get blocked by UI event as IsBlockedByUI is by default true
         /// </summary>
         private void Update()
         {
@@ -179,7 +181,7 @@ namespace Game.Input
                 IClickListener listener = component != null ? component.Listener : null;
                 if (Events.Count == 0) {
                     //No event listeners
-                    if (listener != null && UIManager.Instance.CanFire(listener.MouseEventData.Tags)) {
+                    if (listener != null && UIManager.Instance.CanFire(listener.MouseEventData)) {
                         //Target is linked to IClickListener
                         listener.OnClick(Button);
                     }
@@ -189,18 +191,18 @@ namespace Game.Input
                         //Loop through all event listeners
                         if (listener != null && listener.MouseEventData.Priority >= mouseEvent.Priority && !onClickProced) {
                             //Target has IClickListener and now is right time to call it, based on priorities
-                            if (UIManager.Instance.CanFire(listener.MouseEventData.Tags)) {
+                            if (UIManager.Instance.CanFire(listener.MouseEventData)) {
                                 listener.OnClick(Button);
                             }
                             onClickProced = true;
                         }
-                        if (target == mouseEvent.Target && UIManager.Instance.CanFire(mouseEvent.Tags)) {
+                        if (target == mouseEvent.Target && UIManager.Instance.CanFire(mouseEvent.EventData)) {
                             //Call event listener
                             mouseEvent.Listener(target);
                         }
                     }
                     //Target has IClickListener and it has lower priority than all the event listeners, call it last
-                    if (listener != null && !onClickProced && UIManager.Instance.CanFire(listener.MouseEventData.Tags)) {
+                    if (listener != null && !onClickProced && UIManager.Instance.CanFire(listener.MouseEventData)) {
                         listener.OnClick(Button);
                     }
                 }
@@ -232,7 +234,7 @@ namespace Game.Input
             public void Activate()
             {
                 foreach (MouseNothingClickEvent clickEvent in Events) {
-                    if (UIManager.Instance.CanFire(clickEvent.Tags)) {
+                    if (UIManager.Instance.CanFire(clickEvent.EventData)) {
                         clickEvent.Listener();
                     }
                 }
@@ -271,7 +273,7 @@ namespace Game.Input
                 IClickListener targetListener = targetComponent != null ? targetComponent.Listener : null;
 
                 foreach (MouseDragEvent dragEvent in Events) {
-                    if(UIManager.Instance.CanFire(dragEvent.Tags) && dragEvent.GameObjectTarget == draggedObject) {
+                    if(UIManager.Instance.CanFire(dragEvent.EventData) && dragEvent.GameObjectTarget == draggedObject) {
                         if (dragEvent.Targeting == MouseDragEvent.TargetType.ClickListener && draggedListener != null) {
                             dragEvent.ClickableListener(vector, draggedListener, targetListener);
                         } else if (dragEvent.Targeting == MouseDragEvent.TargetType.GameObject) {
