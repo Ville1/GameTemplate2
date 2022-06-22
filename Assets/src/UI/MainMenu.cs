@@ -64,7 +64,7 @@ namespace Game.UI
         public override bool HandleWindowEvent(WindowEvent windowEvent)
         {
             if(windowEvent == WindowEvent.Close && Main.Instance.State != State.MainMenu) {
-                Active = !Active;
+                Active = false;
             }
             return true;
         }

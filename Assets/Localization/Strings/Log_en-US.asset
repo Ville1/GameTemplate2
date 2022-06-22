@@ -147,6 +147,14 @@ MonoBehaviour:
     m_Localized: Object2D does not have a sprite
     m_Metadata:
       m_Items: []
+  - m_Id: 5119633087885312
+    m_Localized: Duplicated console commands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5120256705392640
+    m_Localized: '''{0}'' is not recognized as a console command'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

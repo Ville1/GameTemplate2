@@ -1,6 +1,8 @@
 {
 	"LogLevel": 0,
+	"LogConsoleLevel": 2,
 	"LogPrefix": true,
 	"LogMethod": true,
-	"SaveFolder": "C:/Users/Ville/GameTemplateSaves"
+	"SaveFolder": "C:/Users/Ville/GameTemplateSaves",
+	"ConsoleEnabled": true
 }

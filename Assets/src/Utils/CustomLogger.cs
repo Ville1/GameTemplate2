@@ -1,3 +1,5 @@
+using Game.UI;
+using Game.Utils.Config;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -7,8 +9,18 @@ namespace Game.Utils
     public class CustomLogger
     {
         public static LogLevel MinLevel { get; set; } = LogLevel.Debug;
+        public static LogLevel MinConsoleLevel { get; set; } = LogLevel.Error;
         public static bool LogPrefix { get; set; } = true;
         public static bool LogMethod { get; set; } = true;
+
+        public static void LoadSettings()
+        {
+            MinLevel = ConfigManager.Config.LogLevel;
+            MinConsoleLevel = ConfigManager.Config.LogConsoleLevel;
+            LogPrefix = ConfigManager.Config.LogPrefix;
+            LogMethod = ConfigManager.Config.LogMethod;
+            LogRaw("LOGGER - " + Localization.Log.Get("LoggerSettingsLoaded"));
+        }
 
         /// <summary>
         /// Log a localized message
@@ -69,6 +81,9 @@ namespace Game.Utils
             messageBuilder.Append(message);
 
             WriteLog(messageBuilder.ToString());
+            if((int)level >= (int)MinConsoleLevel && ConsoleManager.Instance != null) {
+                ConsoleManager.Instance.RunCommand(string.Format("echo {0}", messageBuilder.ToString()), true);
+            }
         }
 
         /// <summary>

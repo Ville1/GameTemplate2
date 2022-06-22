@@ -10,7 +10,8 @@ namespace Game.UI
             /// Does not get closed with UIManager.CloseWindows if Main.Instance.State == State.MainMenu
             /// </summary>
             MainMenu,
-            ProgressBar
+            ProgressBar,
+            Console
         }
 
         public GameObject Panel;

@@ -32,10 +32,10 @@ namespace Game
             ConfigManager.Load();
 
             //Apply logger settings
-            CustomLogger.MinLevel = ConfigManager.Config.LogLevel;
-            CustomLogger.LogPrefix = ConfigManager.Config.LogPrefix;
-            CustomLogger.LogMethod = ConfigManager.Config.LogMethod;
-            CustomLogger.LogRaw("LOGGER - " + Localization.Log.Get("LoggerSettingsLoaded"));
+            CustomLogger.LoadSettings();
+
+            //Enable/disable console
+            ConsoleManager.Instance.Enabled = ConfigManager.Config.ConsoleEnabled;
 
             //Show main menu
             MainMenu.Instance.Active = true;
