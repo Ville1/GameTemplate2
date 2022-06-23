@@ -1,5 +1,6 @@
 using Game.Utils;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Game.UI.Components
@@ -107,6 +108,16 @@ namespace Game.UI.Components
             }
         }
 
+        public bool Interactable
+        {
+            get {
+                return ButtonBase.interactable;
+            }
+            set {
+                ButtonBase.interactable = value;
+            }
+        }
+
         public override string ToString()
         {
             return ButtonBase.name;
@@ -116,15 +127,13 @@ namespace Game.UI.Components
         {
             //Set localized text
             TmpText = ButtonBase.GetComponentInChildren<TMPro.TMP_Text>();
-            if (TmpText == null) {
-                CustomLogger.Error("UIElementError", "Text object not found");
-            } else if (!string.IsNullOrEmpty(textKey)) {
+            if (TmpText != null && !string.IsNullOrEmpty(textKey)) {
                 TmpText.text = Localization.Game.Get(textKey);
             }
 
             //Set event listener
             Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
-            buttonClickedEvent.AddListener(new UnityEngine.Events.UnityAction(onClick));
+            buttonClickedEvent.AddListener(new UnityAction(onClick));
             ButtonBase.onClick = buttonClickedEvent;
         }
     }

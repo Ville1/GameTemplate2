@@ -56,6 +56,11 @@ namespace Game
             return textures[directory][name];
         }
 
+        public static Sprite GetSprite(IHasSprite objectWithSprite)
+        {
+            return GetSprite(objectWithSprite.SpriteDirectory, objectWithSprite.Sprite);
+        }
+
         /// <summary>
         /// TODO: Runtime loading
         /// </summary>
@@ -130,5 +135,11 @@ namespace Game
                 CustomLogger.Debug("NoTextures");
             }
         }
+    }
+
+    public interface IHasSprite
+    {
+        string Sprite { get; }
+        TextureDirectory SpriteDirectory { get; }
     }
 }

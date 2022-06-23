@@ -43,6 +43,38 @@ MonoBehaviour:
     m_Key: Cancel
     m_Metadata:
       m_Items: []
+  - m_Id: 6509620115107840
+    m_Key: EnterSaveName
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6540505577254912
+    m_Key: Accept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6540529627394048
+    m_Key: Decline
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6540549093158912
+    m_Key: Ok
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6543865743241216
+    m_Key: OverwriteSaveConfirmationDialog
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6550864178540544
+    m_Key: OverwriteSaveFile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6563972972376064
+    m_Key: FailedToSaveGame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6564199045361664
+    m_Key: SaveException
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

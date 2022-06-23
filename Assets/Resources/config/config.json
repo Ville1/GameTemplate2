@@ -4,5 +4,6 @@
 	"LogPrefix": true,
 	"LogMethod": true,
 	"SaveFolder": "C:/Users/Ville/GameTemplateSaves",
+	"SavingTargetFPS": 60,
 	"ConsoleEnabled": true
 }

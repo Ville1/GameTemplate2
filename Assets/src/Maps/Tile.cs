@@ -102,6 +102,20 @@ namespace Game.Maps
             }
         }
 
+        public Saving.Data.Tile GetSaveData()
+        {
+            Saving.Data.Tile saveData = new Saving.Data.Tile();
+            saveData.X = X;
+            saveData.Y = Y;
+            saveData.Name = Name;
+            return saveData;
+        }
+
+        public void Load(Saving.Data.Tile saveData)
+        {
+            //TODO
+        }
+
         private void FindRectangle()
         {
             rectangleGameObject = GameObject.Find(string.Format("{0}/Rectangle", GameObject.name));

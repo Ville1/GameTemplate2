@@ -8,7 +8,7 @@ namespace Game
     /// <summary>
     /// TODO: allow spriteless objects
     /// </summary>
-    public class Object2D : IClickListener
+    public class Object2D : IClickListener, IHasSprite
     {
         public GameObject GameObject { get { return gameObject; } }
         public RectTransform RectTransform { get; private set; }

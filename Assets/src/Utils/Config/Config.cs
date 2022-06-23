@@ -7,6 +7,7 @@ namespace Game.Utils.Config
         public bool LogPrefix;
         public bool LogMethod;
         public string SaveFolder;
+        public float SavingTargetFPS;
         public bool ConsoleEnabled;
 
         public static Config Default
@@ -17,6 +18,8 @@ namespace Game.Utils.Config
                     LogConsoleLevel = LogLevel.Error,
                     LogPrefix = true,
                     LogMethod = true,
+                    SaveFolder = "C:/",
+                    SavingTargetFPS = 60.0f,
                     ConsoleEnabled = true
                 };
             }

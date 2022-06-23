@@ -61,10 +61,16 @@ namespace Game.UI
                 return Panel.activeSelf;
             }
             set {
+                if(Panel.activeSelf == value) {
+                    return;
+                }
                 if (value && Tags.Contains(Tag.ClosesOthers) && UIManager.Instance != null) {
                     UIManager.Instance.CloseAllWindows();
                 }
                 Panel.SetActive(value);
+                if (value) {
+                    UpdateUI();
+                }
             }
         }
 
@@ -135,5 +141,10 @@ namespace Game.UI
             }
             return false;
         }
+
+        /// <summary>
+        /// Called then window opens, can be used to refresh ui
+        /// </summary>
+        public virtual void UpdateUI() { }
     }
 }

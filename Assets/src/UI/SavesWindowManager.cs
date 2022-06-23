@@ -1,5 +1,9 @@
 using Game.UI.Components;
 using Game.Utils;
+using Game.Utils.Config;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +15,8 @@ namespace Game.UI
     /// </summary>
     public class SavesWindowManager : WindowBase
     {
+        private static readonly string FILE_PATTERN = "*.json";
+
         public enum WindowState { Uninitialized, Saving, Loading }
 
         public static SavesWindowManager Instance;
@@ -19,6 +25,7 @@ namespace Game.UI
         public Button CloseButton;
         public GameObject ScrollViewContent;
         public GameObject ScrollViewRowPrototype;
+        public TMP_InputField InputField;
         public Button ConfirmButton;
         public Button CancelButton;
 
@@ -27,6 +34,9 @@ namespace Game.UI
         private CustomButton closeButton = null;
         private CustomButton confirmButton = null;
         private CustomButton cancelButton = null;
+        private CustomInputField inputField = null;
+        private List<string> fileNames = new List<string>();
+        private bool validSaveName = false;
 
         /// <summary>
         /// Initializiation
@@ -45,6 +55,7 @@ namespace Game.UI
             closeButton = new CustomButton(CloseButton, null, Close);
             confirmButton = new CustomButton(ConfirmButton, "Save", Confirm);
             cancelButton = new CustomButton(CancelButton, "Cancel", Close);
+            inputField = new CustomInputField(InputField, "EnterSaveName", HandleInputChange);
         }
 
         /// <summary>
@@ -57,14 +68,20 @@ namespace Game.UI
 
         public void OpenSavingWindow()
         {
-            Active = true;
-            State = WindowState.Saving;
+            Open(WindowState.Saving);
         }
 
         public void OpenLoadingWindow()
         {
+            Open(WindowState.Loading);
+        }
+
+        private void Open(WindowState state)
+        {
+            validSaveName = false;
+            InputField.text = string.Empty;
+            State = state;
             Active = true;
-            State = WindowState.Loading;
         }
 
         public WindowState State
@@ -73,16 +90,45 @@ namespace Game.UI
                 return windowState;
             }
             set {
-                if(windowState != value) {
+                //if(windowState != value) {
                     windowState = value;
-                    UpdateUI();
-                }
+                  //  UpdateUI();
+                //}
             }
         }
 
-        private void UpdateUI()
+        public override void UpdateUI()
         {
             TitleText.text = Localization.Game.Get(State == WindowState.Saving ? "SaveGameTitle" : "LoadGameTitle");
+            inputField.PlaceholderLocalizationKey = State == WindowState.Saving ? "EnterSaveName" : null;
+            inputField.Interactable = State == WindowState.Saving;
+            list.Clear();
+            fileNames.Clear();
+
+            //Find all saves and add rows to the list
+            foreach(string fullFileName in Directory.GetFiles(ConfigManager.Config.SaveFolder, FILE_PATTERN)) {
+                FileInfo fileInfo = new FileInfo(fullFileName);
+                string saveName = fileInfo.Name.Substring(0, fileInfo.Name.LastIndexOf('.'));
+                list.AddRow(saveName, new List<UIElementData>() {
+                    UIElementData.Text("File Name Text", saveName, null),
+                    UIElementData.Button("Hidden Button", null, null, () => { HandleFileClick(saveName); })
+                });
+                fileNames.Add(saveName);
+            }
+
+            confirmButton.Interactable = State == WindowState.Saving && validSaveName || State == WindowState.Loading && !string.IsNullOrEmpty(InputField.text);
+        }
+
+        private void HandleFileClick(string fileName)
+        {
+            inputField.Text = fileName;
+            confirmButton.Interactable = true;
+        }
+
+        private void HandleInputChange(string inputText)
+        {
+            validSaveName = !string.IsNullOrEmpty(inputText);
+            confirmButton.Interactable = validSaveName;
         }
 
         private void Close()
@@ -92,7 +138,38 @@ namespace Game.UI
 
         private void Confirm()
         {
+            if(State == WindowState.Uninitialized) {
+                throw new Exception("Uninitialized");
+            }
 
+            if(State == WindowState.Saving) {
+                if (fileNames.Contains(inputField.Text)) {
+                    //Overwrite save?
+                    //TODO: Disable windows that are under other windows
+                    ConfirmationDialogManager.Instance.ShowDialog(
+                        string.Format(Localization.Game.Get("OverwriteSaveConfirmationDialog"), inputField.Text),
+                        "OverwriteSaveFile",
+                        "Cancel",
+                        StartSaving,
+                        () => {}
+                    );
+                } else {
+                    StartSaving();
+                }
+            } else {
+                StartLoading();
+            }
+        }
+
+        private void StartSaving()
+        {
+            Active = false;
+            Main.Instance.SaveGame(ConfigManager.Config.SaveFolder, inputField.Text);
+        }
+
+        private void StartLoading()
+        {
+            Active = false;
         }
     }
 }

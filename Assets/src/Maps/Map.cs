@@ -25,14 +25,14 @@ namespace Game.Maps
         public int Height { get; private set; }
         public List<List<Tile>> Tiles { get; private set; }
 
-        private int generationPositionX;
-        private int generationPositionY;
+        private Coordinates generationPosition;
         private EndGenerationCallback endGenerationCallback;
         private int generationTilesPerFrame;
         private WeightedRandomizer<Tile> tileRandomizer;
         private static List<Tile> tilePrototypes;
         private Tile draggedTile;
         private Tile dragOverTile;
+        private Coordinates savingPosition;
 
         /// <summary>
         /// Initializiation
@@ -73,8 +73,7 @@ namespace Game.Maps
             }
             Active = true;
             State = MapState.Generation;
-            generationPositionX = 0;
-            generationPositionY = 0;
+            generationPosition = new Coordinates(0, 0);
             Tiles = new List<List<Tile>>();
             Tiles.Add(new List<Tile>());
             this.endGenerationCallback = endGenerationCallback;
@@ -85,10 +84,19 @@ namespace Game.Maps
             tileRandomizer.Add(TilePrototypes[1], 10);
         }
 
-        public void Save(ref ISaveData data)
+        public bool Save(ref ISaveData data)
         {
             Game.Saving.Data.Map saveData = (Game.Saving.Data.Map)data;
-            saveData.Tiles.Add(new Saving.Data.Tile());
+            if(saveData.Tiles == null) {
+                //Initialize save data
+                saveData.Tiles = new List<Saving.Data.Tile>();
+                savingPosition = new Coordinates(0, 0);
+                return true;
+            }
+
+            //Save next tile
+            saveData.Tiles.Add(Tiles[savingPosition.X][savingPosition.Y].GetSaveData());
+            return savingPosition.MoveToNextInRectangle(0, Width, Height);
         }
 
         public static Map Instantiate(string mapName, int width, int height)
@@ -142,11 +150,11 @@ namespace Game.Maps
             //Instantiate a new tile
             Tile tile = new Tile(
                 this,
-                generationPositionX,
-                generationPositionY,
+                generationPosition.X,
+                generationPosition.Y,
                 tileRandomizer.Next()
             );
-            Tiles[generationPositionY].Add(tile);
+            Tiles[generationPosition.Y].Add(tile);
 
             //Add event listeners
             MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
@@ -154,16 +162,16 @@ namespace Game.Maps
             MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
 
             //Move to next coordinates
-            generationPositionX++;
-            if (generationPositionX == Width) {
+            generationPosition.X++;
+            if (generationPosition.X == Width) {
                 //Move y-coordinate
-                generationPositionY++;
-                if (generationPositionY == Height) {
+                generationPosition.Y++;
+                if (generationPosition.Y == Height) {
                     //End generation
                     return false;
                 }
                 //Add a new row
-                generationPositionX = 0;
+                generationPosition.X = 0;
                 Tiles.Add(new List<Tile>());
             }
 

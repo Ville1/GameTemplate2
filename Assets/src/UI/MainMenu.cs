@@ -12,7 +12,7 @@ namespace Game.UI
 
         public Button PrototypeButton;
 
-        private List<CustomButton> buttons;
+        private Dictionary<string, CustomButton> buttons;
 
         /// <summary>
         /// Initializiation
@@ -37,9 +37,9 @@ namespace Game.UI
             };
 
             float buttonSpacing = 30.0f;
-            buttons = new List<CustomButton>();
+            buttons = new Dictionary<string, CustomButton>();
             foreach(KeyValuePair<string, CustomButton.OnClick> pair in buttonActions) {
-                buttons.Add(new CustomButton(
+                buttons.Add(pair.Key, new CustomButton(
                     PrototypeButton,
                     Panel.gameObject,
                     new Vector2(0.0f, (-1.0f * buttons.Count * buttonSpacing)),
@@ -76,24 +76,29 @@ namespace Game.UI
             return false;
         }
 
-        private static void NewGame()
+        private void NewGame()
         {
             Main.Instance.NewGame();
         }
 
-        private static void Load()
+        private void Load()
         {
             SavesWindowManager.Instance.OpenLoadingWindow();
         }
 
-        private static void Save()
+        private void Save()
         {
             SavesWindowManager.Instance.OpenSavingWindow();
         }
 
-        private static void Quit()
+        private void Quit()
         {
             CustomLogger.DebugRaw("Quit game");
+        }
+
+        public override void UpdateUI()
+        {
+            buttons["Save"].Interactable = Main.Instance != null && Main.Instance.State == State.Running;
         }
     }
 }

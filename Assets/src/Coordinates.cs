@@ -4,13 +4,26 @@ namespace Game
 {
     public class Coordinates : IEquatable<Coordinates>
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public Coordinates(int x, int y)
         {
             X = x;
             Y = y;
+        }
+
+        public bool MoveToNextInRectangle(int left, int width, int height)
+        {
+            X++;
+            if(X >= left + width) {
+                X = left;
+                Y++;
+                if(Y >= height) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public override string ToString()
