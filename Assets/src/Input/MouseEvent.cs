@@ -1,3 +1,4 @@
+using Game.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,19 +28,41 @@ namespace Game.Input
         public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
         public MouseEventData EventData { get; private set; }
 
-        public MouseEvent(IClickListener target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        /// <summary>
+        /// Listener delegate can be left undefined, when removing event listeners
+        /// </summary>
+        public MouseEvent(IClickListener target, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
-            if (target == null || listener == null) {
+            if (target == null) {
                 throw new NullReferenceException();
             }
-            Target = target.GameObject;
-            Listener = listener;
-            EventData = new MouseEventData(priority, tags, isBlockedByUI);
+            Initialize(target.GameObject, null, priority, tags, isBlockedByUI);
+        }
+
+        /// <summary>
+        /// Listener delegate can be left undefined, when removing event listeners
+        /// </summary>
+        public MouseEvent(GameObject target, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Initialize(target, null, priority, tags, isBlockedByUI);
+        }
+
+        public MouseEvent(IClickListener target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            if (target == null) {
+                throw new NullReferenceException();
+            }
+            Initialize(target.GameObject, listener, priority, tags, isBlockedByUI);
         }
 
         public MouseEvent(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
-            if(target == null || listener == null) {
+            Initialize(target, listener, priority, tags, isBlockedByUI);
+        }
+
+        private void Initialize(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            if (target == null) {
                 throw new NullReferenceException();
             }
             Target = target;
@@ -54,11 +77,11 @@ namespace Game.Input
 
         public override bool Equals(object obj)
         {
-            if(!(obj is MouseEvent)) {
+            if(obj == null || !(obj is MouseEvent)) {
                 return false;
             }
             MouseEvent otherEvent = obj as MouseEvent;
-            return Target == otherEvent.Target && Listener == otherEvent.Listener;
+            return Target == otherEvent.Target && EventData.Equals(otherEvent.EventData);
         }
     }
 
@@ -79,6 +102,20 @@ namespace Game.Input
         {
             get { return new MouseEventData(0, new List<MouseEventTag>(), true); }
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is MouseEventData)) {
+                return false;
+            }
+            MouseEventData otherData = obj as MouseEventData;
+            return Priority == otherData.Priority && Tags.HasSameItems(otherData.Tags) && IsBlockedByUI == otherData.IsBlockedByUI;
+        }
     }
 
     public class MouseNothingClickEvent
@@ -90,6 +127,15 @@ namespace Game.Input
         public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
         public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
         public MouseEventData EventData { get; private set; }
+
+        /// <summary>
+        /// Listener delegate can be left undefined, when removing event listeners
+        /// </summary>
+        public MouseNothingClickEvent(int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Listener = null;
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
+        }
 
         public MouseNothingClickEvent(OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
@@ -107,11 +153,10 @@ namespace Game.Input
 
         public override bool Equals(object obj)
         {
-            if (!(obj is MouseNothingClickEvent)) {
+            if (obj == null || !(obj is MouseNothingClickEvent)) {
                 return false;
             }
-            MouseNothingClickEvent otherEvent = obj as MouseNothingClickEvent;
-            return Listener == otherEvent.Listener;
+            return EventData.Equals((obj as MouseNothingClickEvent).EventData);
         }
     }
 
@@ -134,6 +179,38 @@ namespace Game.Input
         public MouseEventData EventData { get; private set; }
         public TargetType Targeting { get { return GameObjectTarget == null ? TargetType.NoTarget : (ClickableTarget == null ? TargetType.GameObject : TargetType.ClickListener); } }
 
+        /// <summary>
+        /// Listener delegate can be left undefined, when removing event listeners
+        /// </summary>
+        public MouseDragEvent(IClickListener target, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            if (target == null) {
+                throw new NullReferenceException();
+            }
+            GameObjectTarget = target.GameObject;
+            ClickableTarget = target;
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
+        }
+
+        /// <summary>
+        /// Listener delegate can be left undefined, when removing event listeners
+        /// </summary>
+        public MouseDragEvent(GameObject target, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            if (target == null) {
+                throw new NullReferenceException();
+            }
+            GameObjectTarget = target;
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
+        }
+
+        /// <summary>
+        /// Listener delegate can be left undefined, when removing event listeners
+        /// </summary>
+        public MouseDragEvent(int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
+        }
 
         public MouseDragEvent(IClickListener target, OnDragDelegateClickable listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
@@ -172,11 +249,11 @@ namespace Game.Input
 
         public override bool Equals(object obj)
         {
-            if (!(obj is MouseDragEvent)) {
+            if (obj == null || !(obj is MouseDragEvent)) {
                 return false;
             }
             MouseDragEvent otherEvent = obj as MouseDragEvent;
-            return ClickableListener == otherEvent.ClickableListener;
+            return GameObjectTarget == otherEvent.GameObjectTarget && ClickableTarget == otherEvent.ClickableTarget && EventData.Equals(otherEvent.EventData);
         }
     }
 }

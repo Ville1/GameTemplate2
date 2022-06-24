@@ -169,9 +169,9 @@ namespace Game.Maps
                 //If map already has tiles, clear old tiles
                 foreach (Tile tile in this) {
                     tile.Destroy();
-                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
-                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile, Drag));
-                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
+                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile));
+                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile));
+                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile));
                 }
                 Tiles.Clear();
             }

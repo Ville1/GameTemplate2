@@ -36,5 +36,23 @@ namespace Game.Utils
         {
             return list.Select(item => item).ToList();
         }
+
+        /// <summary>
+        /// Returns true, if both lists contain each other's items. Order and duplicates are ignored.
+        /// </summary>
+        public static bool HasSameItems<TItem>(this List<TItem> thisList, List<TItem> list)
+        {
+            foreach(TItem item in thisList) {
+                if (!list.Contains(item)) {
+                    return false;
+                }
+            }
+            foreach (TItem item in list) {
+                if (!thisList.Contains(item)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
