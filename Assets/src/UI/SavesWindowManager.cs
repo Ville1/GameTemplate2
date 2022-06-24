@@ -100,6 +100,7 @@ namespace Game.UI
         public override void UpdateUI()
         {
             TitleText.text = Localization.Game.Get(State == WindowState.Saving ? "SaveGameTitle" : "LoadGameTitle");
+            confirmButton.Text = Localization.Game.Get(State == WindowState.Saving ? "Save" : "Load");
             inputField.PlaceholderLocalizationKey = State == WindowState.Saving ? "EnterSaveName" : null;
             inputField.Interactable = State == WindowState.Saving;
             list.Clear();
@@ -170,6 +171,7 @@ namespace Game.UI
         private void StartLoading()
         {
             Active = false;
+            Main.Instance.LoadGame(ConfigManager.Config.SaveFolder, inputField.Text);
         }
     }
 }

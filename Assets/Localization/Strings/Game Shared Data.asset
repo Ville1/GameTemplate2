@@ -71,10 +71,6 @@ MonoBehaviour:
     m_Key: FailedToSaveGame
     m_Metadata:
       m_Items: []
-  - m_Id: 6564199045361664
-    m_Key: SaveException
-    m_Metadata:
-      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

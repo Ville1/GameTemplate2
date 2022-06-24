@@ -52,9 +52,9 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1196501792813056
-    m_Localized: When using StartSaving(), TSaveData-class should have at least one
-      non-static public field with DataPropertyAttribute and type which implements
-      ISaveData-interface
+    m_Localized: When using StartSaving() or StartLoading(), TSaveData-class should
+      have at least one non-static public field with DataPropertyAttribute and type
+      which implements ISaveData-interface
     m_Metadata:
       m_Items: []
   - m_Id: 809246934790144
@@ -66,7 +66,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1193334774525952
-    m_Localized: Call StartSaving() at least once before calling Update()
+    m_Localized: 'Invalid state: {0}'
     m_Metadata:
       m_Items: []
   - m_Id: 1211570060619776
@@ -153,6 +153,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 5120256705392640
     m_Localized: '''{0}'' is not recognized as a console command'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6868286160859136
+    m_Localized: 'Exception occurred while trying to save the game: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6868326291959808
+    m_Localized: 'Exception occurred while trying to load the game: {0}'
     m_Metadata:
       m_Items: []
   references:

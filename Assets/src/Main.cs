@@ -53,9 +53,10 @@ namespace Game
         private void Update()
         {
             CurrentFrameRate = 1.0f / Time.deltaTime;
-            if(saveManager != null && State == State.Saving) {
+            if(saveManager != null && (State == State.Saving || State == State.Loading)) {
                 switch (saveManager.State) {
                     case SaveManager<SaveData>.ManagerState.Saving:
+                    case SaveManager<SaveData>.ManagerState.Loading:
                         saveManager.Update();
                         ProgressBar.Instance.Progress = saveManager.Progress;
                         ProgressBar.Instance.Description = saveManager.Description;
@@ -90,6 +91,18 @@ namespace Game
             };
             saveManager = new SaveManager<SaveData>(folder, saveables);
             saveManager.StartSaving(fileName);
+            ProgressBar.Instance.Show(saveManager.Description);
+        }
+
+        public void LoadGame(string folder, string fileName)
+        {
+            State = State.Loading;
+            WorldMap = WorldMap ?? Maps.Map.Instantiate("WorldMap", 1, 1);
+            List<ISaveable> saveables = new List<ISaveable>() {
+                WorldMap
+            };
+            saveManager = new SaveManager<SaveData>(folder, saveables);
+            saveManager.StartLoading(fileName);
             ProgressBar.Instance.Show(saveManager.Description);
         }
 

@@ -74,10 +74,6 @@ MonoBehaviour:
     m_Localized: Saving failed :(
     m_Metadata:
       m_Items: []
-  - m_Id: 6564199045361664
-    m_Localized: 'Exception occurred while trying to save the game: {0}'
-    m_Metadata:
-      m_Items: []
   references:
     version: 2
     RefIds: []

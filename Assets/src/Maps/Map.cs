@@ -18,7 +18,7 @@ namespace Game.Maps
 
         public delegate void EndGenerationCallback();
 
-        public enum MapState { Uninitialized, Generation, Ready }
+        public enum MapState { Uninitialized, Generation, Loading, Ready }
 
         public MapState State { get; private set; }
         public int Width { get; private set; }
@@ -33,6 +33,7 @@ namespace Game.Maps
         private Tile draggedTile;
         private Tile dragOverTile;
         private Coordinates savingPosition;
+        private int loadingPosition;
 
         /// <summary>
         /// Initializiation
@@ -64,18 +65,11 @@ namespace Game.Maps
 
         public void StartGeneration(EndGenerationCallback endGenerationCallback)
         {
-            if(State == MapState.Ready) {
-                //If map is already generated, clear old tiles
-                foreach(Tile tile in this) {
-                    tile.Destroy();
-                }
-                Tiles.Clear();
-            }
-            Active = true;
+            Clear();
+            Tiles.Add(new List<Tile>());
+
             State = MapState.Generation;
             generationPosition = new Coordinates(0, 0);
-            Tiles = new List<List<Tile>>();
-            Tiles.Add(new List<Tile>());
             this.endGenerationCallback = endGenerationCallback;
             generationTilesPerFrame = GENERATION_TILES_PER_FRAME_DEFAULT;
 
@@ -84,19 +78,63 @@ namespace Game.Maps
             tileRandomizer.Add(TilePrototypes[1], 10);
         }
 
-        public bool Save(ref ISaveData data)
+        public void StartSaving(ref ISaveData data)
         {
             Game.Saving.Data.Map saveData = (Game.Saving.Data.Map)data;
-            if(saveData.Tiles == null) {
-                //Initialize save data
-                saveData.Tiles = new List<Saving.Data.Tile>();
-                savingPosition = new Coordinates(0, 0);
-                return true;
-            }
+
+            //Initialize save data
+            saveData.Width = Width;
+            saveData.Height = Height;
+            saveData.Tiles = new List<Saving.Data.Tile>();
+            savingPosition = new Coordinates(0, 0);
+        }
+
+        public float Save(ref ISaveData data)
+        {
+            Game.Saving.Data.Map saveData = (Game.Saving.Data.Map)data;
 
             //Save next tile
             saveData.Tiles.Add(Tiles[savingPosition.X][savingPosition.Y].GetSaveData());
-            return savingPosition.MoveToNextInRectangle(0, Width, Height);
+
+            //Move to next tile
+            if (savingPosition.MoveToNextInRectangle(0, Width, Height)) {
+                float fullRows = savingPosition.Y * Width;
+                float currentRow = savingPosition.X;
+                return (fullRows + currentRow) / ((float)Width * Height);
+            } else {
+                return 1.0f;
+            }
+        }
+
+        public void StartLoading(ISaveData data)
+        {
+            Game.Saving.Data.Map saveData = (Game.Saving.Data.Map)data;
+
+            Clear();
+            State = MapState.Loading;
+            Width = saveData.Width;
+            Height = saveData.Height;
+            loadingPosition = 0;
+
+            //Initialize tile lists with nulls, so it does not matter what order tiles are in save file
+            //We can replace nulls in any order
+            for(int y = 0; y < Height; y++) {
+                Tiles.Add(new List<Tile>());
+                for(int x = 0; x < Width; x++) {
+                    Tiles[y].Add(null);
+                }
+            }
+        }
+
+        public float Load(ISaveData data)
+        {
+            Game.Saving.Data.Map saveData = (Game.Saving.Data.Map)data;
+            Game.Saving.Data.Tile tileSaveData = saveData.Tiles[loadingPosition];
+            Tile tile = Tile.Load(this, tileSaveData);
+            Tiles[tileSaveData.X][tileSaveData.Y] = tile;
+            SetEventListeners(tile);
+            loadingPosition++;
+            return loadingPosition / (float)saveData.Tiles.Count;
         }
 
         public static Map Instantiate(string mapName, int width, int height)
@@ -123,6 +161,22 @@ namespace Game.Maps
         public MapEnumerator GetEnumerator()
         {
             return new MapEnumerator(Tiles, Width, Height);
+        }
+
+        private void Clear()
+        {
+            if (State == MapState.Ready) {
+                //If map already has tiles, clear old tiles
+                foreach (Tile tile in this) {
+                    tile.Destroy();
+                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
+                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile, Drag));
+                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
+                }
+                Tiles.Clear();
+            }
+            Active = true;
+            Tiles = new List<List<Tile>>();
         }
 
         private void Generate()
@@ -157,9 +211,7 @@ namespace Game.Maps
             Tiles[generationPosition.Y].Add(tile);
 
             //Add event listeners
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile, Drag));
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
+            SetEventListeners(tile);
 
             //Move to next coordinates
             generationPosition.X++;
@@ -176,6 +228,13 @@ namespace Game.Maps
             }
 
             return true;
+        }
+
+        private void SetEventListeners(Tile tile)
+        {
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile, Drag));
+            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
         }
 
         private void EndGeneration()

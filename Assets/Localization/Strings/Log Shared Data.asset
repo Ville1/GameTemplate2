@@ -56,7 +56,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1193334774525952
-    m_Key: CallStartSavingBeforeUpdate
+    m_Key: InvalidState
     m_Metadata:
       m_Items: []
   - m_Id: 1196501792813056
@@ -145,6 +145,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 5120256705392640
     m_Key: CommandNotRecognized
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6868286160859136
+    m_Key: SaveException
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6868326291959808
+    m_Key: LoadException
     m_Metadata:
       m_Items: []
   m_Metadata:

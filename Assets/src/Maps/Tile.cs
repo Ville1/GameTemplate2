@@ -1,5 +1,6 @@
 using Game.Input;
 using Game.UI;
+using System.Linq;
 using UnityEngine;
 
 namespace Game.Maps
@@ -111,9 +112,10 @@ namespace Game.Maps
             return saveData;
         }
 
-        public void Load(Saving.Data.Tile saveData)
+        public static Tile Load(Map map, Saving.Data.Tile saveData)
         {
-            //TODO
+            //TODO: Error handling. Save file can have tile names that don't match any prototypes
+            return new Tile(map, saveData.X, saveData.Y, Map.TilePrototypes.First(prototype => prototype.Name == saveData.Name));
         }
 
         private void FindRectangle()
