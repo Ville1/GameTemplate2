@@ -74,6 +74,22 @@ MonoBehaviour:
     m_Localized: Saving failed :(
     m_Metadata:
       m_Items: []
+  - m_Id: 7638725803995136
+    m_Localized: This command requires {0} argument(s)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7641831170207744
+    m_Localized: Variable does not exist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7642322063159296
+    m_Localized: Variable deleted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7646191165992960
+    m_Localized: No variables
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

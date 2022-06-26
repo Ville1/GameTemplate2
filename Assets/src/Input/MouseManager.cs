@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Game.Input
 {
@@ -128,6 +127,9 @@ namespace Game.Input
             mouseClickEvents[button].Add(mouseEvent);
         }
 
+        /// <summary>
+        /// TODO: Give events guids, and allow removing of an events with them (like keyboard events)
+        /// </summary>
         public void RemoveEventListerener(MouseButton button, MouseEvent mouseEvent)
         {
             mouseClickEvents[button].Remove(mouseEvent);

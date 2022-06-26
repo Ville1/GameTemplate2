@@ -12,6 +12,8 @@ namespace Game.UI
 {
     public class ConsoleManager : WindowBase
     {
+        private static readonly string VARIABLE_PREFIX = "$";
+
         public static ConsoleManager Instance;
 
         /// <summary>
@@ -28,6 +30,7 @@ namespace Game.UI
         private List<ArchivedCommand> history = new List<ArchivedCommand>();
         private int? historyPosition = null;
         private bool delayedScrollDown = false;
+        private Dictionary<string, object> variables = new Dictionary<string, object>();
 
         /// <summary>
         /// Initializiation
@@ -41,6 +44,7 @@ namespace Game.UI
             }
             Instance = this;
             Text.text = string.Empty;
+            Text.faceColor = new Color(1.0f, 1.0f, 1.0f);
             Active = false;
             Tags.Add(Tag.Console);
 
@@ -49,7 +53,17 @@ namespace Game.UI
                 if(parameters.Count == 0) {
                     return null;
                 }
-                return string.Join(" ", parameters);
+                string output = string.Join(" ", parameters);
+                foreach(KeyValuePair<string, object> variable in variables) {
+                    //TODO: variable name endings
+                    //Example:
+                    //test1 = "abc"
+                    //test12 = "def"
+                    //echo $test12
+                    //prints: abc2
+                    output = output.Replace(VARIABLE_PREFIX + variable.Key, variable.Value.ToString());
+                }
+                return output;
             }));
 
             commands.Add(new Command("list", new List<string>() { "li" }, "Shows this list :)", (List<string> parameters) => {
@@ -83,6 +97,53 @@ namespace Game.UI
                 Text.text = string.Empty;
                 return null;
             }, false));
+
+            commands.Add(new Command("setVariable", new List<string>() { "set_variable", "setVar", "set_var" }, "Create a new variable or assing a new value to a pre-existing variable", (List<string> parameters) => {
+                return SetVariable(parameters);
+            }));
+
+            commands.Add(new Command("deleteVariable", new List<string>() { "delete_variable", "delVar", "del_var" }, "Delete a variable (if it exists)", (List<string> parameters) => {
+                if (parameters.Count != 1) {
+                    return string.Format(Localization.Game.Get("ConsoleCommandInvalidArgumentCount"), 1);
+                }
+                if (!variables.ContainsKey(parameters[0])) {
+                    return Localization.Game.Get("ConsoleVariableDoesNotExist");
+                }
+                variables.Remove(parameters[0]);
+                return Localization.Game.Get("ConsoleVariableDeleted");
+            }));
+
+
+            commands.Add(new Command("listVariables", new List<string>() { "list_variables", "listVars", "list_vars" }, "Prints list of all the current variables, along with their values", (List<string> parameters) => {
+                if(variables.Count == 0) {
+                    return Localization.Game.Get("ConsoleNoVariables");
+                }
+                StringBuilder output = new StringBuilder();
+                for (int i = 0; i < variables.Count; i++) {
+                    output.Append(GetVariablePrint(variables.ElementAt(0).Key));
+                    if (i != variables.Count - 1) {
+                        output.Append(Environment.NewLine);
+                    }
+                }
+                return output.ToString();
+            }));
+
+            commands.Add(new Command("test1", null, "Test command 1", (List<string> parameters) => {
+                Game.Input.KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.T, () => { CustomLogger.DebugRaw("Test t"); });
+                Guid id = Game.Input.KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Y, () => { CustomLogger.DebugRaw("Test y"); });
+                SetVariable("testi", id.ToString());
+                return id.ToString();
+            }));
+
+            commands.Add(new Command("test2", null, "Test command 2", (List<string> parameters) => {
+                Game.Input.KeyboardManager.Instance.RemoveOnKeyDownEventListeners(KeyCode.T);
+                return "Test command 2";
+            }));
+
+            commands.Add(new Command("test3", null, "Test command 3", (List<string> parameters) => {
+                Game.Input.KeyboardManager.Instance.RemoveOnKeyDownEventListeners(KeyCode.Y, new Guid(variables["testi"].ToString()));
+                return "Test command 3";
+            }));
 
             //Check for duplicate names
             if (commands.Select(command => command.Name).Distinct().Count() != commands.Count) {
@@ -174,8 +235,17 @@ namespace Game.UI
                 });
                 Text.text = Text.text + output + Environment.NewLine;
             } else {
-                //Run command
+                //Command found
+                //Remove name from parameter list
                 parameters.RemoveAt(0);
+                //Assing variables
+                parameters = parameters.Select(parameter => {
+                    if (parameter.StartsWith(VARIABLE_PREFIX) && parameter.Length > 1 && variables.ContainsKey(parameter.Substring(1))) {
+                        return variables[parameter.Substring(1)].ToString();
+                    }
+                    return parameter;
+                }).ToList();
+                //Run command
                 output = command.Action(parameters);
                 if (command.SaveToHistory) {
                     history.Add(new ArchivedCommand() {
@@ -235,6 +305,61 @@ namespace Game.UI
         {
             EventSystem.current.SetSelectedGameObject(Input.gameObject, null);
             Input.OnPointerClick(new PointerEventData(EventSystem.current));
+        }
+
+        private string SetVariable(string name, string value)
+        {
+            return SetVariable(new List<string>() { name, value });
+        }
+
+        private string SetVariable(List<string> parameters)
+        {
+            if (parameters.Count != 2) {
+                //TODO: Add support for arrays
+                return string.Format(Localization.Game.Get("ConsoleCommandInvalidArgumentCount"), 2);
+            }
+            string variableName = parameters[0];
+            string variableValueS = parameters[1];
+            object variableValueO = null;
+
+            //Check if value is int
+            int intValue;
+            if (int.TryParse(variableValueS, out intValue)) {
+                variableValueO = intValue;
+            }
+
+            //Check if value is long
+            if(variableValueO == null) {
+                long longValue;
+                if (long.TryParse(variableValueS, out longValue)) {
+                    variableValueO = longValue;
+                }
+            }
+
+            if (variableValueO == null) {
+                //Variable is string
+                variableValueO = variableValueS;
+            }
+
+            //Add or update
+            if (variables.ContainsKey(variableName)) {
+                variables[variableName] = variableValueO;
+            } else {
+                variables.Add(variableName, variableValueO);
+            }
+
+            string quotes = variableValueO.GetType() == typeof(string) ? "\"" : string.Empty;
+            return GetVariablePrint(variableName);
+        }
+
+        private string GetVariablePrint(string name)
+        {
+            if (!variables.ContainsKey(name)) {
+                return string.Empty;
+            }
+            object variableValue = variables[name];
+            string quotes = variableValue.GetType() == typeof(string) ? "\"" : string.Empty;
+            return string.Format("{0} = {1}{2}{3}", name, quotes, variableValue.ToString(), quotes);
         }
 
         private class ArchivedCommand

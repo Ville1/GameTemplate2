@@ -71,6 +71,22 @@ MonoBehaviour:
     m_Key: FailedToSaveGame
     m_Metadata:
       m_Items: []
+  - m_Id: 7638725803995136
+    m_Key: ConsoleCommandInvalidArgumentCount
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7641831170207744
+    m_Key: ConsoleVariableDoesNotExist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7642322063159296
+    m_Key: ConsoleVariableDeleted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7646191165992960
+    m_Key: ConsoleNoVariables
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
