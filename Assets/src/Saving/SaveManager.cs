@@ -23,7 +23,7 @@ namespace Game.Saving
 
         public ManagerState State { get; private set; }
         public float Progress { get; private set; }
-        public string Description { get; private set; }
+        public LString Description { get; private set; }
         public Exception SaveException { get; private set; }
 
         private string saveFolder = null;
@@ -91,7 +91,7 @@ namespace Game.Saving
                     data = JsonUtility.FromJson<TSaveData>(File.ReadAllText(Path.Combine(saveFolder, saveName + ".json")));
                 } catch (Exception exception) {
                     SaveException = exception;
-                    CustomLogger.Error("LoadException", exception.Message);
+                    CustomLogger.Error("{LoadException}", exception.Message);
                     State = ManagerState.Error;
                     return false;
                 }
@@ -105,14 +105,14 @@ namespace Game.Saving
             ).ToList();
             if (dataFields.Count == 0) {
                 //No properties with DataPropertyAttribute
-                CustomLogger.Error("InvalidSaveDataClass");
+                CustomLogger.Error("{InvalidSaveDataClass}");
                 return false;
             }
 
             //Check that all saveables are found in saveables - list
             foreach (FieldInfo field in dataFields) {
                 if (!saveables.Any(saveable => saveable.GetType().Name == field.GetCustomAttribute<DataPropertyAttribute>().SaveableName)) {
-                    CustomLogger.Error("SaveableIsMissing", field.GetCustomAttribute<DataPropertyAttribute>().SaveableName);
+                    CustomLogger.Error("{SaveableIsMissing}", field.GetCustomAttribute<DataPropertyAttribute>().SaveableName);
                     return false;
                 }
             }
@@ -163,7 +163,7 @@ namespace Game.Saving
                 if (!stateStartWarningSent) {
                     //If Update() gets called before StartSaving() or StartLoading() log a warning, but only once. Update() is intended to be called repeatedly and we don't want
                     //spam log with same warning a million times, so lets use startSavingWarningSent variable to see if error has already been sent
-                    CustomLogger.Warning("InvalidState", State.ToString());
+                    CustomLogger.Warning("{InvalidState}", State.ToString());
                     stateStartWarningSent = true;
                 }
                 return;
@@ -210,16 +210,11 @@ namespace Game.Saving
                         File.WriteAllText(Path.Combine(saveFolder, saveName), JsonUtility.ToJson(data, PRETTY_JSON));
                     } catch (Exception exception) {
                         SaveException = exception;
-                        CustomLogger.Error("SaveException", exception.Message);
+                        CustomLogger.Error("{SaveException}", exception.Message);
                         State = ManagerState.Error;
                     }
                 }
             }
-        }
-
-        private void UpdateDescription()
-        {
-            Description = currentSaveableStep.Attribute.LocalizeDescription ? Localization.Game.Get(currentSaveableStep.Attribute.Description) : currentSaveableStep.Attribute.Description;
         }
 
         private bool NextSaveable()
@@ -249,7 +244,7 @@ namespace Game.Saving
                 currentSaveableStep.Saveable.StartLoading(currentSaveData);
             }
 
-            UpdateDescription();
+            Description = currentSaveableStep.Attribute.DescriptionL;
             return true;
         }
 

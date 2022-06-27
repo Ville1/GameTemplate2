@@ -19,37 +19,29 @@ namespace Game.Utils
             MinConsoleLevel = ConfigManager.Config.LogConsoleLevel;
             LogPrefix = ConfigManager.Config.LogPrefix;
             LogMethod = ConfigManager.Config.LogMethod;
-            LogRaw("LOGGER - " + Localization.Log.Get("LoggerSettingsLoaded"));
+            Log("LOGGER - " + Localization.Log.Get("LoggerSettingsLoaded"));
         }
 
-        /// <summary>
-        /// Log a localized message
-        /// </summary>
-        public static void Log(LogLevel level, string key)
+        public static void Log(LString message)
         {
-            LogRaw(level, Localization.Log.Get(key));
+            WriteLog(message);
         }
 
-        /// <summary>
-        /// Log a localized message
-        /// </summary>
-        public static void Log(LogLevel level, string key, params string[] arguments)
+        public static void Log(LogLevel level, LString message)
         {
-            LogRaw(level, string.Format(Localization.Log.Get(key), arguments));
+            PrintLog(level, message);
         }
 
-        /// <summary>
-        /// Log a raw string
-        /// </summary>
-        public static void LogRaw(LogLevel level, string format, params string[] arguments)
+        private static void PrintLog(LogLevel level, LString format, params object[] arguments)
         {
-            LogRaw(level, string.Format(format, arguments));
+            if (format.IsImplicit) {
+                //Implicitly localized string, change default table to Log
+                format.Table = LTables.Log;
+            }
+            PrintLog(level, string.Format(format, arguments));
         }
 
-        /// <summary>
-        /// Log a raw string
-        /// </summary>
-        public static void LogRaw(LogLevel level, string message)
+        private static void PrintLog(LogLevel level, LString message)
         {
             if((int)level < (int)MinLevel) {
                 //Level too low
@@ -78,6 +70,11 @@ namespace Game.Utils
                 messageBuilder.Append(": ");
             }
 
+            if (message.IsImplicit) {
+                //Implicitly localized string, change default table to Log
+                message.Table = LTables.Log;
+            }
+
             messageBuilder.Append(message);
 
             WriteLog(messageBuilder.ToString());
@@ -86,108 +83,34 @@ namespace Game.Utils
             }
         }
 
-        /// <summary>
-        /// Log a raw string
-        /// </summary>
-        public static void LogRaw(string message)
+        public static void Debug(LString message)
         {
-            WriteLog(message);
+            PrintLog(LogLevel.Debug, message);
         }
 
-        /// <summary>
-        /// Log a localized debug message
-        /// </summary>
-        public static void Debug(string key)
+        public static void Debug(LString format, params object[] arguments)
         {
-            Log(LogLevel.Debug, key);
+            PrintLog(LogLevel.Debug, format, arguments);
         }
 
-        /// <summary>
-        /// Log a localized debug message
-        /// </summary>
-        public static void Debug(string key, params string[] arguments)
+        public static void Warning(LString message)
         {
-            Log(LogLevel.Debug, key, arguments);
+            PrintLog(LogLevel.Warning, message);
         }
 
-        /// <summary>
-        /// Log a debug message
-        /// </summary>
-        public static void DebugRaw(string message)
+        public static void Warning(LString format, params object[] arguments)
         {
-            LogRaw(LogLevel.Debug, message);
+            PrintLog(LogLevel.Warning, format, arguments);
         }
 
-        /// <summary>
-        /// Log a debug message
-        /// </summary>
-        public static void DebugRaw(string format, params string[] arguments)
+        public static void Error(LString message)
         {
-            LogRaw(LogLevel.Debug, format, arguments);
+            PrintLog(LogLevel.Error, message);
         }
 
-        /// <summary>
-        /// Log a localized warning message
-        /// </summary>
-        public static void Warning(string key)
+        public static void Error(LString format, params object[] arguments)
         {
-            Log(LogLevel.Warning, key);
-        }
-
-        /// <summary>
-        /// Log a localized warning message
-        /// </summary>
-        public static void Warning(string key, params string[] arguments)
-        {
-            Log(LogLevel.Warning, key, arguments);
-        }
-
-        /// <summary>
-        /// Log a warning message
-        /// </summary>
-        public static void WarningRaw(string message)
-        {
-            LogRaw(LogLevel.Warning, message);
-        }
-
-        /// <summary>
-        /// Log a warning message
-        /// </summary>
-        public static void WarningRaw(string format, params string[] arguments)
-        {
-            LogRaw(LogLevel.Warning, format, arguments);
-        }
-
-        /// <summary>
-        /// Log a localized error message
-        /// </summary>
-        public static void Error(string key)
-        {
-            Log(LogLevel.Error, key);
-        }
-
-        /// <summary>
-        /// Log a localized error message
-        /// </summary>
-        public static void Error(string key, params string[] arguments)
-        {
-            Log(LogLevel.Error, key, arguments);
-        }
-
-        /// <summary>
-        /// Log a error message
-        /// </summary>
-        public static void ErrorRaw(string message)
-        {
-            LogRaw(LogLevel.Error, message);
-        }
-
-        /// <summary>
-        /// Log a error message
-        /// </summary>
-        public static void ErrorRaw(string format, params string[] arguments)
-        {
-            LogRaw(LogLevel.Error, format, arguments);
+            PrintLog(LogLevel.Error, format, arguments);
         }
 
         /// <summary>

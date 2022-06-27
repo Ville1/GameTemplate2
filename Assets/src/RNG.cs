@@ -21,7 +21,7 @@ namespace Game
         public static int Range(int min, int max)
         {
             if(min >= max) {
-                CustomLogger.Warning("InvalidMethodParameters");
+                CustomLogger.Warning("{InvalidMethodParameters}");
                 return min;
             }
             return UnityEngine.Random.Range(min, max + 1);
@@ -33,7 +33,7 @@ namespace Game
         public static float Range(float min, float max)
         {
             if (min >= max) {
-                CustomLogger.Warning("InvalidMethodParameters");
+                CustomLogger.Warning("{InvalidMethodParameters}");
                 return min;
             }
             return UnityEngine.Random.Range(min, max);
@@ -45,7 +45,7 @@ namespace Game
         public static TItem Item<TItem>(List<TItem> list)
         {
             if(list.Count == 0) {
-                CustomLogger.Warning("InvalidMethodParameters");
+                CustomLogger.Warning("{InvalidMethodParameters}");
                 return default(TItem);
             }
             return list.Count == 1 ? list[0] : list[Range(0, list.Count - 1)];

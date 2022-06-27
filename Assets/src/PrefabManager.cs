@@ -17,22 +17,22 @@ namespace Game {
         private void Start()
         {
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
 
             if (PRELOAD_ALL) {
-                CustomLogger.Debug("LoadingPrefabs");
+                CustomLogger.Debug("{LoadingPrefabs}");
                 foreach(GameObject prefab in Resources.LoadAll<GameObject>("Prefabs")) {
                     if (prefabs.ContainsKey(prefab.name)) {
-                        CustomLogger.Warning("DuplicatedPrefab", prefab.name);
+                        CustomLogger.Warning("{DuplicatedPrefab}", prefab.name);
                     } else {
                         prefabs.Add(prefab.name, prefab);
-                        CustomLogger.Debug("PrefabLoaded", prefab.name);
+                        CustomLogger.Debug("{PrefabLoaded}", prefab.name);
                     }
                 }
-                CustomLogger.Debug("AllPrefabsLoaded");
+                CustomLogger.Debug("{AllPrefabsLoaded}");
             }
         }
 
@@ -47,7 +47,7 @@ namespace Game {
             if (PRELOAD_ALL) {
                 //All prefabs are loaded on game start, fetch prefab from dictionary
                 if (!prefabs.ContainsKey(name)) {
-                    CustomLogger.Error("PrefabNotFound", name);
+                    CustomLogger.Error("{PrefabNotFound}", name);
                     return null;
                 }
                 return prefabs[name];
@@ -60,10 +60,10 @@ namespace Game {
             //Load prefab
             GameObject prefab = Resources.Load<GameObject>(string.Format("Prefabs/{0}", name));
             if(prefab == null) {
-                CustomLogger.Error("PrefabNotFound", name);
+                CustomLogger.Error("{PrefabNotFound}", name);
                 return null;
             }
-            CustomLogger.Debug("PrefabLoaded", name);
+            CustomLogger.Debug("{PrefabLoaded}", name);
             prefabs.Add(name, prefab);
             return prefab;
         }

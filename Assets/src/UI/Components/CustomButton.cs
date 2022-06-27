@@ -12,10 +12,12 @@ namespace Game.UI.Components
         public Button ButtonBase { get; private set; }
         public TMPro.TMP_Text TmpText { get; private set; }
 
+        private LString text;
+
         /// <summary>
         /// Instantiate a new button based on prototype
         /// </summary>
-        public CustomButton(Button prototype, GameObject parent, Vector2 positionDelta, string textKey, OnClick onClick)
+        public CustomButton(Button prototype, GameObject parent, Vector2 positionDelta, LString text, OnClick onClick)
         {
             ButtonBase = GameObject.Instantiate(
                 prototype,
@@ -32,14 +34,14 @@ namespace Game.UI.Components
             int index = 0;
             string name = null;
             while (name == null) {
-                string newName = string.Format("{0}{1}Button", textKey, index == 0 ? string.Empty : index);
+                string newName = string.Format("{0}{1}Button", text.IsLocalized ? text.Key : string.Empty, index == 0 ? string.Empty : index);
                 if(GameObject.Find(string.Format("{0}/{1}", parent.name, newName)) == null) {
                     name = newName;
                 }
                 index++;
                 if(index == 10000) {
                     //This should not happen, but lest be sure to avoid infinite loops
-                    CustomLogger.Error("FailedToGenerateGameObjectName");
+                    CustomLogger.Error("{FailedToGenerateGameObjectName}");
                     break;
                 }
             }
@@ -47,26 +49,27 @@ namespace Game.UI.Components
                 ButtonBase.gameObject.name = name;
             }
 
-            InitializeTextAndEventListener(textKey, onClick);
+            InitializeTextAndEventListener(text, onClick);
         }
 
         /// <summary>
         /// Wrap a pre-existing button as a CustomButton
         /// </summary>
-        public CustomButton(Button button, string textKey, OnClick onClick)
+        public CustomButton(Button button, LString text, OnClick onClick)
         {
             ButtonBase = button;
-            InitializeTextAndEventListener(textKey, onClick);
+            InitializeTextAndEventListener(text, onClick);
         }
 
-        public string Text
+        public LString Text
         {
             get {
-                return TmpText == null ? null : TmpText.text;
+                return text;
             }
             set {
                 if(TmpText != null) {
-                    TmpText.text = value;
+                    TmpText.text = text;
+                    text = value;
                 }
             }
         }
@@ -123,12 +126,17 @@ namespace Game.UI.Components
             return ButtonBase.name;
         }
 
-        private void InitializeTextAndEventListener(string textKey, OnClick onClick)
+        private void InitializeTextAndEventListener(LString text, OnClick onClick)
         {
-            //Set localized text
+            //Set text
             TmpText = ButtonBase.GetComponentInChildren<TMPro.TMP_Text>();
-            if (TmpText != null && !string.IsNullOrEmpty(textKey)) {
-                TmpText.text = Localization.Game.Get(textKey);
+            this.text = text;
+            if (TmpText != null) {
+                if (string.IsNullOrEmpty(text)) {
+                    this.text = TmpText.text;
+                } else {
+                    TmpText.text = text;
+                }
             }
 
             //Set event listener

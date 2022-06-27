@@ -21,7 +21,7 @@ namespace Game.UI
         {
             base.Start();
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
@@ -30,10 +30,10 @@ namespace Game.UI
             //Create buttons
             //Localized string key, action delegate
             Dictionary<string, CustomButton.OnClick> buttonActions = new Dictionary<string, CustomButton.OnClick>() {
-                { "NewGame", NewGame },
-                { "Load", Load },
-                { "Save", Save },
-                { "Quit", Quit }
+                { "{NewGame}", NewGame },
+                { "{Load}", Load },
+                { "{Save}", Save },
+                { "{Quit}", Quit }
             };
 
             float buttonSpacing = 30.0f;
@@ -93,12 +93,12 @@ namespace Game.UI
 
         private void Quit()
         {
-            CustomLogger.DebugRaw("Quit game");
+            CustomLogger.Debug("Quit game");
         }
 
         public override void UpdateUI()
         {
-            buttons["Save"].Interactable = Main.Instance != null && Main.Instance.State == State.Running;
+            buttons["{Save}"].Interactable = Main.Instance != null && Main.Instance.State == State.Running;
         }
     }
 }

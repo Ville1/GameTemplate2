@@ -16,7 +16,7 @@ namespace Game.UI
         {
             base.Start();
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;

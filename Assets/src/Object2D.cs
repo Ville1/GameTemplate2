@@ -64,7 +64,7 @@ namespace Game
             }
             set {
                 if (IsPrototype) {
-                    CustomLogger.Error("ObjectIsPrototype", string.IsNullOrEmpty(name) ? "Unnamed" : name);
+                    CustomLogger.Error("{ObjectIsPrototype}", string.IsNullOrEmpty(name) ? "Unnamed" : name);
                 } else {
                     gameObject.SetActive(value);
                 }
@@ -128,7 +128,7 @@ namespace Game
         public void Destroy()
         {
             if (isDestroyed) {
-                CustomLogger.Error("ObjectIsDestroyed", name);
+                CustomLogger.Error("{ObjectIsDestroyed}", name);
             } else {
                 GameObject.Destroy(gameObject);
                 isDestroyed = true;
@@ -181,7 +181,7 @@ namespace Game
                 //Use default sprite from prefab
                 if(Renderer.sprite == null) {
                     //Sprite name was not provided with spriteName - parameter and Renderer is missing or is lacking a sprite
-                    CustomLogger.Error("Object2DNoSprite");
+                    CustomLogger.Error("{Object2DNoSprite}");
                     this.spriteName = string.Empty;
                 } else {
                     this.spriteName = Renderer.sprite.name;

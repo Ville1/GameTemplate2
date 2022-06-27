@@ -20,18 +20,18 @@ namespace Game
         private void Start()
         {
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
 
             if (PRELOAD_ALL) {
-                CustomLogger.Debug("LoadingTextures");
+                CustomLogger.Debug("{LoadingTextures}");
                 foreach (TextureDirectory folder in Enum.GetValues(typeof(TextureDirectory))) {
                     LoadTextures(folder);
                     LoadSprites(folder);
                 }
-                CustomLogger.Debug("AllTexturesLoaded");
+                CustomLogger.Debug("{AllTexturesLoaded}");
             }
         }
 
@@ -50,7 +50,7 @@ namespace Game
                 throw new NotImplementedException();
             }
             if (!textures[directory].ContainsKey(name)) {
-                CustomLogger.Error("TextureNotFound", directory.ToString().ToLower(), name);
+                CustomLogger.Error("{TextureNotFound}", directory.ToString().ToLower(), name);
                 return null;
             }
             return textures[directory][name];
@@ -70,7 +70,7 @@ namespace Game
                 throw new NotImplementedException();
             }
             if (!sprites[directory].ContainsKey(name)) {
-                CustomLogger.Error("TextureNotFound", directory.ToString().ToLower(), name);
+                CustomLogger.Error("{TextureNotFound}", directory.ToString().ToLower(), name);
                 return null;
             }
             return sprites[directory][name];
@@ -87,23 +87,23 @@ namespace Game
             Dictionary<string, Texture2D> dictionary = new Dictionary<string, Texture2D>();
             textures.Add(directory, dictionary);
 
-            CustomLogger.Debug("LoadingTexturesFromDirectory", typeof(Texture2D).Name, "/" + path);
+            CustomLogger.Debug("{LoadingTexturesFromDirectory}", typeof(Texture2D).Name, "/" + path);
             bool textureFound = false;
             foreach (Texture2D texture in Resources.LoadAll<Texture2D>(path)) {
                 /*if (texture.name.Contains("/")) {
-                    CustomLogger.Warning("UnsupportedTextureName");
+                    CustomLogger.Warning("{UnsupportedTextureName}");
                 } else {*/
                 if (dictionary.ContainsKey(texture.name)) {
-                    CustomLogger.Warning("DuplicatedTexture", texture.name);
+                    CustomLogger.Warning("{DuplicatedTexture}", texture.name);
                 } else {
                     dictionary.Add(texture.name, texture);
-                    CustomLogger.Debug("TextureLoaded", typeof(Texture2D).Name, texture.name);
+                    CustomLogger.Debug("{TextureLoaded}", typeof(Texture2D).Name, texture.name);
                 }
                 //}
                 textureFound = true;
             }
             if (!textureFound) {
-                CustomLogger.Debug("NoTextures");
+                CustomLogger.Debug("{NoTextures}");
             }
         }
 
@@ -116,23 +116,23 @@ namespace Game
             Dictionary<string, Sprite> dictionary = new Dictionary<string, Sprite>();
             sprites.Add(directory, dictionary);
 
-            CustomLogger.Debug("LoadingTexturesFromDirectory", typeof(Sprite).Name, "/" + path);
+            CustomLogger.Debug("{LoadingTexturesFromDirectory}", typeof(Sprite).Name, "/" + path);
             bool textureFound = false;
             foreach (Sprite texture in Resources.LoadAll<Sprite>(path)) {
                 /*if (texture.name.Contains("/")) {
-                    CustomLogger.Warning("UnsupportedTextureName");
+                    CustomLogger.Warning("{UnsupportedTextureName}");
                 } else {*/
                 if (dictionary.ContainsKey(texture.name)) {
-                    CustomLogger.Warning("DuplicatedTexture", texture.name);
+                    CustomLogger.Warning("{DuplicatedTexture}", texture.name);
                 } else {
                     dictionary.Add(texture.name, texture);
-                    CustomLogger.Debug("TextureLoaded", typeof(Sprite).Name, texture.name);
+                    CustomLogger.Debug("{TextureLoaded}", typeof(Sprite).Name, texture.name);
                 }
                 //}
                 textureFound = true;
             }
             if (!textureFound) {
-                CustomLogger.Debug("NoTextures");
+                CustomLogger.Debug("{NoTextures}");
             }
         }
     }

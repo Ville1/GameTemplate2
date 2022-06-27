@@ -39,7 +39,7 @@ namespace Game.UI
         {
             base.Start();
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
@@ -104,23 +104,23 @@ namespace Game.UI
 
             commands.Add(new Command("deleteVariable", new List<string>() { "delete_variable", "delVar", "del_var" }, "Delete a variable (if it exists)", (List<string> parameters) => {
                 if (parameters.Count != 1) {
-                    return string.Format(Localization.Game.Get("ConsoleCommandInvalidArgumentCount"), 1);
+                    return new LString("ConsoleCommandInvalidArgumentCount", LTables.Game, 1);
                 }
                 if (!variables.ContainsKey(parameters[0])) {
-                    return Localization.Game.Get("ConsoleVariableDoesNotExist");
+                    return "{ConsoleVariableDoesNotExist}";
                 }
                 variables.Remove(parameters[0]);
-                return Localization.Game.Get("ConsoleVariableDeleted");
+                return "{ConsoleVariableDeleted}";
             }));
 
 
             commands.Add(new Command("listVariables", new List<string>() { "list_variables", "listVars", "list_vars" }, "Prints list of all the current variables, along with their values", (List<string> parameters) => {
                 if(variables.Count == 0) {
-                    return Localization.Game.Get("ConsoleNoVariables");
+                    return "{ConsoleNoVariables}";
                 }
                 StringBuilder output = new StringBuilder();
                 for (int i = 0; i < variables.Count; i++) {
-                    output.Append(GetVariablePrint(variables.ElementAt(0).Key));
+                    output.Append(GetVariablePrint(variables.ElementAt(i).Key));
                     if (i != variables.Count - 1) {
                         output.Append(Environment.NewLine);
                     }
@@ -129,25 +129,16 @@ namespace Game.UI
             }));
 
             commands.Add(new Command("test1", null, "Test command 1", (List<string> parameters) => {
-                Game.Input.KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.T, () => { CustomLogger.DebugRaw("Test t"); });
-                Guid id = Game.Input.KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Y, () => { CustomLogger.DebugRaw("Test y"); });
-                SetVariable("testi", id.ToString());
-                return id.ToString();
+                return "Test command 1";
             }));
 
             commands.Add(new Command("test2", null, "Test command 2", (List<string> parameters) => {
-                Game.Input.KeyboardManager.Instance.RemoveOnKeyDownEventListeners(KeyCode.T);
                 return "Test command 2";
-            }));
-
-            commands.Add(new Command("test3", null, "Test command 3", (List<string> parameters) => {
-                Game.Input.KeyboardManager.Instance.RemoveOnKeyDownEventListeners(KeyCode.Y, new Guid(variables["testi"].ToString()));
-                return "Test command 3";
             }));
 
             //Check for duplicate names
             if (commands.Select(command => command.Name).Distinct().Count() != commands.Count) {
-                CustomLogger.Warning("DuplicatedConsoleCommands");
+                CustomLogger.Warning("{DuplicatedConsoleCommands}");
             }
 
             //Sort
@@ -316,12 +307,11 @@ namespace Game.UI
         {
             if (parameters.Count != 2) {
                 //TODO: Add support for arrays
-                return string.Format(Localization.Game.Get("ConsoleCommandInvalidArgumentCount"), 2);
+                return new LString("ConsoleCommandInvalidArgumentCount", LTables.Game, 2);
             }
             string variableName = parameters[0];
             string variableValueS = parameters[1];
             object variableValueO = null;
-
             //Check if value is int
             int intValue;
             if (int.TryParse(variableValueS, out intValue)) {
@@ -373,37 +363,37 @@ namespace Game.UI
 
         private class Command
         {
-            public delegate string ActionDelegate(List<string> parameters);
+            public delegate LString ActionDelegate(List<string> parameters);
 
             public string Name { get;private set; }
             public List<string> Aliases { get; private set; }
             /// <summary>
             /// Description split into lines
             /// </summary>
-            public List<string> Description { get; private set; }
+            public List<LString> Description { get; private set; }
             public ActionDelegate Action { get; private set; }
             public bool SaveToHistory { get; private set; }
 
-            public Command(string name, List<string> aliases, List<string> description, ActionDelegate action, bool saveToHistory = true)
+            public Command(string name, List<string> aliases, List<LString> description, ActionDelegate action, bool saveToHistory = true)
             {
                 if (string.IsNullOrEmpty(name) || action == null) {
                     throw new ArgumentNullException();
                 }
                 Name = name;
                 Aliases = aliases == null ? new List<string>() : aliases.Copy();
-                Description = description == null ? new List<string>() : description.Copy();
+                Description = description == null ? new List<LString>() : description.Copy();
                 Action = action;
                 SaveToHistory = saveToHistory;
             }
 
-            public Command(string name, List<string> aliases, string description, ActionDelegate action, bool saveToHistory = true)
+            public Command(string name, List<string> aliases, LString description, ActionDelegate action, bool saveToHistory = true)
             {
                 if(string.IsNullOrEmpty(name) || action == null) {
                     throw new ArgumentNullException();
                 }
                 Name = name;
                 Aliases = aliases == null ? new List<string>() : aliases.Copy();
-                Description = new List<string>() { description };
+                Description = new List<LString>() { description };
                 Action = action;
                 SaveToHistory = saveToHistory;
             }

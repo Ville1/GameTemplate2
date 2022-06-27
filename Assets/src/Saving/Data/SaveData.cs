@@ -5,7 +5,7 @@ namespace Game.Saving.Data
     [Serializable]
     public class SaveData
     {
-        [DataProperty("Map", "Map", false)]
+        [DataProperty("Map", "Map")]
         public Map Map;
     }
 }

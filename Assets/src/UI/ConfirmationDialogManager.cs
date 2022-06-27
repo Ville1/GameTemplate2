@@ -38,7 +38,7 @@ namespace Game.UI
         {
             base.Start();
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
@@ -75,9 +75,9 @@ namespace Game.UI
         /// <summary>
         /// Show dialog with 2 options
         /// </summary>
-        public void ShowDialog(string message, string acceptKey, string declineKey, DialogAction acceptCallback, DialogAction declineCallback)
+        public void ShowDialog(LString message, LString acceptText, LString declineText, DialogAction acceptCallback, DialogAction declineCallback)
         {
-            ShowDialog(message, acceptKey, declineKey, null, acceptCallback, declineCallback, null);
+            ShowDialog(message, acceptText, declineText, null, acceptCallback, declineCallback, null);
         }
 
         /// <summary>
@@ -86,15 +86,15 @@ namespace Game.UI
         /// Idea: Create some kind of LocalizedString-class for localized strings?
         /// Note: MessageText.text can't use localization because of params[], ^could that help? LocalizedString.FormatParams string[]
         /// </summary>
-        public void ShowDialog(string message, string acceptKey, string declineKey, string cancelKey, DialogAction acceptCallback, DialogAction declineCallback, DialogAction cancelCallback)
+        public void ShowDialog(LString message, LString acceptText, LString declineText, LString cancelText, DialogAction acceptCallback, DialogAction declineCallback, DialogAction cancelCallback)
         {
             showCancel = cancelCallback != null;
 
             //Set texts
             MessageText.text = message;
-            acceptButton.Text = Localization.Game.Get(acceptKey);
-            declineButton.Text = Localization.Game.Get(declineKey);
-            cancelButton.Text = showCancel ? Localization.Game.Get(cancelKey) : string.Empty;
+            acceptButton.Text = acceptText;
+            declineButton.Text = declineText;
+            cancelButton.Text = showCancel ? cancelText : string.Empty;
 
             //Hide / show cancel
             cancelButton.Active = showCancel;

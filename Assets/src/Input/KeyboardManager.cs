@@ -27,7 +27,7 @@ namespace Game.Input
         private void Start()
         {
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
@@ -167,43 +167,11 @@ namespace Game.Input
             KeyEvent keyEvent = new KeyEvent(onKeyDown, priority, tags);
             listeners.Add(key, keyEvent);
             return keyEvent.Id;
-            /*if (running) {
-                //Game is running, use queues
-                if (!listeners.ContainsKey(key)) {
-                    //Key does not have an event listener, add to queue
-                    if (!queue.ContainsKey(key)) {
-                        queue.Add(key, new KeyEventListener());
-                    }
-                    queue[key].Add(keyEvent);
-                } else {
-                    //Key has an event listener, use it's queue
-                    listeners[key].Add(keyEvent);
-                }
-            } else {
-                if (!listeners.ContainsKey(key)) {
-                    //Key does not have an event listener, add one
-                    listeners.Add(key, new KeyEventListener());
-                }
-                //Add event to listener
-                listeners[key].Add(keyEvent);
-            }*/
         }
 
         private void RemoveEventListeners(KeyEventListenerContainer listeners, KeyCode key, List<KeyEventTag> tags = null)
         {
             listeners.Remove(key, tags);
-            /*if (running) {
-                //Game is running, use queues
-                if (!queue.ContainsKey(key)) {
-                    queue.Add(key, new KeyEventListener());
-                }
-                queue
-            } else if(listeners.ContainsKey(key)) {
-                listeners[key].Remove(tags);
-                if (listeners[key].Events.Count == 0) {
-                    listeners.Remove(key);
-                }
-            }*/
         }
 
         private void RemoveEventListeners(KeyEventListenerContainer listeners, KeyCode key, Guid id)

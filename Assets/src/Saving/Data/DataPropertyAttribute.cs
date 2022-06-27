@@ -9,30 +9,22 @@ namespace Game.Saving.Data
         public string SaveableName { get; private set; }
         public float Weight { get; private set; }
         public string Description { get; private set; }
-        public bool LocalizeDescription { get; private set; }
+        public string DescriptionLocalizationTable { get; private set; }
 
-        public DataPropertyAttribute(string saveableName, float weight, string description, bool localizeDescription)
+        public DataPropertyAttribute(string saveableName, float weight, string descriptionLocalizationKey, string descriptionLocalizationTable)
         {
             SaveableName = saveableName;
             Weight = weight;
-            Description = description;
-            LocalizeDescription = localizeDescription;
+            Description = descriptionLocalizationKey;
+            DescriptionLocalizationTable = descriptionLocalizationTable;
         }
 
-        public DataPropertyAttribute(string saveableName, string description, bool localizeDescription)
+        public DataPropertyAttribute(string saveableName, string descriptionLocalizationKey, string descriptionLocalizationTable)
         {
             SaveableName = saveableName;
             Weight = DEFAULT_WEIGHT;
-            Description = description;
-            LocalizeDescription = localizeDescription;
-        }
-
-        public DataPropertyAttribute(string saveableName, float weight, string description)
-        {
-            SaveableName = saveableName;
-            Weight = weight;
-            Description = description;
-            LocalizeDescription = true;
+            Description = descriptionLocalizationKey;
+            DescriptionLocalizationTable = descriptionLocalizationTable;
         }
 
         public DataPropertyAttribute(string saveableName, string description)
@@ -40,7 +32,14 @@ namespace Game.Saving.Data
             SaveableName = saveableName;
             Weight = DEFAULT_WEIGHT;
             Description = description;
-            LocalizeDescription = true;
+            DescriptionLocalizationTable = null;
+        }
+
+        public LString DescriptionL
+        {
+            get {
+                return string.IsNullOrEmpty(DescriptionLocalizationTable) ? Description : new LString(Description, DescriptionLocalizationTable);
+            }
         }
     }
 }

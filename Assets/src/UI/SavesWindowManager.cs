@@ -45,7 +45,7 @@ namespace Game.UI
         {
             base.Start();
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             Instance = this;
@@ -53,9 +53,9 @@ namespace Game.UI
 
             list = new ScrollableList(ScrollViewRowPrototype, ScrollViewContent);
             closeButton = new CustomButton(CloseButton, null, Close);
-            confirmButton = new CustomButton(ConfirmButton, "Save", Confirm);
-            cancelButton = new CustomButton(CancelButton, "Cancel", Close);
-            inputField = new CustomInputField(InputField, "EnterSaveName", HandleInputChange);
+            confirmButton = new CustomButton(ConfirmButton, "{Save}", Confirm);
+            cancelButton = new CustomButton(CancelButton, "{Cancel}", Close);
+            inputField = new CustomInputField(InputField, "{EnterSaveName}", HandleInputChange);
         }
 
         /// <summary>
@@ -99,9 +99,9 @@ namespace Game.UI
 
         public override void UpdateUI()
         {
-            TitleText.text = Localization.Game.Get(State == WindowState.Saving ? "SaveGameTitle" : "LoadGameTitle");
-            confirmButton.Text = Localization.Game.Get(State == WindowState.Saving ? "Save" : "Load");
-            inputField.PlaceholderLocalizationKey = State == WindowState.Saving ? "EnterSaveName" : null;
+            TitleText.text = State == WindowState.Saving ? "{SaveGameTitle}" : "{LoadGameTitle}";
+            confirmButton.Text = State == WindowState.Saving ? "{Save}" : "{Load}";
+            inputField.PlaceholderText = State == WindowState.Saving ? "{EnterSaveName}" : null;
             inputField.Interactable = State == WindowState.Saving;
             list.Clear();
             fileNames.Clear();
@@ -148,9 +148,9 @@ namespace Game.UI
                     //Overwrite save?
                     //TODO: Disable windows that are under other windows
                     ConfirmationDialogManager.Instance.ShowDialog(
-                        string.Format(Localization.Game.Get("OverwriteSaveConfirmationDialog"), inputField.Text),
-                        "OverwriteSaveFile",
-                        "Cancel",
+                        new LString("OverwriteSaveConfirmationDialog", LTables.Game, inputField.Text),
+                        "{OverwriteSaveFile}",
+                        "{Cancel}",
                         StartSaving,
                         () => {}
                     );

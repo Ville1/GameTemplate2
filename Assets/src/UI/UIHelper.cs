@@ -23,12 +23,12 @@ namespace Game.UI
             return GameObject.Find(string.Format("{0}/{1}", parent, name));
         }
 
-        public static void SetText(GameObject parent, string textGameObjectName, string text, Color? color = null)
+        public static void SetText(GameObject parent, string textGameObjectName, LString text, Color? color = null)
         {
             SetText(parent.name, textGameObjectName, text, color);
         }
 
-        public static void SetText(string parentGameObjectName, string textGameObjectName, string text, Color? color = null)
+        public static void SetText(string parentGameObjectName, string textGameObjectName, LString text, Color? color = null)
         {
             //Find GameObject
             GameObject textGameObject = Find(parentGameObjectName, textGameObjectName);
@@ -48,12 +48,12 @@ namespace Game.UI
                 textComponent.color = color.Value;
             }
         }
-        public static CustomButton SetButton(GameObject parentGameObject, string buttonGameObjectName, string text, CustomButton.OnClick onClick)
+        public static CustomButton SetButton(GameObject parentGameObject, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
         {
             return SetButton(parentGameObject.name, buttonGameObjectName, text, onClick);
         }
 
-        public static CustomButton SetButton(string parentGameObjectName, string buttonGameObjectName, string text, CustomButton.OnClick onClick)
+        public static CustomButton SetButton(string parentGameObjectName, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
         {
             //Find GameObject
             GameObject buttonGameObject = UIHelper.Find(parentGameObjectName, buttonGameObjectName);

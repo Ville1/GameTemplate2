@@ -26,13 +26,13 @@ namespace Game
         private void Start()
         {
             if (Instance != null) {
-                CustomLogger.Error("AttemptingToCreateMultipleInstances");
+                CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
                 return;
             }
             //Initialize Main
             Instance = this;
             State = State.MainMenu;
-            CustomLogger.Debug("GameStart");
+            CustomLogger.Debug("{GameStart}");
 
             //Load config
             ConfigManager.Load();
