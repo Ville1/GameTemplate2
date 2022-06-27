@@ -34,10 +34,8 @@ namespace Game.Utils
 
         private static void PrintLog(LogLevel level, LString format, params object[] arguments)
         {
-            if (format.IsImplicit) {
-                //Implicitly localized string, change default table to Log
-                format.Table = LTables.Log;
-            }
+            //Change default localization table for implicitly localized strings to Log
+            format.ChangeImplicitDefaultTable(LTables.Log);
             PrintLog(level, string.Format(format, arguments));
         }
 
@@ -70,10 +68,8 @@ namespace Game.Utils
                 messageBuilder.Append(": ");
             }
 
-            if (message.IsImplicit) {
-                //Implicitly localized string, change default table to Log
-                message.Table = LTables.Log;
-            }
+            //Change default localization table for implicitly localized strings to Log
+            message.ChangeImplicitDefaultTable(LTables.Log);
 
             messageBuilder.Append(message);
 

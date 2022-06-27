@@ -5,11 +5,12 @@ namespace Game
     {
         public static readonly string IMPLICIT_LOCALIZATION_PREFIX = "{";
         public static readonly string IMPLICIT_LOCALIZATION_SUFFIX = "}";
+        public static readonly string IMPLICIT_LOCALIZATION_TABLE_NAME_SEPARATOR = "/";
         public static readonly string IMPLICIT_LOCALIZATION_DEFAULT_TABLE = "Game";
 
         public object[] Arguments { get; private set; } = null;
         public bool IsLocalized { get; private set; } = false;
-        public bool IsImplicit { get; private set; } = false;
+        public bool UsesImplicitDefaultTable { get; private set; } = false;
         private string key = null;
         private string table = null;
         private string text = null;
@@ -37,16 +38,25 @@ namespace Game
 
         /// <summary>
         /// Initializes a new implicitly localized string or nonlocalized string
-        /// TODO: Add support for implicit table names [TableName/KeyName]
+        /// TODO: Write down syntax explanation / examples
         /// </summary>
         public LString(string s)
         {
-            if (s.EndsWith(IMPLICIT_LOCALIZATION_SUFFIX)) {
+            int minLength = IMPLICIT_LOCALIZATION_PREFIX.Length + IMPLICIT_LOCALIZATION_SUFFIX.Length;
+            if (s.EndsWith(IMPLICIT_LOCALIZATION_SUFFIX) && s.Length > minLength) {
                 if (s.StartsWith(IMPLICIT_LOCALIZATION_PREFIX)) {
                     //Implicitly localized string
-                    key = s.Substring(IMPLICIT_LOCALIZATION_PREFIX.Length, s.Length - IMPLICIT_LOCALIZATION_PREFIX.Length - IMPLICIT_LOCALIZATION_SUFFIX.Length);
-                    table = IMPLICIT_LOCALIZATION_DEFAULT_TABLE;
-                    IsImplicit = true;
+                    if (s.Contains(IMPLICIT_LOCALIZATION_TABLE_NAME_SEPARATOR) && s.Length > minLength + IMPLICIT_LOCALIZATION_TABLE_NAME_SEPARATOR.Length + 1) {
+                        //Table name defined
+                        int splitIndex = s.IndexOf(IMPLICIT_LOCALIZATION_TABLE_NAME_SEPARATOR);
+                        table = s.Substring(IMPLICIT_LOCALIZATION_PREFIX.Length, splitIndex - 1);
+                        key = s.Substring(splitIndex + 1, s.Length - splitIndex - IMPLICIT_LOCALIZATION_SUFFIX.Length - 1);
+                    } else {
+                        //Use default table
+                        key = s.Substring(IMPLICIT_LOCALIZATION_PREFIX.Length, s.Length - IMPLICIT_LOCALIZATION_PREFIX.Length - IMPLICIT_LOCALIZATION_SUFFIX.Length);
+                        table = IMPLICIT_LOCALIZATION_DEFAULT_TABLE;
+                        UsesImplicitDefaultTable = true;
+                    }
                 } else if(s.StartsWith("\\" + IMPLICIT_LOCALIZATION_PREFIX)) {
                     //Escaped implicit localization
                     text = s.Substring(1);
@@ -88,7 +98,7 @@ namespace Game
                     return;
                 }
                 table = value;
-                IsImplicit = false;
+                UsesImplicitDefaultTable = false;
                 if (string.IsNullOrEmpty(table)) {
                     Empty();
                 } else {
@@ -111,12 +121,24 @@ namespace Game
             }
         }
 
+        public void ChangeImplicitDefaultTable(string table)
+        {
+            if (UsesImplicitDefaultTable) {
+                Table = table;
+            }
+        }
+
         private void Empty()
         {
             key = null;
             table = null;
             text = string.Empty;
             IsLocalized = false;
+        }
+
+        public override string ToString()
+        {
+            return Text;
         }
 
         public static implicit operator string(LString lString)

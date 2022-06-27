@@ -54,7 +54,7 @@ namespace Game.Utils
             }
             if (watches.ContainsKey(name)) {
                 //This segment has already been started
-                CustomLogger.Warning("DiagnosticsSegmentAlreadyStarted", name.ToString());
+                CustomLogger.Warning("{DiagnosticsSegmentAlreadyStarted}", name);
                 return;
             }
             watches.Add(name, Stopwatch.StartNew());
@@ -67,7 +67,7 @@ namespace Game.Utils
             }
             if (!watches.ContainsKey(name)) {
                 //This segment has not been started
-                CustomLogger.Warning("DiagnosticsSegmentNotStarted", name.ToString());
+                CustomLogger.Warning("{DiagnosticsSegmentNotStarted}", name);
                 return;
             }
             watches[name].Stop();
