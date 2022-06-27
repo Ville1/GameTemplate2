@@ -163,6 +163,34 @@ MonoBehaviour:
     m_Localized: 'Exception occurred while trying to load the game: {0}'
     m_Metadata:
       m_Items: []
+  - m_Id: 7979554028482560
+    m_Localized: Diagnostics segment '{0}' has already been started
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7979740163305472
+    m_Localized: Diagnostics segment '{0}' has not been started
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7982320654315520
+    m_Localized: Started clocking diagnostics
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7982441269915648
+    m_Localized: Diagnostics restarted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7982657112993792
+    m_Localized: 'Results:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7983756343603200
+    m_Localized: 'Invalid diagnostics tag: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7986290311393280
+    m_Localized: No results
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -68,8 +68,8 @@ namespace Game.UI.Components
             }
             set {
                 if(TmpText != null) {
-                    TmpText.text = text;
                     text = value;
+                    TmpText.text = text;
                 }
             }
         }

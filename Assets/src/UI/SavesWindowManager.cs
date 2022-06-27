@@ -99,7 +99,7 @@ namespace Game.UI
 
         public override void UpdateUI()
         {
-            TitleText.text = State == WindowState.Saving ? "{SaveGameTitle}" : "{LoadGameTitle}";
+            TitleText.text = new LString(State == WindowState.Saving ? "{SaveGameTitle}" : "{LoadGameTitle}");
             confirmButton.Text = State == WindowState.Saving ? "{Save}" : "{Load}";
             inputField.PlaceholderText = State == WindowState.Saving ? "{EnterSaveName}" : null;
             inputField.Interactable = State == WindowState.Saving;

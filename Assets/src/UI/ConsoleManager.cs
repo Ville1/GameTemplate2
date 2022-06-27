@@ -113,7 +113,6 @@ namespace Game.UI
                 return "{ConsoleVariableDeleted}";
             }));
 
-
             commands.Add(new Command("listVariables", new List<string>() { "list_variables", "listVars", "list_vars" }, "Prints list of all the current variables, along with their values", (List<string> parameters) => {
                 if(variables.Count == 0) {
                     return "{ConsoleNoVariables}";
@@ -124,6 +123,53 @@ namespace Game.UI
                     if (i != variables.Count - 1) {
                         output.Append(Environment.NewLine);
                     }
+                }
+                return output.ToString();
+            }));
+
+            commands.Add(new Command("startDiagnostics", new List<string>() { "start_diagnostics" }, "Start clocking diagnostics. Can be run without parameters, or given a list of tags to clock.", (List<string> parameters) => {
+                bool wasRunning = DiagnosticsManager.IsRunning;
+                if(parameters.Count == 0) {
+                    DiagnosticsManager.Start();
+                } else {
+                    List<DiagnosticsManager.Tag> tags = new List<DiagnosticsManager.Tag>();
+                    foreach(string parameter in parameters) {
+                        int intParameter;
+                        if(int.TryParse(parameter, out intParameter)) {
+                            tags.Add((DiagnosticsManager.Tag)intParameter);
+                        } else {
+                            DiagnosticsManager.Tag? parsedTag = null;
+                            foreach (DiagnosticsManager.Tag tag in Enum.GetValues(typeof(DiagnosticsManager.Tag))) {
+                                if(tag.ToString() == parameter) {
+                                    parsedTag = tag;
+                                    break;
+                                }
+                            }
+                            if (parsedTag.HasValue) {
+                                tags.Add(parsedTag.Value);
+                            } else {
+                                return new LString("InvalidDiagnosticsTag", LTables.Log, parameter);
+                            }
+                        }
+                    }
+                    DiagnosticsManager.Start(tags);
+                }
+                return new LString(wasRunning ? "RestartedClockingDiagnostics" : "StartedClockingDiagnostics", LTables.Log);
+            }));
+
+            commands.Add(new Command("endDiagnostics", new List<string>() { "end_diagnostics" }, "End diagnostics clocking and print results", (List<string> parameters) => {
+                Dictionary<string, long> totals = DiagnosticsManager.End();
+                StringBuilder output = new StringBuilder();
+                output.AppendLine(new LString("DiagnosticsResults", LTables.Log));
+                if(totals.Count != 0) {
+                    for (int i = 0; i < totals.Count; i++) {
+                        output.Append(totals.ElementAt(i).Key).Append(": ").Append(totals.ElementAt(i).Value).Append("ms");
+                        if (i != totals.Count - 1) {
+                            output.Append(Environment.NewLine);
+                        }
+                    }
+                } else {
+                    output.Append(new LString("NoResults", LTables.Log));
                 }
                 return output.ToString();
             }));
@@ -259,6 +305,27 @@ namespace Game.UI
             delayedScrollDown = true;
             
             FocusInput();
+        }
+
+        public void AutoComplete()
+        {
+            if (!Active || string.IsNullOrEmpty(Input.text)) {
+                return;
+            }
+            foreach(Command command in commands) {
+                if (command.Name.StartsWith(Input.text)) {
+                    Input.text = command.Name;
+                    return;
+                }
+            }
+            foreach (Command command in commands) {
+                foreach(string alias in command.Aliases) {
+                    if (alias.StartsWith(Input.text)) {
+                        Input.text = alias;
+                        return;
+                    }
+                }
+            }
         }
 
         public void HistoryUp()

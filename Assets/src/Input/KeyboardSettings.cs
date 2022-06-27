@@ -26,6 +26,7 @@ namespace Game.Input
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.F12, () => { ConsoleManager.Instance.Active = !ConsoleManager.Instance.Active; }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.UpArrow, () => { ConsoleManager.Instance.HistoryUp(); }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.DownArrow, () => { ConsoleManager.Instance.HistoryDown(); }, KeyEventTag.IgnoreUI);
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Tab, () => { ConsoleManager.Instance.AutoComplete(); }, KeyEventTag.IgnoreUI);
         }
 
         /// <summary>

@@ -51,7 +51,7 @@ namespace Game.UI.Components
                 rowPrototype,
                 new Vector3(
                     rowPrototype.transform.position.x,
-                    rowPrototype.transform.position.y + (rows.Count * rowSpacing),
+                    rowPrototype.transform.position.y + (rows.Count * -rowSpacing),
                     rowPrototype.transform.position.z
                 ),
                 Quaternion.identity,

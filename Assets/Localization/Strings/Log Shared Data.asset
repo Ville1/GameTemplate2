@@ -155,6 +155,34 @@ MonoBehaviour:
     m_Key: LoadException
     m_Metadata:
       m_Items: []
+  - m_Id: 7979554028482560
+    m_Key: DiagnosticsSegmentAlreadyStarted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7979740163305472
+    m_Key: DiagnosticsSegmentNotStarted
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7982320654315520
+    m_Key: StartedClockingDiagnostics
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7982441269915648
+    m_Key: RestartedClockingDiagnostics
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7982657112993792
+    m_Key: DiagnosticsResults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7983756343603200
+    m_Key: InvalidDiagnosticsTag
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7986290311393280
+    m_Key: NoResults
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

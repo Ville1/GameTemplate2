@@ -73,6 +73,7 @@ namespace Game.Saving
             //Set state
             this.task = task;
             State = state;
+            StartDiagnosticsSegment();
 
             //Initialize variables
             this.saveName = saveName.Contains(".json") ? saveName : saveName + ".json";
@@ -93,6 +94,7 @@ namespace Game.Saving
                     SaveException = exception;
                     CustomLogger.Error("{LoadException}", exception.Message);
                     State = ManagerState.Error;
+                    EndDiagnosticsSegment();
                     return false;
                 }
             }
@@ -106,6 +108,7 @@ namespace Game.Saving
             if (dataFields.Count == 0) {
                 //No properties with DataPropertyAttribute
                 CustomLogger.Error("{InvalidSaveDataClass}");
+                EndDiagnosticsSegment();
                 return false;
             }
 
@@ -113,6 +116,7 @@ namespace Game.Saving
             foreach (FieldInfo field in dataFields) {
                 if (!saveables.Any(saveable => saveable.GetType().Name == field.GetCustomAttribute<DataPropertyAttribute>().SaveableName)) {
                     CustomLogger.Error("{SaveableIsMissing}", field.GetCustomAttribute<DataPropertyAttribute>().SaveableName);
+                    EndDiagnosticsSegment();
                     return false;
                 }
             }
@@ -145,6 +149,7 @@ namespace Game.Saving
             stepIndex = -1;
             NextSaveable();
 
+            EndDiagnosticsSegment();
             return true;
         }
 
@@ -173,6 +178,7 @@ namespace Game.Saving
                 //Task not defined, if State is corrent this should not happen
                 throw new Exception("Task not defined");
             }
+            StartDiagnosticsSegment();
 
             //Adjust saving/loading speed
             //TODO: Use weight -> slower calls per frame delta?
@@ -215,6 +221,7 @@ namespace Game.Saving
                     }
                 }
             }
+            EndDiagnosticsSegment();
         }
 
         private bool NextSaveable()
@@ -246,6 +253,34 @@ namespace Game.Saving
 
             Description = currentSaveableStep.Attribute.DescriptionL;
             return true;
+        }
+
+        private void StartDiagnosticsSegment()
+        {
+            switch (task) {
+                case Task.Save:
+                    DiagnosticsManager.StartSegment("{Saving}", DiagnosticsManager.Tag.Saving, DiagnosticsManager.Tag.Saves);
+                    break;
+                case Task.Load:
+                    DiagnosticsManager.StartSegment("{Loading}", DiagnosticsManager.Tag.Loading, DiagnosticsManager.Tag.Saves);
+                    break;
+                default:
+                    throw new NotImplementedException(task.ToString());
+            }
+        }
+
+        private void EndDiagnosticsSegment()
+        {
+            switch (task) {
+                case Task.Save:
+                    DiagnosticsManager.EndSegment("{Saving}");
+                    break;
+                case Task.Load:
+                    DiagnosticsManager.EndSegment("{Loading}");
+                    break;
+                default:
+                    throw new NotImplementedException(task.ToString());
+            }
         }
 
         private class SaveableStepData
