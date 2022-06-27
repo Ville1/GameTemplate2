@@ -37,6 +37,7 @@ namespace Game
 
         /// <summary>
         /// Initializes a new implicitly localized string or nonlocalized string
+        /// TODO: Add support for implicit table names [TableName/KeyName]
         /// </summary>
         public LString(string s)
         {
