@@ -56,5 +56,28 @@ namespace Game
         }
 
         public Vector3 Vector3 { get { return new Vector3(Vector2.x, Vector2.y, 0.0f); } }
+
+        /// <param name="amount">Positive = clockwise, negative = counter clockwise</param>
+        public Direction Rotate(int amount)
+        {
+            //Convert to int
+            int orientationI = (int)Type;
+            int maxOrientationI = (int)Orientation.NorthWest;
+
+            //Change orientation
+            orientationI += amount;
+            while(orientationI > maxOrientationI) {
+                orientationI -= (maxOrientationI + 1);
+            }
+
+            //Cast to Orientation
+            Type = (Orientation)orientationI;
+            return this;
+        }
+
+        public override string ToString()
+        {
+            return Type.ToString();
+        }
     }
 }

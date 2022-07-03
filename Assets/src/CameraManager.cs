@@ -68,10 +68,24 @@ namespace Game
             CurrentCamera.transform.Translate(Time.deltaTime * MovementSpeed * direction.Vector3);
         }
 
-        public void Move(Vector3 vector)
+        public void Move(Vector3 delta)
         {
-            Vector2 vector2 = new Vector2(-1.0f * vector.x, -1.0f * vector.y);
+            Vector2 vector2 = new Vector2(-1.0f * delta.x, -1.0f * delta.y);
             CurrentCamera.transform.Translate(vector2);
+        }
+
+        public void Center(Object2D object2D)
+        {
+            Center(object2D.Position);
+        }
+
+        public void Center(Vector2 position)
+        {
+            CurrentCamera.transform.position = new Vector3(
+                position.x,
+                position.y,
+                CurrentCamera.transform.position.z
+            );
         }
     }
 }

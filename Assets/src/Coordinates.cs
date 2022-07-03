@@ -13,6 +13,13 @@ namespace Game
             Y = y;
         }
 
+        public Coordinates Move(Direction direction)
+        {
+            X += (int)direction.Vector2.x;
+            Y += (int)direction.Vector2.y;
+            return this;
+        }
+
         public bool MoveToNextInRectangle(int left, int width, int height)
         {
             X++;

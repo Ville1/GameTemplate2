@@ -36,8 +36,7 @@ namespace Game.Maps
             true,
             new Vector3(map.gameObject.transform.position.x + (x * 1.0f), map.gameObject.transform.position.y + (y * 1.0f), map.gameObject.transform.position.z),
             map.transform,
-            null,
-            TextureDirectory.Terrain,
+            new SpriteData(null, TextureDirectory.Terrain),
             MouseEventData.Default)
         {
             Map = map;
@@ -47,7 +46,7 @@ namespace Game.Maps
             MouseEventData.Tags.Add(MouseEventTag.IgnoreUI);
         }
 
-        public Tile(string name, string spriteName) : base("Tile", string.Format("TilePrototype_{0}", name), spriteName, TextureDirectory.Terrain, MouseEventData.Default)
+        public Tile(string name, string spriteName) : base("Tile", string.Format("TilePrototype_{0}", name), new SpriteData(spriteName, TextureDirectory.Terrain), MouseEventData.Default)
         {
             Name = name;
         }

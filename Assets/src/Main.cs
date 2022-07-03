@@ -4,7 +4,6 @@ using Game.Maps;
 using UnityEngine;
 using Game.UI;
 using Game.Saving;
-using Game.Saving.Data;
 using System.Collections.Generic;
 using System;
 
@@ -17,8 +16,9 @@ namespace Game
         public State State { get; private set; }
         public Maps.Map WorldMap { get; private set; }
         public float CurrentFrameRate { get; private set; }
+        public Character PlayerCharacter { get; private set; }
 
-        private SaveManager<SaveData> saveManager = null;
+        private SaveManager<Saving.Data.SaveData> saveManager = null;
 
         /// <summary>
         /// Initializiation
@@ -55,16 +55,16 @@ namespace Game
             CurrentFrameRate = 1.0f / Time.deltaTime;
             if(saveManager != null && (State == State.Saving || State == State.Loading)) {
                 switch (saveManager.State) {
-                    case SaveManager<SaveData>.ManagerState.Saving:
-                    case SaveManager<SaveData>.ManagerState.Loading:
+                    case SaveManager<Saving.Data.SaveData>.ManagerState.Saving:
+                    case SaveManager<Saving.Data.SaveData>.ManagerState.Loading:
                         saveManager.Update();
                         ProgressBar.Instance.Progress = saveManager.Progress;
                         ProgressBar.Instance.Description = saveManager.Description;
                         break;
-                    case SaveManager<SaveData>.ManagerState.Error:
+                    case SaveManager<Saving.Data.SaveData>.ManagerState.Error:
                     //TODO: Show message on screen
                     //Localization.Game.Get("FailedToSaveGame");
-                    case SaveManager<SaveData>.ManagerState.Done:
+                    case SaveManager<Saving.Data.SaveData>.ManagerState.Done:
                         ProgressBar.Instance.Active = false;
                         State = State.Running;
                         saveManager = null;
@@ -89,7 +89,7 @@ namespace Game
             List<ISaveable> saveables = new List<ISaveable>() {
                 WorldMap
             };
-            saveManager = new SaveManager<SaveData>(folder, saveables);
+            saveManager = new SaveManager<Saving.Data.SaveData>(folder, saveables);
             saveManager.StartSaving(fileName);
             ProgressBar.Instance.Show(saveManager.Description);
         }
@@ -101,7 +101,7 @@ namespace Game
             List<ISaveable> saveables = new List<ISaveable>() {
                 WorldMap
             };
-            saveManager = new SaveManager<SaveData>(folder, saveables);
+            saveManager = new SaveManager<Saving.Data.SaveData>(folder, saveables);
             saveManager.StartLoading(fileName);
             ProgressBar.Instance.Show(saveManager.Description);
         }
@@ -110,6 +110,9 @@ namespace Game
         {
             State = State.Running;
             ProgressBar.Instance.Active = false;
+            Tile centerTile = WorldMap.Tiles[WorldMap.Width / 2][WorldMap.Height / 2];
+            CameraManager.Instance.Center(centerTile);
+            PlayerCharacter = new Character(centerTile);
         }
     }
 }

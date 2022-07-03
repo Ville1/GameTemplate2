@@ -23,6 +23,9 @@ namespace Game.Maps
         public MapState State { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
+        /// <summary>
+        /// Note: coordinates are flipped: Tiles[y][x]
+        /// </summary>
         public List<List<Tile>> Tiles { get; private set; }
 
         private Coordinates generationPosition;
@@ -163,6 +166,19 @@ namespace Game.Maps
             return new MapEnumerator(Tiles, Width, Height);
         }
 
+        public Tile GetTileAt(Coordinates coordinates)
+        {
+            return GetTileAt(coordinates.X, coordinates.Y);
+        }
+
+        public Tile GetTileAt(int x, int y)
+        {
+            if(x < 0 || y < 0 || x >= Width || y >= Height) {
+                return null;
+            }
+            return Tiles[y][x];
+        }
+
         private void Clear()
         {
             if (State == MapState.Ready) {
@@ -246,7 +262,6 @@ namespace Game.Maps
             if(endGenerationCallback != null) {
                 endGenerationCallback();
             }
-
             //Input.MouseManager.Instance.AddEventListerener(MouseButton.Middle, new Input.MouseEvent(Tiles[0][0], (GameObject target) => { Utils.CustomLogger.DebugRaw("First tile middle click callback"); }, 1));
         }
 

@@ -10,6 +10,8 @@ namespace Game
     /// </summary>
     public class Object2D : IClickListener, IHasSprite
     {
+        public delegate void EventListenerDelegate();
+
         public GameObject GameObject { get { return gameObject; } }
         public RectTransform RectTransform { get; private set; }
         public SpriteRenderer Renderer { get; private set; }
@@ -17,44 +19,65 @@ namespace Game
         public bool IsPrototype { get { return gameObject == null; } }
         public MouseEventData MouseEventData { get { return clickListenerData; } }
         public bool IsClickable { get { return clickListenerData != null; } }
+        public float MovementSpeed { get; set; }
+        public bool CanMove { get { return MovementSpeed != 0.0f; } }
+        public List<EventListenerDelegate> OnMovementStart { get; set; } = new List<EventListenerDelegate>();
+        public List<EventListenerDelegate> OnMovement { get; set; } = new List<EventListenerDelegate>();
+        public List<EventListenerDelegate> OnMovementEnd { get; set; } = new List<EventListenerDelegate>();
+
+        protected bool IsMoving { get { return movementTarget.HasValue; } }
 
         protected Object2DListener updateListener = null;
         private GameObject gameObject = null;
         private string prefabName = null;
         private string name = null;
-        private string spriteName = null;
-        private TextureDirectory spriteDirectory = TextureDirectory.Sprites;
+        private SpriteData spriteData = null;
         private bool isDestroyed = false;
         private bool spriteDirectoryChanged = false;
         protected MouseEventData clickListenerData;
+        protected Vector3? oldPosition = null;
+        protected Vector3? movementTarget = null;
+        protected float movementDistanceTotal = -1.0f;
+        protected float movementDistanceCurrent = -1.0f;
 
         /// <summary>
-        /// GameObject constructor
+        /// GameObject constructor (prototype)
         /// </summary>
         public Object2D(Object2D prototype, string objectName, bool active, Vector3 position, Transform parent)
         {
-            Initialize(prototype.prefabName, objectName, active, position, parent, prototype.spriteName, prototype.spriteDirectory, prototype.clickListenerData);
+            Initialize(prototype.prefabName, objectName, active, position, parent, prototype.spriteData, prototype.clickListenerData, prototype.MovementSpeed);
+            OnMovementStart = prototype.OnMovementStart.Copy();
+            OnMovement = prototype.OnMovement.Copy();
+            OnMovementEnd = prototype.OnMovementEnd.Copy();
         }
 
         /// <summary>
         /// GameObject constructor
         /// </summary>
-        public Object2D(string prefabName, string objectName, bool active, Vector3 position, Transform parent, string spriteName, TextureDirectory spriteDirectory,
-            MouseEventData clickListenerData = null)
+        public Object2D(string objectName, bool active, Vector3 position, Transform parent, SpriteData spriteData, MouseEventData clickListenerData = null, float movementSpeed = 0.0f)
         {
-            Initialize(prefabName, objectName, active, position, parent, spriteName, spriteDirectory, clickListenerData);
+            Initialize(null, objectName, active, position, parent, spriteData, clickListenerData, movementSpeed);
+        }
+
+        /// <summary>
+        /// GameObject constructor (prefab)
+        /// </summary>
+        public Object2D(string prefabName, string objectName, bool active, Vector3 position, Transform parent, SpriteData spriteData, MouseEventData clickListenerData = null,
+            float movementSpeed = 0.0f)
+        {
+            Initialize(prefabName, objectName, active, position, parent, spriteData, clickListenerData, movementSpeed);
         }
 
         /// <summary>
         /// Prototype constructor
         /// </summary>
-        public Object2D(string prefabName, string name, string spriteName, TextureDirectory spriteDirectory, MouseEventData clickListenerData = null)
+        public Object2D(string prefabName, string name, SpriteData spriteData, MouseEventData clickListenerData = null, float movementSpeed = 0.0f)
         {
             this.prefabName = prefabName;
             this.name = name;
-            this.spriteName = spriteName;
-            this.spriteDirectory = spriteDirectory;
+            this.spriteData = spriteData.Copy;
             this.clickListenerData = clickListenerData;
+            MovementSpeed = movementSpeed;
         }
 
         public virtual bool Active
@@ -94,10 +117,10 @@ namespace Game
         public string Sprite
         {
             get {
-                return spriteName;
+                return spriteData.Sprite;
             }
             set {
-                spriteName = value;
+                spriteData.Sprite = value;
                 if(Renderer != null) {
                     UpdateSprite();
                 }
@@ -107,11 +130,11 @@ namespace Game
         public TextureDirectory SpriteDirectory
         {
             get {
-                return spriteDirectory;
+                return spriteData.SpriteDirectory;
             }
             set {
-                if(spriteDirectory != value) {
-                    spriteDirectory = value;
+                if(spriteData.SpriteDirectory != value) {
+                    spriteData.SpriteDirectory = value;
                     spriteDirectoryChanged = true;
                     if (Renderer != null) {
                         UpdateSprite();
@@ -120,10 +143,50 @@ namespace Game
             }
         }
 
+        public int RenderingOrder
+        {
+            get {
+                return spriteData.Order;
+            }
+            set {
+                spriteData.Order = value;
+                if (Renderer != null) {
+                    Renderer.sortingOrder = value;
+                }
+            }
+        }
+
+        public Vector3 Position
+        {
+            get {
+                return new Vector3(GameObject.transform.position.x, GameObject.transform.position.y, GameObject.transform.position.z);
+            }
+            set {
+                GameObject.transform.position = new Vector3(value.x, value.y, value.z);
+            }
+        }
+
         public virtual void OnClick(MouseButton button)
         { }
 
-        public virtual void Update() { }
+        public virtual void Update() {
+            if (IsMoving) {
+                if (CanMove) {
+                    movementDistanceCurrent = Mathf.Clamp(movementDistanceCurrent + Time.deltaTime * MovementSpeed, 0.0f, movementDistanceTotal);
+                    float progress = movementDistanceCurrent / movementDistanceTotal;
+                    Position = Vector3.Lerp(oldPosition.Value, movementTarget.Value, progress);
+                    foreach (EventListenerDelegate eventListener in OnMovement) {
+                        eventListener();
+                    }
+                    if (progress == 1.0f) {
+                        EndMovement();
+                    }
+                } else {
+                    //This object can no longer move
+                    EndMovement();
+                }
+            }
+        }
 
         public void Destroy()
         {
@@ -140,22 +203,64 @@ namespace Game
             return gameObject.name;
         }
 
-        private void Initialize(string prefabName, string objectName, bool active, Vector3 position, Transform parent, string spriteName, TextureDirectory spriteDirectory,
-            MouseEventData clickListenerData)
+        protected bool StartMoving(Vector3 target)
+        {
+            if (IsMoving || !CanMove) {
+                //Already moving or can't move
+                return false;
+            }
+            if(Position.x == target.x && Position.y == target.y && Position.z == target.z) {
+                //Same position
+                return false;
+            }
+            movementTarget = target;
+            oldPosition = Position;
+            movementDistanceTotal = Vector3.Distance(oldPosition.Value, movementTarget.Value);
+            movementDistanceCurrent = 0.0f;
+            foreach(EventListenerDelegate eventListener in OnMovementStart) {
+                eventListener();
+            }
+            return true;
+        }
+
+        protected bool EndMovement()
+        {
+            bool wasMoving = IsMoving;
+            movementTarget = null;
+            oldPosition = null;
+            movementDistanceTotal = -1.0f;
+            movementDistanceCurrent = -1.0f;
+            if (wasMoving) {
+                foreach (EventListenerDelegate eventListener in OnMovementEnd) {
+                    eventListener();
+                }
+            }
+            return wasMoving;
+        }
+
+        private void Initialize(string prefabName, string objectName, bool active, Vector3 position, Transform parent, SpriteData spriteData, MouseEventData clickListenerData,
+            float movementSpeed)
         {
             this.prefabName = prefabName;
             name = objectName;
-            this.spriteName = spriteName;
-            this.spriteDirectory = spriteDirectory;
+            this.spriteData = spriteData.Copy;
             this.clickListenerData = clickListenerData;
+            MovementSpeed = movementSpeed;
 
             //Instantiate GameObject
-            gameObject = GameObject.Instantiate(
-                PrefabManager.Instance.Get(prefabName),
-                position,
-                Quaternion.identity,
-                parent
-            );
+            if (string.IsNullOrEmpty(prefabName)) {
+                gameObject = new GameObject();
+                gameObject.transform.position = position;
+                gameObject.transform.parent = parent;
+            } else {
+                //Prefab
+                gameObject = GameObject.Instantiate(
+                    PrefabManager.Instance.Get(prefabName),
+                    position,
+                    Quaternion.identity,
+                    parent
+                );
+            }
             gameObject.name = objectName;
             gameObject.SetActive(active);
 
@@ -177,14 +282,14 @@ namespace Game
             if (Renderer == null) {
                 Renderer = gameObject.AddComponent<SpriteRenderer>();
             }
-            if (string.IsNullOrEmpty(this.spriteName)) {
+            if (string.IsNullOrEmpty(this.spriteData.Sprite)) {
                 //Use default sprite from prefab
                 if(Renderer.sprite == null) {
                     //Sprite name was not provided with spriteName - parameter and Renderer is missing or is lacking a sprite
                     CustomLogger.Error("{Object2DNoSprite}");
-                    this.spriteName = string.Empty;
+                    this.spriteData.Sprite = string.Empty;
                 } else {
-                    this.spriteName = Renderer.sprite.name;
+                    this.spriteData.Sprite = Renderer.sprite.name;
                 }
             }
 
@@ -197,15 +302,22 @@ namespace Game
                     Collider = gameObject.AddComponent<BoxCollider>();
                 }
             }
+
+            if (string.IsNullOrEmpty(prefabName)) {
+                //Not prefab, set size based on sprite
+                Width = 100 / Renderer.sprite.pixelsPerUnit;
+                Height = 100 / Renderer.sprite.pixelsPerUnit;
+            }
         }
 
         private void UpdateSprite()
         {
-            if((Renderer.sprite != null && Renderer.sprite.name == spriteName) && !spriteDirectoryChanged) {
+            if((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged) {
                 //No change
                 return;
             }
-            Renderer.sprite = TextureManager.GetSprite(spriteDirectory, spriteName);
+            Renderer.sprite = TextureManager.GetSprite(spriteData);
+            Renderer.sortingOrder = spriteData.Order;
             spriteDirectoryChanged = false;
         }
     }
