@@ -5,11 +5,11 @@ namespace Game.Maps
 {
     public class Character : Object2D
     {
-        private enum MovementType { Grid, Free, FreeNoRotation };
+        public enum MovementType { Grid, Free, FreeNoRotation };
 
         private static bool HighlightTiles = true;
-        private static MovementType movementType = MovementType.Free;
 
+        public MovementType Movement { get; set; } = MovementType.Free;
         public Tile Tile { get; private set; }
 
         private Tile oldTile = null;
@@ -28,19 +28,19 @@ namespace Game.Maps
                 DebugWindowManager.Instance.SetValue("Player tile", Tile.Coordinates.ToString());
             });
             DebugWindowManager.Instance.SetValue("Player tile", Tile.Coordinates.ToString());
-            if (movementType != MovementType.Grid) {
+            if (Movement != MovementType.Grid) {
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
         }
 
         public void Move(Direction direction)
         {
-            if (movementType != MovementType.Grid) {
+            if (Movement != MovementType.Grid) {
                 if (movedThisFrame) {
                     return;
                 }
                 Vector3 lastPosition = new Vector3(Position.x, Position.y, Position.z);
-                Move(direction.Quaternion, movementType == MovementType.Free);
+                Move(direction.Quaternion, Movement == MovementType.Free);
                 Tile newTile = Tile.Map.GetTileAt(new Coordinates(Position));
                 if(newTile != null) {
                     if (HighlightTiles) {

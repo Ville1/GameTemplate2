@@ -103,6 +103,9 @@ namespace Game
             while(orientationI > maxOrientationI) {
                 orientationI -= (maxOrientationI + 1);
             }
+            while (orientationI < 0) {
+                orientationI += (maxOrientationI + 1);
+            }
 
             //Cast to Orientation
             Type = (Orientation)orientationI;

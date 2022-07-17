@@ -87,5 +87,31 @@ namespace Game.Utils
             }
             return true;
         }
+
+        public static TEnum Shift<TEnum>(this TEnum e, int amount) where TEnum : struct, IConvertible
+        {
+            if (!typeof(TEnum).IsEnum) {
+                throw new ArgumentException("TEnum must be an enum type");
+            }
+            List<TEnum> values = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToList();
+            int originalIndex = -1;
+            for (int i = 0; i < values.Count && originalIndex == -1; i++) {
+                if (values[i].Equals(e)) {
+                    originalIndex = i;
+                }
+            }
+            if(originalIndex == -1) {
+                //This should not be possible
+                throw new ArgumentException("TEnum does not contain e");
+            }
+            int newIndex = originalIndex + amount;
+            while(newIndex >= values.Count) {
+                newIndex -= values.Count;
+            }
+            while(newIndex < 0) {
+                newIndex += values.Count;
+            }
+            return values[newIndex];
+        }
     }
 }

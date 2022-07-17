@@ -179,6 +179,11 @@ namespace Game.UI
                 return string.Format("Debug window {0}", DebugWindowManager.Instance.Active ? "opened" : "closed");
             }));
 
+            commands.Add(new Command("togglePlayerMovement", null, "Changes players movement type (DELETE THIS: TEMPLATE PROJECT DEBUGGING ONLY)", (List<string> parameters) => {
+                Main.Instance.PlayerCharacter.Movement = Main.Instance.PlayerCharacter.Movement.Shift(1);
+                return Main.Instance.PlayerCharacter.Movement.ToString();
+            }));
+
             commands.Add(new Command("test1", null, "Test command 1", (List<string> parameters) => {
                 return "Test command 1";
             }));
