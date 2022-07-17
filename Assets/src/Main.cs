@@ -53,6 +53,7 @@ namespace Game
         private void Update()
         {
             CurrentFrameRate = 1.0f / Time.deltaTime;
+            DebugWindowManager.Instance.SetValue("FPS", CurrentFrameRate.Parse(2, true));
             if(saveManager != null && (State == State.Saving || State == State.Loading)) {
                 switch (saveManager.State) {
                     case SaveManager<Saving.Data.SaveData>.ManagerState.Saving:
@@ -66,6 +67,11 @@ namespace Game
                     //Localization.Game.Get("FailedToSaveGame");
                     case SaveManager<Saving.Data.SaveData>.ManagerState.Done:
                         ProgressBar.Instance.Active = false;
+                        if(State == State.Loading) {
+                            Tile centerTile = WorldMap.Tiles[WorldMap.Width / 2][WorldMap.Height / 2];
+                            CameraManager.Instance.Center(centerTile);
+                            PlayerCharacter = new Character(centerTile);
+                        }
                         State = State.Running;
                         saveManager = null;
                         break;
@@ -98,6 +104,10 @@ namespace Game
         {
             State = State.Loading;
             WorldMap = WorldMap ?? Maps.Map.Instantiate("WorldMap", 1, 1);
+            if(PlayerCharacter != null) {
+                PlayerCharacter.Destroy();
+                PlayerCharacter = null;
+            }
             List<ISaveable> saveables = new List<ISaveable>() {
                 WorldMap
             };

@@ -174,6 +174,11 @@ namespace Game.UI
                 return output.ToString();
             }));
 
+            commands.Add(new Command("debugWindow", new List<string>() { "debug_window", "dw" }, "Opens and closes debug window", (List<string> parameters) => {
+                DebugWindowManager.Instance.Active = !DebugWindowManager.Instance.Active;
+                return string.Format("Debug window {0}", DebugWindowManager.Instance.Active ? "opened" : "closed");
+            }));
+
             commands.Add(new Command("test1", null, "Test command 1", (List<string> parameters) => {
                 return "Test command 1";
             }));

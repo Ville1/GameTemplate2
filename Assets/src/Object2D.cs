@@ -39,6 +39,8 @@ namespace Game
         protected Vector3? movementTarget = null;
         protected float movementDistanceTotal = -1.0f;
         protected float movementDistanceCurrent = -1.0f;
+        protected bool movedThisFrame = false;
+        protected bool movedLastFrame = false;
 
         /// <summary>
         /// GameObject constructor (prototype)
@@ -170,11 +172,15 @@ namespace Game
         { }
 
         public virtual void Update() {
+            movedLastFrame = movedThisFrame;
+            movedThisFrame = false;
+
             if (IsMoving) {
                 if (CanMove) {
                     movementDistanceCurrent = Mathf.Clamp(movementDistanceCurrent + Time.deltaTime * MovementSpeed, 0.0f, movementDistanceTotal);
                     float progress = movementDistanceCurrent / movementDistanceTotal;
                     Position = Vector3.Lerp(oldPosition.Value, movementTarget.Value, progress);
+                    movedThisFrame = true;
                     foreach (EventListenerDelegate eventListener in OnMovement) {
                         eventListener();
                     }
@@ -201,6 +207,22 @@ namespace Game
         public override string ToString()
         {
             return gameObject.name;
+        }
+
+        protected void Move(Quaternion direction, bool rotateToFaceDirection = false)
+        {
+            if (rotateToFaceDirection) {
+                RectTransform.rotation = direction;
+                RectTransform.Translate(new Vector3(0.0f, MovementSpeed * Time.deltaTime, 0.0f));
+            } else {
+                Vector3 delta = new Vector3(0.0f, MovementSpeed * Time.deltaTime, 0.0f);
+                delta = direction * delta;
+                Position += delta;
+            }
+            movedThisFrame = true;
+            foreach (EventListenerDelegate eventListener in OnMovement) {
+                eventListener();
+            }
         }
 
         protected bool StartMoving(Vector3 target)

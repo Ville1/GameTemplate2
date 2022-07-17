@@ -23,8 +23,7 @@ namespace Game.UI
 
         public TMP_Text TitleText;
         public Button CloseButton;
-        public GameObject ScrollViewContent;
-        public GameObject ScrollViewRowPrototype;
+        public GameObject ScrollView;
         public TMP_InputField InputField;
         public Button ConfirmButton;
         public Button CancelButton;
@@ -51,7 +50,7 @@ namespace Game.UI
             Instance = this;
             Tags.Add(Tag.ClosesOthers);
 
-            list = new ScrollableList(ScrollViewRowPrototype, ScrollViewContent);
+            list = new ScrollableList(ScrollView);
             closeButton = new CustomButton(CloseButton, null, Close);
             confirmButton = new CustomButton(ConfirmButton, "{Save}", Confirm);
             cancelButton = new CustomButton(CancelButton, "{Cancel}", Close);

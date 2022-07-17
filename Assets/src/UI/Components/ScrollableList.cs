@@ -1,105 +1,60 @@
-using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.UI.Components
 {
-    public class ScrollableList
+    public class ScrollableList : UIList
     {
-        private static long currentId = 0;
+        private static readonly string DEFAULT_CONTENT_NAME = "Content";
+        private static float DEFAULT_SENSITIVITY = 10.0f;
 
-        private GameObject rowPrototype;
-        private GameObject scrollViewContent;
-        private List<Row> rows;
-        private float rowSpacing;
+        public Scrollbar HorizontalScrollbar { get; private set; }
+        public Scrollbar VerticalScrollbar { get; private set; }
+        public ScrollRect ScrollRect { get; private set; }
 
-        public ScrollableList(GameObject rowPrototype, GameObject scrollViewContent, float? rowSpacing = null)
+        public ScrollableList(GameObject rowPrototype, GameObject scrollView, GameObject scrollViewContent, float? rowSpacing = null) : base(rowPrototype, scrollViewContent, rowSpacing)
         {
-            if(rowPrototype == null || scrollViewContent == null) {
-                throw new ArgumentNullException();
-            }
-            this.rowPrototype = rowPrototype;
-            this.scrollViewContent = scrollViewContent;
-            this.rowSpacing = rowSpacing.HasValue ? rowSpacing.Value : rowPrototype.GetComponent<RectTransform>().rect.height;
-            rows = new List<Row>();
-            rowPrototype.SetActive(false);
+            Initialize(scrollView);
         }
 
-        public GameObject AddRow(List<UIElementData> elementData)
+        public ScrollableList(GameObject rowPrototype, GameObject scrollView, float? rowSpacing = null) : base(rowPrototype, FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
         {
-            return AddRow(new Row() { KeyInt = rows.Count, ElementData = elementData });
+            Initialize(scrollView);
         }
 
-        public GameObject AddRow(int key, List<UIElementData> elementData)
+        public ScrollableList(string rowPrototypeName, GameObject scrollView, float? rowSpacing = null) : base(rowPrototypeName, FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
         {
-            return AddRow(new Row() { KeyInt = key, ElementData = elementData });
+            Initialize(scrollView);
         }
 
-        public GameObject AddRow(long key, List<UIElementData> elementData)
+        public ScrollableList(GameObject scrollView, float? rowSpacing = null) : base(FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
         {
-            return AddRow(new Row() { KeyLong = key, ElementData = elementData });
+            Initialize(scrollView);
         }
 
-        public GameObject AddRow(string key, List<UIElementData> elementData)
+        private void Initialize(GameObject scrollView)
         {
-            return AddRow(new Row() { KeyString = key, ElementData = elementData });
+            //Find scroll bars
+            Scrollbar[] scrollbars = scrollView.GetComponentsInChildren<Scrollbar>();
+            HorizontalScrollbar = scrollbars.FirstOrDefault(bar => bar.direction == Scrollbar.Direction.LeftToRight || bar.direction == Scrollbar.Direction.RightToLeft);
+            VerticalScrollbar = scrollbars.FirstOrDefault(bar => bar.direction == Scrollbar.Direction.TopToBottom || bar.direction == Scrollbar.Direction.BottomToTop);
+
+            //Set sensitivity
+            ScrollRect = scrollView.GetComponent<ScrollRect>();
+            ScrollRect.scrollSensitivity = DEFAULT_SENSITIVITY;
         }
 
-        private GameObject AddRow(Row row)
+        private static GameObject FindContent(GameObject scrollView, string name)
         {
-            GameObject gameObject = GameObject.Instantiate(
-                rowPrototype,
-                new Vector3(
-                    rowPrototype.transform.position.x,
-                    rowPrototype.transform.position.y + (rows.Count * -rowSpacing),
-                    rowPrototype.transform.position.z
-                ),
-                Quaternion.identity,
-                scrollViewContent.transform
-            );
-            gameObject.SetActive(true);
-            string name = string.Format("Row {0} (#{1})", row.Key, currentId);
-            if(UIHelper.Find(scrollViewContent, name) != null) {
-                throw new Exception(string.Format("Scroll view content already contains a row with name: '{0}'", name));
-            }
-            gameObject.name = name;
-            currentId = currentId == long.MaxValue ? 0 : currentId + 1;
-            foreach(UIElementData uiElementData in row.ElementData) {
-                uiElementData.Set(gameObject);
-            }
-            row.GameObject = gameObject;
-            rows.Add(row);
-            return gameObject;
-        }
-
-        public void Clear()
-        {
-            foreach(Row row in rows) {
-                GameObject.Destroy(row.GameObject);
-            }
-            rows.Clear();
-        }
-
-        private class Row
-        {
-            public int? KeyInt { get; set; }
-            public long? KeyLong { get; set; }
-            public string KeyString { get; set; }
-            public List<UIElementData> ElementData { get; set; }
-            public GameObject GameObject { get; set; }
-
-            public string Key
-            {
-                get {
-                    if (KeyInt.HasValue) {
-                        return KeyInt.Value.ToString();
-                    }
-                    if (KeyLong.HasValue) {
-                        return KeyLong.Value.ToString();
-                    }
-                    return KeyString;
+            GameObject viewport = scrollView.GetComponentInChildren<Mask>().gameObject;
+            RectTransform[] rectTransforms = viewport.GetComponentsInChildren<RectTransform>();
+            foreach (RectTransform rectTransform in rectTransforms) {
+                if(rectTransform.gameObject.name == name) {
+                    return rectTransform.gameObject;
                 }
             }
+            return null;
         }
     }
 }

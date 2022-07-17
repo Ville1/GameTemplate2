@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Game
 {
@@ -13,11 +14,36 @@ namespace Game
             Y = y;
         }
 
+        public Coordinates(float x, float y)
+        {
+            X = (int)MathF.Round(x);
+            Y = (int)MathF.Round(y);
+        }
+
+        public Coordinates(Vector2 vector)
+        {
+            X = (int)MathF.Round(vector.x);
+            Y = (int)MathF.Round(vector.y);
+        }
+
+        public Coordinates(Vector3 vector)
+        {
+            X = (int)MathF.Round(vector.x);
+            Y = (int)MathF.Round(vector.y);
+        }
+
+        public Coordinates(Coordinates coordinates)
+        {
+            X = coordinates.X;
+            Y = coordinates.Y;
+        }
+
         public Coordinates Move(Direction direction)
         {
-            X += (int)direction.Vector2.x;
-            Y += (int)direction.Vector2.y;
-            return this;
+            Coordinates coordinates = new Coordinates(this);
+            coordinates.X += (int)direction.Vector2.x;
+            coordinates.Y += (int)direction.Vector2.y;
+            return coordinates;
         }
 
         public bool MoveToNextInRectangle(int left, int width, int height)
@@ -31,6 +57,16 @@ namespace Game
                 }
             }
             return true;
+        }
+
+        public bool IsAdjacent(Coordinates coordinates)
+        {
+            if(this == coordinates) {
+                return false;
+            }
+            return
+                (X == coordinates.X || X == coordinates.X - 1 || X == coordinates.X + 1) &&
+                (Y == coordinates.Y || Y == coordinates.Y - 1 || Y == coordinates.Y + 1);
         }
 
         public override string ToString()

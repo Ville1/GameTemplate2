@@ -11,14 +11,23 @@ namespace Game.UI
             /// </summary>
             MainMenu,
             /// <summary>
-            /// Does not get closed by WindowEvent.Close in default event handling (in virtual base.HandleWindowEvent)
+            /// Does not get closed by UIManager.CloseWindows unless specificly targeted by with include-parameter or
+            /// WindowEvent.Close in default event handling (in virtual base.HandleWindowEvent)
             /// </summary>
             ProgressBar,
-            Console,
+            /// <summary>
+            /// Does not get closed by UIManager.CloseWindows unless specificly targeted by with include-parameter
+            /// </summary>
+            StaysOpen,
             /// <summary>
             /// Closes other windows then opened (if base.Active gets called)
             /// </summary>
-            ClosesOthers
+            ClosesOthers,
+            /// <summary>
+            /// Alternative to combining StaysOpen-tag with BlockKeyboardInputs = false and BlockMouseEvents = false
+            /// </summary>
+            HUD,
+            Console
         }
 
         public enum WindowEventPriorityDefaults

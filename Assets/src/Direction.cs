@@ -57,6 +57,40 @@ namespace Game
 
         public Vector3 Vector3 { get { return new Vector3(Vector2.x, Vector2.y, 0.0f); } }
 
+        public Quaternion Quaternion
+        {
+            get {
+                float degrees = 0.0f;
+                switch (Type) {
+                    case Orientation.North:
+                        degrees = 0.0f;
+                        break;
+                    case Orientation.NorthEast:
+                        degrees = 315.0f;
+                        break;
+                    case Orientation.East:
+                        degrees = 270.0f;
+                        break;
+                    case Orientation.SouthEast:
+                        degrees = 225.0f;
+                        break;
+                    case Orientation.South:
+                        degrees = 180.0f;
+                        break;
+                    case Orientation.SouthWest:
+                        degrees = 135.0f;
+                        break;
+                    case Orientation.West:
+                        degrees = 90.0f;
+                        break;
+                    case Orientation.NorthWest:
+                        degrees = 45.0f;
+                        break;
+                }
+                return Quaternion.Euler(0.0f, 0.0f, degrees);
+            }
+        }
+
         /// <param name="amount">Positive = clockwise, negative = counter clockwise</param>
         public Direction Rotate(int amount)
         {

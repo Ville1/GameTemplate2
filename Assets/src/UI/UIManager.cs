@@ -69,6 +69,9 @@ namespace Game.UI {
             exclude = exclude ?? new List<WindowBase.Tag>();
             foreach (WindowBase window in windows) {
                 if(window.Active &&
+                    (!window.Tags.Contains(WindowBase.Tag.ProgressBar) || include.Contains(WindowBase.Tag.ProgressBar)) &&
+                    (!window.Tags.Contains(WindowBase.Tag.StaysOpen) || include.Contains(WindowBase.Tag.StaysOpen)) &&
+                    (!window.Tags.Contains(WindowBase.Tag.HUD) || include.Contains(WindowBase.Tag.HUD)) &&
                     (Main.Instance.State != State.MainMenu || !window.Tags.Contains(WindowBase.Tag.MainMenu)) &&
                     (include.Count == 0 || window.Tags.Any(tag => include.Contains(tag))) &&
                     (exclude.Count == 0 || !window.Tags.Any(tag => exclude.Contains(tag)))) {
@@ -79,8 +82,9 @@ namespace Game.UI {
 
         public void HandleWindowEventKeydown(WindowEvent windowEvent)
         {
+            bool progressBarOpen = windows.Any(window => window.Active && window.Tags.Contains(WindowBase.Tag.ProgressBar));
             foreach (WindowBase window in windows) {
-                if ((window.Active || window.Tags.Contains(WindowBase.Tag.MainMenu)) && window.HandleWindowEvent(windowEvent)) {
+                if ((window.Active || (window.Tags.Contains(WindowBase.Tag.MainMenu) && !progressBarOpen)) && window.HandleWindowEvent(windowEvent)) {
                     break;
                 }
             }
@@ -88,13 +92,26 @@ namespace Game.UI {
 
         public bool CanFire(List<KeyEventTag> tags)
         {
-            return !windows.Any(window => window.Active && window.BlockKeyboardInputs && !window.AllowedKeyEvents.Any(allowed => tags.Contains(allowed)));
+            return !windows.Any(window =>
+                window.Active &&
+                window.BlockKeyboardInputs &&
+                !window.Tags.Contains(WindowBase.Tag.HUD) &&
+                !window.AllowedKeyEvents.Any(allowed => tags.Contains(allowed))
+            );
         }
 
         public bool CanFire(MouseEventData eventData)
         {
-            return (!eventData.IsBlockedByUI || !EventSystem.current.IsPointerOverGameObject()) &&
-                !windows.Any(window => window.Active && window.BlockMouseEvents && !window.AllowedMouseEvents.Any(allowed => eventData.Tags.Contains(allowed)));
+            return (
+                !eventData.IsBlockedByUI ||
+                !EventSystem.current.IsPointerOverGameObject()
+            ) && !windows.Any(
+                window =>
+                    window.Active &&
+                    window.BlockMouseEvents &&
+                    !window.Tags.Contains(WindowBase.Tag.HUD) &&
+                    !window.AllowedMouseEvents.Any(allowed => eventData.Tags.Contains(allowed))
+            );
         }
     }
 }
