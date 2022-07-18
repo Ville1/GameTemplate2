@@ -24,6 +24,7 @@ namespace Game
         public List<EventListenerDelegate> OnMovementStart { get; set; } = new List<EventListenerDelegate>();
         public List<EventListenerDelegate> OnMovement { get; set; } = new List<EventListenerDelegate>();
         public List<EventListenerDelegate> OnMovementEnd { get; set; } = new List<EventListenerDelegate>();
+        public bool IsPlayingAnimation { get { return currentAnimation != null && currentAnimation.IsPlaying; } }
 
         protected bool IsMoving { get { return movementTarget.HasValue; } }
 
@@ -41,6 +42,8 @@ namespace Game
         protected float movementDistanceCurrent = -1.0f;
         protected bool movedThisFrame = false;
         protected bool movedLastFrame = false;
+        protected Dictionary<string, SpriteAnimation> animations = new Dictionary<string, SpriteAnimation>();
+        protected SpriteAnimation currentAnimation;
 
         /// <summary>
         /// GameObject constructor (prototype)
@@ -51,6 +54,7 @@ namespace Game
             OnMovementStart = prototype.OnMovementStart.Copy();
             OnMovement = prototype.OnMovement.Copy();
             OnMovementEnd = prototype.OnMovementEnd.Copy();
+            animations = DictionaryHelper.Copy(prototype.animations, (string name, SpriteAnimation animation) => { return new SpriteAnimation(animation); });
         }
 
         /// <summary>
@@ -171,6 +175,40 @@ namespace Game
         public virtual void OnClick(MouseButton button)
         { }
 
+        public void AddAnimation(string name, SpriteAnimation animation)
+        {
+            if (animations.ContainsKey(name)) {
+                animations[name] = animation;
+            } else {
+                animations.Add(name, animation);
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="callback">If provided, this gets called then animation ends</param>
+        public void PlayAnimation(string name, SpriteAnimation.AnimationDelegate callback = null)
+        {
+            if (!animations.ContainsKey(name)) {
+                CustomLogger.Warning("{AnimationNotFound}", this.name, name);
+                return;
+            }
+            if(currentAnimation != null) {
+                currentAnimation.Stop();
+            }
+            currentAnimation = animations[name];
+            currentAnimation.Start(spriteData, UpdateSprite, callback);
+        }
+
+        public void StopAnimation()
+        {
+            if (IsPlayingAnimation) {
+                currentAnimation.Stop();
+                currentAnimation = null;
+            }
+        }
+
         public virtual void Update() {
             movedLastFrame = movedThisFrame;
             movedThisFrame = false;
@@ -192,6 +230,12 @@ namespace Game
                     EndMovement();
                 }
             }
+
+            if(currentAnimation != null && currentAnimation.IsPlaying) {
+                if (currentAnimation.Update() && !currentAnimation.IsPlaying) {
+                    currentAnimation = null;
+                }
+            }
         }
 
         public void Destroy()
@@ -206,7 +250,7 @@ namespace Game
 
         public override string ToString()
         {
-            return gameObject.name;
+            return name;
         }
 
         protected void Move(Quaternion direction, bool rotateToFaceDirection = false)

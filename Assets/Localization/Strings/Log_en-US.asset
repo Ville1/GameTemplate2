@@ -191,6 +191,10 @@ MonoBehaviour:
     m_Localized: No results
     m_Metadata:
       m_Items: []
+  - m_Id: 15664619285999616
+    m_Localized: '{0} does not have animation ''{1}'''
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

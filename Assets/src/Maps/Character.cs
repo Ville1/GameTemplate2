@@ -1,4 +1,5 @@
 using Game.UI;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game.Maps
@@ -31,6 +32,8 @@ namespace Game.Maps
             if (Movement != MovementType.Grid) {
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
+
+            AddAnimation("wave", new SpriteAnimation(10.0f, 2, new List<string>() { "stick figure wave 1", "stick figure wave 2", "stick figure wave 3", "stick figure wave 4" }, TextureDirectory.Sprites));
         }
 
         public void Move(Direction direction)
@@ -52,10 +55,21 @@ namespace Game.Maps
                     //Map edge
                     Position = lastPosition;
                 }
+                StopAnimation();
                 DebugWindowManager.Instance.SetValue("Player tile", Tile.Coordinates.ToString());
                 DebugWindowManager.Instance.SetValue("Player position", string.Format("{0} ({1})", Position, direction));
             } else {
                 GridMove(direction);
+            }
+        }
+
+        public void Wave()
+        {
+            if (IsPlayingAnimation) {
+                StopAnimation();
+            } else {
+                //PlayAnimation("wave", () => { Utils.CustomLogger.Debug("Stopped waving :-("); });
+                PlayAnimation("wave");
             }
         }
 
@@ -77,6 +91,7 @@ namespace Game.Maps
                 Tile.RectangleColor = Color.black;
             }
             StartMoving(Tile.Position);
+            StopAnimation();
             DebugWindowManager.Instance.SetValue("Player tile", string.Format("{0} -> {1} ({2})", oldTile.Coordinates, Tile.Coordinates, direction));
         }
 
