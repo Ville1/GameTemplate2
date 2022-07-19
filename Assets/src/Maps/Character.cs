@@ -1,5 +1,6 @@
 using Game.UI;
-using System.Collections.Generic;
+using Game.Utils;
+using System.Linq;
 using UnityEngine;
 
 namespace Game.Maps
@@ -10,12 +11,12 @@ namespace Game.Maps
 
         private static bool HighlightTiles = true;
 
-        public MovementType Movement { get; set; } = MovementType.Free;
+        public MovementType Movement { get; set; } = MovementType.Grid;
         public Tile Tile { get; private set; }
 
         private Tile oldTile = null;
 
-        public Character(Tile tile) : base("Character", true, tile.Position, tile.Map.transform, new SpriteData("stick figure", TextureDirectory.Sprites, 1), null, 10.0f)
+        public Character(Tile tile) : base("Character", true, tile.Position, tile.Map.transform, new SpriteData("stick figure", TextureDirectory.Sprites, 1), null, 1.0f)
         {
             Tile = tile;
             Tile.RectangleColor = Color.black;
@@ -33,7 +34,10 @@ namespace Game.Maps
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
 
-            AddAnimation("wave", new SpriteAnimation(10.0f, 2, new List<string>() { "stick figure wave 1", "stick figure wave 2", "stick figure wave 3", "stick figure wave 4" }, TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("wave", 10.0f, 2, "stick figure wave {0}".Replicate(1, 4), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("horn", 10.0f, null, "stick figure horn {0}".Replicate(1, 5), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("walk east", 10.0f, 2, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("walk west", 10.0f, 2, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
         }
 
         public void Move(Direction direction)
@@ -65,12 +69,17 @@ namespace Game.Maps
 
         public void Wave()
         {
-            if (IsPlayingAnimation) {
-                StopAnimation();
+            if(CurrentAnimation == "wave") {
+                StopAnimation(false);
             } else {
                 //PlayAnimation("wave", () => { Utils.CustomLogger.Debug("Stopped waving :-("); });
                 PlayAnimation("wave");
             }
+        }
+
+        public void Horn()
+        {
+            PlayAnimation("horn", AnimationQueue.QueueUnlimited);
         }
 
         private void GridMove(Direction direction)
@@ -90,8 +99,7 @@ namespace Game.Maps
                 oldTile.RectangleColor = Color.white;
                 Tile.RectangleColor = Color.black;
             }
-            StartMoving(Tile.Position);
-            StopAnimation();
+            StartMoving(Tile.Position, direction.Vector2.x >= 0 ? "walk east" : "walk west");
             DebugWindowManager.Instance.SetValue("Player tile", string.Format("{0} -> {1} ({2})", oldTile.Coordinates, Tile.Coordinates, direction));
         }
 
@@ -100,6 +108,8 @@ namespace Game.Maps
             if (!movedLastFrame) {
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
+            DebugWindowManager.Instance.SetValue("Player animation", currentAnimation == null ? "none" : CurrentAnimation);
+            DebugWindowManager.Instance.SetValue("Animation queue", "(" + animationQueue.Count + "): " + string.Join(", ", animationQueue.Select(x => x.Name).ToList()));
             base.Update();
         }
     }

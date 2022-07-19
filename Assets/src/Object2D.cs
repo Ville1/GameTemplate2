@@ -1,6 +1,7 @@
 using Game.Input;
 using Game.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Game
@@ -21,12 +22,12 @@ namespace Game
         public bool IsClickable { get { return clickListenerData != null; } }
         public float MovementSpeed { get; set; }
         public bool CanMove { get { return MovementSpeed != 0.0f; } }
+        public bool IsMoving { get { return movementTarget.HasValue; } }
         public List<EventListenerDelegate> OnMovementStart { get; set; } = new List<EventListenerDelegate>();
         public List<EventListenerDelegate> OnMovement { get; set; } = new List<EventListenerDelegate>();
         public List<EventListenerDelegate> OnMovementEnd { get; set; } = new List<EventListenerDelegate>();
         public bool IsPlayingAnimation { get { return currentAnimation != null && currentAnimation.IsPlaying; } }
-
-        protected bool IsMoving { get { return movementTarget.HasValue; } }
+        public string CurrentAnimation { get { return IsPlayingAnimation ? currentAnimation.Name : null; } }
 
         protected Object2DListener updateListener = null;
         private GameObject gameObject = null;
@@ -42,8 +43,11 @@ namespace Game
         protected float movementDistanceCurrent = -1.0f;
         protected bool movedThisFrame = false;
         protected bool movedLastFrame = false;
-        protected Dictionary<string, SpriteAnimation> animations = new Dictionary<string, SpriteAnimation>();
+        protected List<SpriteAnimation> animations = new List<SpriteAnimation>();
         protected SpriteAnimation currentAnimation;
+        protected bool hasMovementAnimation = false;
+        protected bool lingeringMovementAnimation = false;
+        protected List<QueuedAnimation> animationQueue = new List<QueuedAnimation>();
 
         /// <summary>
         /// GameObject constructor (prototype)
@@ -54,7 +58,7 @@ namespace Game
             OnMovementStart = prototype.OnMovementStart.Copy();
             OnMovement = prototype.OnMovement.Copy();
             OnMovementEnd = prototype.OnMovementEnd.Copy();
-            animations = DictionaryHelper.Copy(prototype.animations, (string name, SpriteAnimation animation) => { return new SpriteAnimation(animation); });
+            animations = prototype.animations.Select(animation => new SpriteAnimation(animation)).ToList();
         }
 
         /// <summary>
@@ -175,44 +179,67 @@ namespace Game
         public virtual void OnClick(MouseButton button)
         { }
 
-        public void AddAnimation(string name, SpriteAnimation animation)
+        public void AddAnimation(SpriteAnimation animation)
         {
-            if (animations.ContainsKey(name)) {
-                animations[name] = animation;
-            } else {
-                animations.Add(name, animation);
-            }
+            animations = animations.Where(a => a.Name != animation.Name).ToList();
+            animations.Add(animation);
         }
 
         /// <summary>
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="queue">Determines what happens, if object is already playing an animation</param>
         /// <param name="callback">If provided, this gets called then animation ends</param>
-        public void PlayAnimation(string name, SpriteAnimation.AnimationDelegate callback = null)
+        public void PlayAnimation(string name, AnimationQueue queue = AnimationQueue.StopCurrent, SpriteAnimation.AnimationDelegate callback = null)
         {
-            if (!animations.ContainsKey(name)) {
+            if (IsPrototype) {
+                CustomLogger.Error("{ObjectIsPrototype}", name);
+                return;
+            }
+            SpriteAnimation animation = animations.FirstOrDefault(animation => animation.Name == name);
+            if (animation == null) {
                 CustomLogger.Warning("{AnimationNotFound}", this.name, name);
                 return;
             }
             if(currentAnimation != null) {
-                currentAnimation.Stop();
+                switch (queue) {
+                    case AnimationQueue.StopCurrent:
+                        currentAnimation.Stop();
+                        animationQueue.Clear();
+                        break;
+                    case AnimationQueue.Skip:
+                        return;
+                    case AnimationQueue.QueueOne:
+                        animationQueue.Clear();
+                        animationQueue.Add(new QueuedAnimation() { Name = name, Callback = callback });
+                        return;
+                    case AnimationQueue.QueueUnlimited:
+                        animationQueue.Add(new QueuedAnimation() { Name = name, Callback = callback });
+                        return;
+                }
             }
-            currentAnimation = animations[name];
+            hasMovementAnimation = false;
+            currentAnimation = animation;
             currentAnimation.Start(spriteData, UpdateSprite, callback);
         }
 
-        public void StopAnimation()
+        public void StopAnimation(bool clearQueue = true)
         {
             if (IsPlayingAnimation) {
                 currentAnimation.Stop();
                 currentAnimation = null;
+                hasMovementAnimation = false;
+                lingeringMovementAnimation = false;
+                if (clearQueue) {
+                    animationQueue.Clear();
+                } else {
+                    ProcessAnimationQueue();
+                }
             }
         }
 
         public virtual void Update() {
-            movedLastFrame = movedThisFrame;
             movedThisFrame = false;
-
             if (IsMoving) {
                 if (CanMove) {
                     movementDistanceCurrent = Mathf.Clamp(movementDistanceCurrent + Time.deltaTime * MovementSpeed, 0.0f, movementDistanceTotal);
@@ -229,13 +256,20 @@ namespace Game
                     //This object can no longer move
                     EndMovement();
                 }
+            } else if(lingeringMovementAnimation) {
+                //Have movement animation linger for one frame for seamless animation
+                StopAnimation(false);
             }
 
             if(currentAnimation != null && currentAnimation.IsPlaying) {
                 if (currentAnimation.Update() && !currentAnimation.IsPlaying) {
+                    //Animation has stopped
                     currentAnimation = null;
+                    ProcessAnimationQueue();
                 }
             }
+
+            movedLastFrame = movedThisFrame;
         }
 
         public void Destroy()
@@ -269,7 +303,7 @@ namespace Game
             }
         }
 
-        protected bool StartMoving(Vector3 target)
+        protected bool StartMoving(Vector3 target, string animationName = null)
         {
             if (IsMoving || !CanMove) {
                 //Already moving or can't move
@@ -283,6 +317,13 @@ namespace Game
             oldPosition = Position;
             movementDistanceTotal = Vector3.Distance(oldPosition.Value, movementTarget.Value);
             movementDistanceCurrent = 0.0f;
+            lingeringMovementAnimation = false;
+
+            if (!string.IsNullOrEmpty(animationName) && (!IsPlayingAnimation || currentAnimation.Name != animationName)) {
+                PlayAnimation(animationName, AnimationQueue.StopCurrent);
+                hasMovementAnimation = true;
+            }
+
             foreach(EventListenerDelegate eventListener in OnMovementStart) {
                 eventListener();
             }
@@ -300,8 +341,21 @@ namespace Game
                 foreach (EventListenerDelegate eventListener in OnMovementEnd) {
                     eventListener();
                 }
+                lingeringMovementAnimation = hasMovementAnimation;
             }
             return wasMoving;
+        }
+
+        /// <summary>
+        /// Playes the next animation in queue (if there is one)
+        /// </summary>
+        protected void ProcessAnimationQueue()
+        {
+            if (animationQueue.Count != 0) {
+                //Pick next animation from queue
+                PlayAnimation(animationQueue[0].Name, AnimationQueue.Skip /* <- This is irrelevant since currentAnimation was just set to null */, animationQueue[0].Callback);
+                animationQueue.RemoveAt(0);
+            }
         }
 
         private void Initialize(string prefabName, string objectName, bool active, Vector3 position, Transform parent, SpriteData spriteData, MouseEventData clickListenerData,
@@ -378,13 +432,22 @@ namespace Game
 
         private void UpdateSprite()
         {
-            if((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged) {
+            if((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged &&
+                spriteData.FlipX == Renderer.flipX && spriteData.FlipY == Renderer.flipY) {
                 //No change
                 return;
             }
             Renderer.sprite = TextureManager.GetSprite(spriteData);
             Renderer.sortingOrder = spriteData.Order;
+            Renderer.flipX = spriteData.FlipX;
+            Renderer.flipY = spriteData.FlipY;
             spriteDirectoryChanged = false;
+        }
+
+        protected class QueuedAnimation
+        {
+            public string Name { get; set; }
+            public SpriteAnimation.AnimationDelegate Callback { get; set; }
         }
     }
 }

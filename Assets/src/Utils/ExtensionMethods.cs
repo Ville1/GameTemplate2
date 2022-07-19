@@ -18,6 +18,31 @@ namespace Game.Utils
             return str[0].ToString().ToUpper() + str.Substring(1);
         }
 
+        public static List<string> Replicate(this string format, int count)
+        {
+            return format.Replicate(0, count);
+        }
+
+        public static List<string> Replicate(this string format, int startIndex, int count)
+        {
+            List<string> list = new List<string>();
+            if(count == 0) {
+                return list;
+            }
+
+            if(count > 0) {
+                for (int i = startIndex; i < count + startIndex; i++) {
+                    list.Add(string.Format(format, i));
+                }
+            } else {
+                for (int i = startIndex; i > count + startIndex; i--) {
+                    list.Add(string.Format(format, i));
+                }
+            }
+
+            return list;
+        }
+
         public static string ToPercentage(this float number)
         {
             return Math.Round((double)number * 100.0f) + "%";

@@ -10,12 +10,16 @@ namespace Game
         public string Sprite { get; set; }
         public TextureDirectory SpriteDirectory { get; set; }
         public int Order { get; set; }
+        public bool FlipX { get; set; }
+        public bool FlipY { get; set; }
 
-        public SpriteData(string sprite, TextureDirectory spriteDirectory, int order = 0)
+        public SpriteData(string sprite, TextureDirectory spriteDirectory, int order = 0, bool flipX = false, bool flipY = false)
         {
             Sprite = sprite;
             SpriteDirectory = spriteDirectory;
             Order = order;
+            FlipX = flipX;
+            FlipY = flipY;
         }
 
         public SpriteData(SpriteData data)
@@ -23,6 +27,8 @@ namespace Game
             Sprite = data.Sprite;
             SpriteDirectory = data.SpriteDirectory;
             Order = data.Order;
+            FlipX = data.FlipX;
+            FlipY = data.FlipY;
         }
 
         public void Set(SpriteData data)
@@ -30,6 +36,8 @@ namespace Game
             Sprite = data.Sprite;
             SpriteDirectory = data.SpriteDirectory;
             Order = data.Order;
+            FlipX = data.FlipX;
+            FlipY = data.FlipY;
         }
 
         public SpriteData Copy
@@ -44,6 +52,7 @@ namespace Game
     {
         public delegate void AnimationDelegate();
 
+        public string Name { get; set; }
         public float FramesPerSecond { get; private set; }
         /// <summary>
         /// Index of sprite where animation restarts, if set to loop. This can be used to skip begining of the animation on successive loops.
@@ -54,6 +63,8 @@ namespace Game
         public List<string> Sprites { get; private set; }
         public List<string> CurrentSprites { get; private set; }
         public TextureDirectory SpriteDirectory { get; private set; }
+        public bool FlipX { get; private set; }
+        public bool FlipY { get; private set; }
         public int CurrentSpriteIndex { get; private set; } = -1;
         public bool IsPlaying { get { return CurrentSpriteIndex >= 0; } }
         public SpriteData CurrentTarget { get; private set; } = null;
@@ -66,32 +77,50 @@ namespace Game
 
         /// <summary>
         /// </summary>
+        /// <param name="name"></param>
         /// <param name="framesPerSecond"></param>
         /// <param name="loopIndex">Index of sprite where animation restarts, if set to loop. This can be used to skip begining of the animation on successive loops.
-        /// Set to 0 to play full animation or -1 to have animation not loop.</param>
+        /// Set to 0 to play full animation or -1 / null to have animation not loop.</param>
         /// <param name="sprites"></param>
         /// <param name="spriteDirectory"></param>
+        /// <param name="flipX"></param>
+        /// <param name="flipY"></param>
         /// <exception cref="ArgumentException"></exception>
-        public SpriteAnimation(float framesPerSecond, int loopIndex, List<string> sprites, TextureDirectory spriteDirectory)
+        public SpriteAnimation(string name, float framesPerSecond, int? loopIndex, List<string> sprites, TextureDirectory spriteDirectory, bool flipX = false, bool flipY = false)
         {
             if (framesPerSecond <= 0.0f) {
                 throw new ArgumentException("framesPerSecond <= 0.0f");
             }
-            if((loopIndex != -1 && loopIndex < 0) || loopIndex >= sprites.Count) {
-                throw new ArgumentException("Invalid loopIndex, set to -1 for a non looping animation.");
+            int loopInd = loopIndex.HasValue ? loopIndex.Value : -1;
+            if((loopInd != -1 && loopInd < 0) || loopInd >= sprites.Count) {
+                throw new ArgumentException("Invalid loopIndex, set to -1 or null for a non looping animation.");
             }
+            Name = name;
             FramesPerSecond = framesPerSecond;
-            LoopIndex = loopIndex;
+            LoopIndex = loopInd;
             Sprites = sprites;
             SpriteDirectory = spriteDirectory;
+            FlipX = flipX;
+            FlipY = flipY;
         }
 
         public SpriteAnimation(SpriteAnimation original)
         {
+            Name = original.Name;
             FramesPerSecond = original.FramesPerSecond;
             LoopIndex = original.LoopIndex;
             Sprites = original.Sprites.Copy();
             SpriteDirectory = original.SpriteDirectory;
+            FlipX = original.FlipX;
+            FlipY = original.FlipY;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="endCallback">If provided, this gets called then animation ends. (Note: If animation is set to loop, this only gets called on Stop())</param>
+        public void Start(AnimationDelegate endCallback)
+        {
+            Start(null, null, endCallback);
         }
 
         /// <summary>
@@ -112,6 +141,8 @@ namespace Game
                 originalSprite = target.Copy;
                 CurrentTarget = target;
                 CurrentTarget.SpriteDirectory = SpriteDirectory;
+                CurrentTarget.FlipX = FlipX;
+                CurrentTarget.FlipY = FlipY;
             }
         }
 
