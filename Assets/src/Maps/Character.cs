@@ -1,5 +1,6 @@
 using Game.UI;
 using Game.Utils;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -36,8 +37,9 @@ namespace Game.Maps
 
             AddAnimation(new SpriteAnimation("wave", 10.0f, 2, "stick figure wave {0}".Replicate(1, 4), TextureDirectory.Sprites));
             AddAnimation(new SpriteAnimation("horn", 10.0f, null, "stick figure horn {0}".Replicate(1, 5), TextureDirectory.Sprites));
-            AddAnimation(new SpriteAnimation("walk east", 10.0f, 2, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
-            AddAnimation(new SpriteAnimation("walk west", 10.0f, 2, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
+            AddAnimation(new SpriteAnimation("walk east", 10.0f, 0, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("walk west", 10.0f, 0, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
+            AddAnimation(new SpriteAnimation("stop", 2.0f, null, new List<string>() { "stick figure stop" }, TextureDirectory.Sprites));
         }
 
         public void Move(Direction direction)
@@ -82,6 +84,21 @@ namespace Game.Maps
             PlayAnimation("horn", AnimationQueue.QueueUnlimited);
         }
 
+        public void Stop()
+        {
+            if (IsMoving) {
+                EndMovement(true);
+                if (HighlightTiles) {
+                    Tile.RectangleColor = null;
+                    oldTile.RectangleColor = Color.black;
+                }
+                Tile = oldTile;
+                PlayAnimation("stop", hasMovementAnimation ? AnimationQueue.QueueOne : AnimationQueue.StopCurrent);
+            } else {
+                PlayAnimation("stop");
+            }
+        }
+
         private void GridMove(Direction direction)
         {
             if (IsMoving) {
@@ -108,7 +125,7 @@ namespace Game.Maps
             if (!movedLastFrame) {
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
-            DebugWindowManager.Instance.SetValue("Player animation", currentAnimation == null ? "none" : CurrentAnimation);
+            DebugWindowManager.Instance.SetValue("Player animation", currentAnimation == null ? "none" : currentAnimation.CurrentSprite);
             DebugWindowManager.Instance.SetValue("Animation queue", "(" + animationQueue.Count + "): " + string.Join(", ", animationQueue.Select(x => x.Name).ToList()));
             base.Update();
         }

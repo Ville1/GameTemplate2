@@ -67,6 +67,7 @@ namespace Game
         public bool FlipY { get; private set; }
         public int CurrentSpriteIndex { get; private set; } = -1;
         public bool IsPlaying { get { return CurrentSpriteIndex >= 0; } }
+        public string CurrentSprite { get { return IsPlaying ? CurrentSprites[CurrentSpriteIndex] : Sprites[0]; } }
         public SpriteData CurrentTarget { get; private set; } = null;
         public AnimationDelegate UpdateCallback { get; private set; } = null;
         public AnimationDelegate EndCallback { get; private set; } = null;
@@ -140,9 +141,14 @@ namespace Game
             if (target != null) {
                 originalSprite = target.Copy;
                 CurrentTarget = target;
+                CurrentTarget.Sprite = CurrentSprite;
                 CurrentTarget.SpriteDirectory = SpriteDirectory;
                 CurrentTarget.FlipX = FlipX;
                 CurrentTarget.FlipY = FlipY;
+            }
+
+            if(UpdateCallback != null) {
+                UpdateCallback();
             }
         }
 
@@ -201,13 +207,6 @@ namespace Game
             }
 
             return false;
-        }
-
-        public string CurrentSprite
-        {
-            get {
-                return IsPlaying ? CurrentSprites[CurrentSpriteIndex] : Sprites[0];
-            }
         }
 
         public void Stop()

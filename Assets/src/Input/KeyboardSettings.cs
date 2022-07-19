@@ -38,6 +38,7 @@ namespace Game.Input
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.Keypad7, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Move(Direction.NorthWest); } });
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha1, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Wave(); } });
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha2, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Horn(); } });
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha3, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Stop(); } });
         }
 
         /// <summary>

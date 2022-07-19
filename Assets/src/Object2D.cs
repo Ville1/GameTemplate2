@@ -190,7 +190,8 @@ namespace Game
         /// <param name="name"></param>
         /// <param name="queue">Determines what happens, if object is already playing an animation</param>
         /// <param name="callback">If provided, this gets called then animation ends</param>
-        public void PlayAnimation(string name, AnimationQueue queue = AnimationQueue.StopCurrent, SpriteAnimation.AnimationDelegate callback = null)
+        /// <param name="canStopMovementAnimation">If true, and queue = AnimationQueue.StopCurrent this can stop movement animation from playing</param>
+        public void PlayAnimation(string name, AnimationQueue queue = AnimationQueue.StopCurrent, SpriteAnimation.AnimationDelegate callback = null, bool canStopMovementAnimation = true)
         {
             if (IsPrototype) {
                 CustomLogger.Error("{ObjectIsPrototype}", name);
@@ -204,6 +205,9 @@ namespace Game
             if(currentAnimation != null) {
                 switch (queue) {
                     case AnimationQueue.StopCurrent:
+                        if(IsMoving && hasMovementAnimation && !canStopMovementAnimation) {
+                            return;
+                        }
                         currentAnimation.Stop();
                         animationQueue.Clear();
                         break;
@@ -330,19 +334,25 @@ namespace Game
             return true;
         }
 
-        protected bool EndMovement()
+        protected bool EndMovement(bool returnToStart = false)
         {
             bool wasMoving = IsMoving;
             movementTarget = null;
-            oldPosition = null;
             movementDistanceTotal = -1.0f;
             movementDistanceCurrent = -1.0f;
             if (wasMoving) {
+                lingeringMovementAnimation = hasMovementAnimation;
+                if (returnToStart) {
+                    Position = new Vector3(oldPosition.Value.x, oldPosition.Value.y, oldPosition.Value.z);
+                    foreach (EventListenerDelegate eventListener in OnMovement) {
+                        eventListener();
+                    }
+                }
                 foreach (EventListenerDelegate eventListener in OnMovementEnd) {
                     eventListener();
                 }
-                lingeringMovementAnimation = hasMovementAnimation;
             }
+            oldPosition = null;
             return wasMoving;
         }
 
