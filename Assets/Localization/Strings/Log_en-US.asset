@@ -136,7 +136,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1876376665026560
-    m_Localized: Texture "{0}/{1}" not found
+    m_Localized: '{0} ''{1}/{2}'' not found'
     m_Metadata:
       m_Items: []
   - m_Id: 1887213903507456

@@ -35,10 +35,10 @@ namespace Game.Maps
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
 
-            AddAnimation(new SpriteAnimation("wave", 10.0f, 2, "stick figure wave {0}".Replicate(1, 4), TextureDirectory.Sprites));
-            AddAnimation(new SpriteAnimation("horn", 10.0f, null, "stick figure horn {0}".Replicate(1, 5), TextureDirectory.Sprites));
-            AddAnimation(new SpriteAnimation("walk east", 10.0f, 0, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
-            AddAnimation(new SpriteAnimation("walk west", 10.0f, 0, "stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
+            AddAnimation(new SpriteAnimation("wave", 10.0f, 2, "wave/stick figure wave {0}".Replicate(1, 4), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("horn", 10.0f, null, "horn/stick figure horn {0}".Replicate(1, 5), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("walk east", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
+            AddAnimation(new SpriteAnimation("walk west", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
             AddAnimation(new SpriteAnimation("stop", 2.0f, null, new List<string>() { "stick figure stop" }, TextureDirectory.Sprites));
         }
 
