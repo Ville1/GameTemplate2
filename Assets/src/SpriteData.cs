@@ -2,6 +2,7 @@ using Game.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game
 {
@@ -45,6 +46,28 @@ namespace Game
             get{
                 return new SpriteData(this);
             }
+        }
+    }
+
+    public class UISpriteData : SpriteData
+    {
+        public float? PixelsPerUnitMultiplier { get; set; }
+        public Image.Type? ImageType { get; set; }
+
+        public UISpriteData(string sprite, TextureDirectory spriteDirectory, float? pixelsPerUnitMultiplier = null, Image.Type? imageType = null) : base(sprite, spriteDirectory, 0, false, false)
+        {
+            PixelsPerUnitMultiplier = pixelsPerUnitMultiplier;
+            ImageType = imageType;
+            if(ImageType.HasValue && ImageType.Value != Image.Type.Sliced && ImageType.Value != Image.Type.Tiled && PixelsPerUnitMultiplier.HasValue) {
+                CustomLogger.Error("pixelsPerUnitMultiplier should be only used with Image.Type.Sliced or Image.Type.Tiled");
+                PixelsPerUnitMultiplier = null;
+            }
+        }
+
+        public UISpriteData(UISpriteData data) : base(data)
+        {
+            PixelsPerUnitMultiplier = data.PixelsPerUnitMultiplier;
+            ImageType = data.ImageType;
         }
     }
 

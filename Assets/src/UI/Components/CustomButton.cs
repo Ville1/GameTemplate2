@@ -7,6 +7,8 @@ namespace Game.UI.Components
 {
     public class CustomButton
     {
+        private static readonly float DEFAULT_PIXELS_PER_UNIT_MULTIPLIER = 3.0f;
+
         public delegate void OnClick();
 
         public Button ButtonBase { get; private set; }
@@ -17,7 +19,7 @@ namespace Game.UI.Components
         /// <summary>
         /// Instantiate a new button based on prototype
         /// </summary>
-        public CustomButton(Button prototype, GameObject parent, Vector2 positionDelta, LString text, OnClick onClick)
+        public CustomButton(Button prototype, GameObject parent, Vector2 positionDelta, LString text, OnClick onClick, UISpriteData spriteData = null)
         {
             ButtonBase = GameObject.Instantiate(
                 prototype,
@@ -49,16 +51,16 @@ namespace Game.UI.Components
                 ButtonBase.gameObject.name = name;
             }
 
-            InitializeTextAndEventListener(text, onClick);
+            InitializeTextEventListenerAndSprite(text, onClick, spriteData);
         }
 
         /// <summary>
         /// Wrap a pre-existing button as a CustomButton
         /// </summary>
-        public CustomButton(Button button, LString text, OnClick onClick)
+        public CustomButton(Button button, LString text, OnClick onClick, UISpriteData spriteData = null)
         {
             ButtonBase = button;
-            InitializeTextAndEventListener(text, onClick);
+            InitializeTextEventListenerAndSprite(text, onClick, spriteData);
         }
 
         public LString Text
@@ -126,7 +128,7 @@ namespace Game.UI.Components
             return ButtonBase.name;
         }
 
-        private void InitializeTextAndEventListener(LString text, OnClick onClick)
+        private void InitializeTextEventListenerAndSprite(LString text, OnClick onClick, UISpriteData spriteData)
         {
             //Set text
             TmpText = ButtonBase.GetComponentInChildren<TMPro.TMP_Text>();
@@ -143,6 +145,12 @@ namespace Game.UI.Components
             Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
             buttonClickedEvent.AddListener(new UnityAction(onClick));
             ButtonBase.onClick = buttonClickedEvent;
+
+            if(spriteData != null) {
+                //Set sprite
+                ButtonBase.image.sprite = TextureManager.GetSprite(spriteData);
+                ButtonBase.image.pixelsPerUnitMultiplier = spriteData.PixelsPerUnitMultiplier.HasValue ? spriteData.PixelsPerUnitMultiplier.Value : DEFAULT_PIXELS_PER_UNIT_MULTIPLIER;
+            }
         }
     }
 }
