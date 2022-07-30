@@ -69,6 +69,22 @@ namespace Game
                 (Y == coordinates.Y || Y == coordinates.Y - 1 || Y == coordinates.Y + 1);
         }
 
+        public Vector2 Vector
+        {
+            get {
+                return new Vector2(X, Y);
+            }
+            set {
+                X = (int)MathF.Round(value.x);
+                Y = (int)MathF.Round(value.y);
+            }
+        }
+
+        public float Distance(Coordinates coordinates)
+        {
+            return Vector2.Distance(Vector, coordinates.Vector);
+        }
+
         public override string ToString()
         {
             return string.Format("{0},{1}", X, Y);

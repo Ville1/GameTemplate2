@@ -1,3 +1,4 @@
+using Game.Pathfinding;
 using Game.UI;
 using Game.Utils;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Game.Maps
         public List<Equipment> Weapons { get; private set; }
 
         private Tile oldTile = null;
+        private List<Tile> currentPath = null;
 
         public Character(Tile tile) : base("Character", true, tile.Position, tile.Map.transform, new SpriteData("stick figure", TextureDirectory.Sprites, 1), null, 1.0f)
         {
@@ -130,6 +132,36 @@ namespace Game.Maps
                 list.AddRange(weapon.Stats);
             }
             return list;
+        }
+
+        public bool Path(Tile tile)
+        {
+            if(currentPath != null) {
+                foreach(Tile t in currentPath) {
+                    t.RectangleColor = null;
+                }
+                currentPath = null;
+            }
+
+            if(Tile == tile) {
+                return false;
+            }
+            List<PathfindingNode<Tile>> path = Tile.Map.Pathfinding.Path(Tile.PathfindingNode, tile.PathfindingNode);
+            if(path != null) {
+                for(int i = 0; i < path.Count; i++) {
+                    PathfindingNode<Tile> node = path[i];
+                    node.Target.RectangleColor = Color.black;
+                    if(i != 0 && !node.Target.Coordinates.IsAdjacent(path[i - 1].Target.Coordinates)) {
+                        throw new System.Exception("Something went wrong with pathfinding!");
+                    }
+                    if (i != path.Count - 1 && !node.Target.Coordinates.IsAdjacent(path[i + 1].Target.Coordinates)) {
+                        throw new System.Exception("Something went wrong with pathfinding!");
+                    }
+                }
+                currentPath = path.Select(n => n.Target).ToList();
+                return true;
+            }
+            return false;
         }
 
         private void GridMove(Direction direction)

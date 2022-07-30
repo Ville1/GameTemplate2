@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game
@@ -14,6 +15,7 @@ namespace Game
         public static Direction SouthWest { get { if (southWest == null) { southWest = new Direction(Orientation.SouthWest); } return southWest; } }
         public static Direction West { get { if (west == null) { west = new Direction(Orientation.West); } return west; } }
         public static Direction NorthWest { get { if (northWest == null) { northWest = new Direction(Orientation.NorthWest); } return northWest; } }
+        public static List<Direction> Values { get { if(values == null) { values = new List<Direction>() { North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest }; } return values; } }
 
         private static Direction north;
         private static Direction northEast;
@@ -23,6 +25,8 @@ namespace Game
         private static Direction southWest;
         private static Direction west;
         private static Direction northWest;
+
+        private static List<Direction> values;
 
         public Orientation Type { get; private set; }
 
@@ -88,6 +92,13 @@ namespace Game
                         break;
                 }
                 return Quaternion.Euler(0.0f, 0.0f, degrees);
+            }
+        }
+
+        public bool IsDiagonal
+        {
+            get {
+                return Type == Orientation.NorthEast || Type == Orientation.SouthEast || Type == Orientation.SouthWest || Type == Orientation.NorthWest;
             }
         }
 

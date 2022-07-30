@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.Pathfinding;
 using Game.Saving;
 using Game.Saving.Data;
 using Game.UI;
@@ -12,9 +13,12 @@ namespace Game.Maps
 {
     public class Map : MonoBehaviour, ISaveable, IEnumerable
     {
-        private int GENERATION_TILES_PER_FRAME_DEFAULT = 10;
-        private int GENERATION_TILES_PER_FRAME_DEFAULT_DELTA = 10;
-        private float GENERATION_TARGET_FRAME_RATE = 60.0f;
+        private static readonly int GENERATION_TILES_PER_FRAME_DEFAULT = 10;
+        private static readonly int GENERATION_TILES_PER_FRAME_DEFAULT_DELTA = 10;
+        private static readonly float GENERATION_TARGET_FRAME_RATE = 60.0f;
+
+        private static readonly bool DYNAMIC_PATHFINDING_NODES = true;
+        private static readonly bool ENABLE_DIAGONAL_PATHFINDING = true;
 
         public delegate void EndGenerationCallback();
 
@@ -27,6 +31,7 @@ namespace Game.Maps
         /// Note: coordinates are flipped: Tiles[y][x]
         /// </summary>
         public List<List<Tile>> Tiles { get; private set; }
+        public AStar<Tile> Pathfinding { get; private set; }
 
         private Coordinates generationPosition;
         private EndGenerationCallback endGenerationCallback;
@@ -137,7 +142,11 @@ namespace Game.Maps
             Tiles[tileSaveData.X][tileSaveData.Y] = tile;
             SetEventListeners(tile);
             loadingPosition++;
-            return loadingPosition / (float)saveData.Tiles.Count;
+            float progress = loadingPosition / (float)saveData.Tiles.Count;
+            if(progress == 1.0f) {
+                UpdatePathfindingNodes();//These should be included in progress bar updates
+            }
+            return progress;
         }
 
         public static Map Instantiate(string mapName, int width, int height)
@@ -262,6 +271,7 @@ namespace Game.Maps
             if(endGenerationCallback != null) {
                 endGenerationCallback();
             }
+            UpdatePathfindingNodes();//These should be included in progress bar updates
             //Input.MouseManager.Instance.AddEventListerener(MouseButton.Middle, new Input.MouseEvent(Tiles[0][0], (GameObject target) => { Utils.CustomLogger.DebugRaw("First tile middle click callback"); }, 1));
         }
 
@@ -307,6 +317,38 @@ namespace Game.Maps
             draggedTile = null;
         }
 
+        public void UpdatePathfindingNodes()
+        {
+            if(Pathfinding == null) {
+                Pathfinding = new AStar<Tile>(
+                    (PathfindingNode<Tile> node, PathfindingNode<Tile> end) => {
+                        return node.Target.Coordinates.Distance(end.Target.Coordinates);
+                    },
+                    DYNAMIC_PATHFINDING_NODES ? (PathfindingNode<Tile> node) => {
+                        return GetNeighbors(node.Target);
+                    } : null
+                );
+            }
+
+            if (!DYNAMIC_PATHFINDING_NODES) {
+                foreach (List<Tile> list in Tiles) {
+                    foreach (Tile tile in list) {
+                        tile.PathfindingNode.Neighbors = GetNeighbors(tile);
+                    }
+                }
+            }
+        }
+
+        private Dictionary<PathfindingNode<Tile>, double> GetNeighbors(Tile tile)
+        {
+            return Direction.Values.Where(direction => ENABLE_DIAGONAL_PATHFINDING || direction.IsDiagonal).Select(direction =>
+                GetTileAt(tile.Coordinates.Move(direction))
+            ).Where((t) => t != null).ToDictionary(
+                t => t.PathfindingNode,
+                t => t.MovementCost * (double)t.Coordinates.Distance(tile.Coordinates)
+            );
+        }
+
         public static List<Tile> TilePrototypes
         {
             get {
@@ -315,8 +357,8 @@ namespace Game.Maps
                 }
                 tilePrototypes = new List<Tile>();
 
-                tilePrototypes.Add(new Tile("Grass", "grass"));
-                tilePrototypes.Add(new Tile("House", "house"));
+                tilePrototypes.Add(new Tile("Grass", "grass", 1.0f));
+                tilePrototypes.Add(new Tile("House", "house", 5.0f));
 
                 return tilePrototypes;
             }

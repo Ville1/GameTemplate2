@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.Pathfinding;
 using Game.UI;
 using System.Linq;
 using UnityEngine;
@@ -12,6 +13,8 @@ namespace Game.Maps
         public int X { get { return Coordinates == null ? 0 : Coordinates.X; } }
         public int Y { get { return Coordinates == null ? 0 : Coordinates.Y; } }
         public string Name { get; private set; }
+        public float MovementCost { get; private set; }
+        public PathfindingNode<Tile> PathfindingNode { get; set; }
 
         private GameObject rectangleGameObject = null;
         private bool rectangleNotFound = false;
@@ -26,8 +29,10 @@ namespace Game.Maps
             Map = map;
             Coordinates = new Coordinates(x, y);
             Name = prototype.Name;
+            MovementCost = prototype.MovementCost;
             RectangleColor = null;
             MouseEventData.Tags.Add(MouseEventTag.IgnoreUI);
+            PathfindingNode = new PathfindingNode<Tile>() { Target = this };
         }
 
         public Tile(Map map, int x, int y) : base(
@@ -42,26 +47,34 @@ namespace Game.Maps
             Map = map;
             Coordinates = new Coordinates(x, y);
             Name = "Unnamed";
+            MovementCost = 1.0f;
             RectangleColor = null;
             MouseEventData.Tags.Add(MouseEventTag.IgnoreUI);
+            PathfindingNode = new PathfindingNode<Tile>() { Target = this };
         }
 
-        public Tile(string name, string spriteName) : base("Tile", string.Format("TilePrototype_{0}", name), new SpriteData(spriteName, TextureDirectory.Terrain), MouseEventData.Default)
+        public Tile(string name, string spriteName, float movementCost) : base("Tile", string.Format("TilePrototype_{0}", name), new SpriteData(spriteName, TextureDirectory.Terrain), MouseEventData.Default)
         {
             Name = name;
+            MovementCost = movementCost;
         }
 
         public void ChangeTo(Tile prototype)
         {
             Name = prototype.Name;
             Sprite = prototype.Sprite;
+            MovementCost = prototype.MovementCost;
+            Map.UpdatePathfindingNodes();
         }
 
         public override void OnClick(MouseButton button)
         {
             base.OnClick(button);
             UIManager.Instance.CloseAllWindows();
-            //Utils.CustomLogger.DebugRaw(ToString() + " -> " + button.ToString());
+
+            if(button == MouseButton.Right && Main.Instance.PlayerCharacter != null) {
+                Main.Instance.PlayerCharacter.Path(this);
+            }
         }
 
         public override void Update()
