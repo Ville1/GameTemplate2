@@ -23,6 +23,15 @@ namespace Game.Utils
             return dictionary;
         }
 
+        public static Dictionary<TKey, TValue> Copy<TKey, TValue>(Dictionary<TKey, TValue> original)
+        {
+            Dictionary<TKey, TValue> copy = new Dictionary<TKey, TValue>();
+            foreach (KeyValuePair<TKey, TValue> originalPair in original) {
+                copy.Add(originalPair.Key, originalPair.Value);
+            }
+            return copy;
+        }
+
         public static Dictionary<TKey, TValue> Copy<TKey, TValue>(Dictionary<TKey, TValue> original, Func<TKey, TValue, TValue> valueCreatorCallback)
         {
             Dictionary<TKey, TValue> copy = new Dictionary<TKey, TValue>();

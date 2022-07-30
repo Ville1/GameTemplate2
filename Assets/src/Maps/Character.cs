@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Maps
 {
-    public class Character : Object2D
+    public class Character : Object2D, IHasStats, IHasStatModifiers
     {
         public enum MovementType { Grid, Free, FreeNoRotation };
 
@@ -14,6 +14,8 @@ namespace Game.Maps
 
         public MovementType Movement { get; set; } = MovementType.Grid;
         public Tile Tile { get; private set; }
+        public Stats Stats { get; private set; }
+        public List<Equipment> Weapons { get; private set; }
 
         private Tile oldTile = null;
 
@@ -40,6 +42,28 @@ namespace Game.Maps
             AddAnimation(new SpriteAnimation("walk east", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
             AddAnimation(new SpriteAnimation("walk west", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
             AddAnimation(new SpriteAnimation("stop", 2.0f, null, new List<string>() { "stick figure stop" }, TextureDirectory.Sprites));
+
+            Weapons = new List<Equipment>();
+            /*Weapons.Add(new Equipment("Sword", new Stats(Stat.Strength, 1.0f)));
+            Weapons.Add(new Equipment("Sword", new List<StatModifier>() { new StatModifier(Stat.TestStat, 10.0f) }));
+            Weapons.Add(new Equipment("Sword2 electric boogaloo", new List<StatModifier>() { new StatModifier(Stat.Strength, 0.0f, 2.0f) }));
+            Stats = new Stats(this, new Dictionary<Stat, float>() { { Stat.Strength, 5.0f }, { Stat.Dexterity, 10.0f }, { Stat.TestStat, 0.0f }, { Stat.Movement, 3.0f }, { Stat.HP, 0.0f } });
+            Stats.Refill();
+
+            Stats.HP -= 999.0f;
+            Stats.HP.Amount = 80.0f;
+            Stats.HP += 10.0f;
+            Weapons.Add(new Equipment("Sword2 electric boogaloo", new List<StatModifier>() { new StatModifier(Stat.Strength, 0.0f, 2.0f) }));
+            Stats.Update();
+
+            Weapons.Add(new Equipment("Sword2 electric boogaloo", new List<StatModifier>() { new StatModifier(Stat.Movement, 1.0f, 2.0f) }));
+            
+            Stats.Strength.BaseValue += 1.0f;
+            Stats.Strength += 1.0f;
+            //Stats.Strength.Value += 1.0f;
+            Stats.TestStat -= 100.0f;
+            Stats.Update();
+            float hp = Stats.HP;*/
         }
 
         public void Move(Direction direction)
@@ -99,6 +123,15 @@ namespace Game.Maps
             }
         }
 
+        public List<StatModifier> GetStatModifiers()
+        {
+            List<StatModifier> list = new List<StatModifier>();
+            foreach(Equipment weapon in Weapons) {
+                list.AddRange(weapon.Stats);
+            }
+            return list;
+        }
+
         private void GridMove(Direction direction)
         {
             if (IsMoving) {
@@ -128,6 +161,18 @@ namespace Game.Maps
             DebugWindowManager.Instance.SetValue("Player animation", currentAnimation == null ? "none" : currentAnimation.CurrentSprite);
             DebugWindowManager.Instance.SetValue("Animation queue", "(" + animationQueue.Count + "): " + string.Join(", ", animationQueue.Select(x => x.Name).ToList()));
             base.Update();
+        }
+
+        public class Equipment
+        {
+            public string Name { get; private set; }
+            public List<StatModifier> Stats { get;private set; }
+
+            public Equipment(string name, List<StatModifier> stats)
+            {
+                Name = name;
+                Stats = stats.Select(modifier => { modifier.Name = name; return modifier; }).ToList();
+            }
         }
     }
 }
