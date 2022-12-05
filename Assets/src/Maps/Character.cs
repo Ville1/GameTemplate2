@@ -1,3 +1,4 @@
+using Game.Input;
 using Game.Pathfinding;
 using Game.UI;
 using Game.Utils;
@@ -44,6 +45,8 @@ namespace Game.Maps
             AddAnimation(new SpriteAnimation("walk east", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
             AddAnimation(new SpriteAnimation("walk west", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites, true));
             AddAnimation(new SpriteAnimation("stop", 2.0f, null, new List<string>() { "stick figure stop" }, TextureDirectory.Sprites));
+
+            //MouseManager.Instance.AddEventListerener(MouseButton.Left, new MouseEvent((GameObject gameObject) => { Effect2DManager.Instance.Play("FlamePermanent", gameObject); }));
 
             Weapons = new List<Equipment>();
             /*Weapons.Add(new Equipment("Sword", new Stats(Stat.Strength, 1.0f)));

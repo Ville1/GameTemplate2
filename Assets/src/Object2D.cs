@@ -373,6 +373,7 @@ namespace Game
         {
             this.prefabName = prefabName;
             name = objectName;
+            spriteData = spriteData ?? new SpriteData();
             this.spriteData = spriteData.Copy;
             this.clickListenerData = clickListenerData;
             MovementSpeed = movementSpeed;
@@ -412,15 +413,9 @@ namespace Game
             if (Renderer == null) {
                 Renderer = gameObject.AddComponent<SpriteRenderer>();
             }
-            if (string.IsNullOrEmpty(this.spriteData.Sprite)) {
-                //Use default sprite from prefab
-                if(Renderer.sprite == null) {
-                    //Sprite name was not provided with spriteName - parameter and Renderer is missing or is lacking a sprite
-                    CustomLogger.Error("{Object2DNoSprite}");
-                    this.spriteData.Sprite = string.Empty;
-                } else {
-                    this.spriteData.Sprite = Renderer.sprite.name;
-                }
+            if (this.spriteData.IsEmpty && Renderer.sprite != null) {
+                //Default sprite from prefab
+                this.spriteData.Sprite = Renderer.sprite.name;
             }
 
             UpdateSprite();
@@ -433,7 +428,7 @@ namespace Game
                 }
             }
 
-            if (string.IsNullOrEmpty(prefabName)) {
+            if (string.IsNullOrEmpty(prefabName) && Renderer.sprite != null) {
                 //Not prefab, set size based on sprite
                 Width = 100 / Renderer.sprite.pixelsPerUnit;
                 Height = 100 / Renderer.sprite.pixelsPerUnit;
@@ -442,12 +437,12 @@ namespace Game
 
         private void UpdateSprite()
         {
-            if((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged &&
-                spriteData.FlipX == Renderer.flipX && spriteData.FlipY == Renderer.flipY) {
+            if(((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged &&
+                spriteData.FlipX == Renderer.flipX && spriteData.FlipY == Renderer.flipY) || (Renderer.sprite == null && spriteData.IsEmpty)) {
                 //No change
                 return;
             }
-            Renderer.sprite = TextureManager.GetSprite(spriteData);
+            Renderer.sprite = spriteData.IsEmpty ? null : TextureManager.GetSprite(spriteData);
             Renderer.sortingOrder = spriteData.Order;
             Renderer.flipX = spriteData.FlipX;
             Renderer.flipY = spriteData.FlipY;

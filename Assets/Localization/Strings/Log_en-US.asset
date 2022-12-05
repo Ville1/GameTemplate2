@@ -195,6 +195,14 @@ MonoBehaviour:
     m_Localized: '{0} does not have animation ''{1}'''
     m_Metadata:
       m_Items: []
+  - m_Id: 66311927077629952
+    m_Localized: Effect '{0}' does not exist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66323154839367680
+    m_Localized: Effect can't have a set duration without looping animation
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

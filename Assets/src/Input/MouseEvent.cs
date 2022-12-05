@@ -60,11 +60,13 @@ namespace Game.Input
             Initialize(target, listener, priority, tags, isBlockedByUI);
         }
 
+        public MouseEvent(OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Initialize(null, listener, priority, tags, isBlockedByUI);
+        }
+
         private void Initialize(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
-            if (target == null) {
-                throw new NullReferenceException();
-            }
             Target = target;
             Listener = listener;
             EventData = new MouseEventData(priority, tags, isBlockedByUI);

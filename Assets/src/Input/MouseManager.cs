@@ -198,7 +198,7 @@ namespace Game.Input
                             }
                             onClickProced = true;
                         }
-                        if (target == mouseEvent.Target && UIManager.Instance.CanFire(mouseEvent.EventData)) {
+                        if ((target == mouseEvent.Target || mouseEvent.Target == null) && UIManager.Instance.CanFire(mouseEvent.EventData)) {
                             //Call event listener
                             mouseEvent.Listener(target);
                         }

@@ -179,6 +179,13 @@ namespace Game.UI
                 return string.Format("Debug window {0}", DebugWindowManager.Instance.Active ? "opened" : "closed");
             }));
 
+            commands.Add(new Command("clearEffects", new List<string>() { "clear_effects", "ce" }, "Clears all effects", (List<string> parameters) => {
+                int count = Effect2DManager.Instance.ActiveEffectCount;
+                Effect2DManager.Instance.RemoveAll();
+                return string.Format("{0} effect(s) cleared", count);
+            }));
+
+            //----- TEMPLATE PROJECT DEBUGGING COMMANDS -----
             commands.Add(new Command("togglePlayerMovement", null, "Changes players movement type (DELETE THIS: TEMPLATE PROJECT DEBUGGING ONLY)", (List<string> parameters) => {
                 Main.Instance.PlayerCharacter.Movement = Main.Instance.PlayerCharacter.Movement.Shift(1);
                 return Main.Instance.PlayerCharacter.Movement.ToString();

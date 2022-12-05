@@ -13,6 +13,7 @@ namespace Game
         public int Order { get; set; }
         public bool FlipX { get; set; }
         public bool FlipY { get; set; }
+        public bool IsEmpty { get { return string.IsNullOrEmpty(Sprite); } }
 
         public SpriteData(string sprite, TextureDirectory spriteDirectory, int order = 0, bool flipX = false, bool flipY = false)
         {
@@ -21,6 +22,15 @@ namespace Game
             Order = order;
             FlipX = flipX;
             FlipY = flipY;
+        }
+
+        public SpriteData()
+        {
+            Sprite = null;
+            SpriteDirectory = TextureDirectory.Sprites;
+            Order = 0;
+            FlipX = false;
+            FlipY = false;
         }
 
         public SpriteData(SpriteData data)
