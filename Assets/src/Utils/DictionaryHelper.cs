@@ -5,6 +5,12 @@ namespace Game.Utils
 {
     public class DictionaryHelper
     {
+        /// <summary>
+        /// </summary>
+        /// <typeparam name="TEnum"></typeparam>
+        /// <typeparam name="TItem"></typeparam>
+        /// <param name="defaultValue">Note: This parameter is given as default value for each key, thus using objects is not adviced. For example, if this is a List all keys get reference to same list. Using Func<TEnum, TItem> - parameter is usually a better option in such a case.</param>
+        /// <returns></returns>
         public static Dictionary<TEnum, TItem> CreateNewFromEnum<TEnum, TItem>(TItem defaultValue)
         {
             Dictionary<TEnum, TItem> dictionary = new Dictionary<TEnum, TItem>();

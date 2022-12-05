@@ -85,7 +85,9 @@ namespace Game
         {
             State = State.GeneratingMap;
             ProgressBar.Instance.Show("Generation map...");
-            WorldMap = Maps.Map.Instantiate("WorldMap", 25, 25);
+            if(WorldMap == null) {
+                WorldMap = Map.Instantiate("WorldMap", 25, 25);
+            }
             WorldMap.StartGeneration(() => { EndMapGeneration(); });
         }
 
@@ -103,7 +105,7 @@ namespace Game
         public void LoadGame(string folder, string fileName)
         {
             State = State.Loading;
-            WorldMap = WorldMap ?? Maps.Map.Instantiate("WorldMap", 1, 1);
+            WorldMap = WorldMap ?? Map.Instantiate("WorldMap", 1, 1);
             if(PlayerCharacter != null) {
                 PlayerCharacter.Destroy();
                 PlayerCharacter = null;
@@ -123,6 +125,17 @@ namespace Game
             Tile centerTile = WorldMap.Tiles[WorldMap.Width / 2][WorldMap.Height / 2];
             CameraManager.Instance.Center(centerTile);
             PlayerCharacter = new Character(centerTile);
+        }
+
+        public void BackToMainMenu()
+        {
+            if(State == State.Running) {
+                WorldMap.Clear();
+                State = State.MainMenu;
+                PlayerCharacter.Destroy();
+                PlayerCharacter = null;
+                MainMenu.Instance.Active = true;
+            }
         }
     }
 }

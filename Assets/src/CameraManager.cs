@@ -34,7 +34,7 @@ namespace Game
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.S, MoveDown, KeyEventTag.Camera);
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.D, MoveRight, KeyEventTag.Camera);
 
-            MouseManager.Instance.AddEventListerener(MouseButton.Middle, MouseDragEventType.Move, new MouseDragEvent(Move));
+            MouseManager.Instance.AddEventListener(MouseButton.Middle, MouseDragEventType.Move, new MouseDragEvent(Move));
         }
 
         /// <summary>

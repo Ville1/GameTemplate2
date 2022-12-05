@@ -303,7 +303,7 @@ namespace Game
             movedLastFrame = movedThisFrame;
         }
 
-        public void Destroy()
+        public virtual void Destroy()
         {
             if (isDestroyed) {
                 CustomLogger.Error("{ObjectIsDestroyed}", name);

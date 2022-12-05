@@ -47,7 +47,7 @@ namespace Game.Input
         {
             //Mouse clicks can be listened in two ways:
             //1. Create an object which implements IClickListener (such as Object2D) and give it `public override void OnClick` - method
-            //2. Use AddEventListerener to add a listener to any GameObject (it needs to have BoxCollider tho, so it can register clicks)
+            //2. Use AddEventListener to add a listener to any GameObject (it needs to have BoxCollider tho, so it can register clicks)
 
             Dictionary<MouseButton, bool> buttonsDownThisFrame = DictionaryHelper.CreateNewFromEnum<MouseButton, bool>(false);
             Dictionary<MouseButton, bool> buttonsHeldThisFrame = DictionaryHelper.CreateNewFromEnum<MouseButton, bool>(false);
@@ -122,37 +122,49 @@ namespace Game.Input
             buttonsHeldLastFrame = buttonsHeldThisFrame;
         }
 
-        public void AddEventListerener(MouseButton button, MouseEvent mouseEvent)
+        public void AddEventListener(MouseButton button, MouseEvent mouseEvent)
         {
             mouseClickEvents[button].Add(mouseEvent);
         }
 
-        /// <summary>
-        /// TODO: Give events guids, and allow removing of an events with them (like keyboard events)
-        /// </summary>
-        public void RemoveEventListerener(MouseButton button, MouseEvent mouseEvent)
+        public bool RemoveEventListener(MouseButton button, MouseEvent mouseEvent)
         {
-            mouseClickEvents[button].Remove(mouseEvent);
+            return mouseClickEvents[button].Remove(mouseEvent.Id);
         }
 
-        public void AddEventListerener(MouseButton button, MouseNothingClickEvent mouseEvent)
+        public bool RemoveEventListener(MouseButton button, Guid eventId)
+        {
+            return mouseClickEvents[button].Remove(eventId);
+        }
+
+        public void AddEventListener(MouseButton button, MouseNothingClickEvent mouseEvent)
         {
             mouseNothingClickEvents[button].Add(mouseEvent);
         }
 
-        public void RemoveEventListerener(MouseButton button, MouseNothingClickEvent mouseEvent)
+        public bool RemoveEventListener(MouseButton button, MouseNothingClickEvent mouseEvent)
         {
-            mouseNothingClickEvents[button].Remove(mouseEvent);
+            return mouseNothingClickEvents[button].Remove(mouseEvent.Id);
         }
 
-        public void AddEventListerener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
+        public bool RemoveNothingClickEventListener(MouseButton button, Guid eventId)
+        {
+            return mouseNothingClickEvents[button].Remove(eventId);
+        }
+
+        public void AddEventListener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
         {
             mouseDragEvents[button][dragEventType].Add(mouseDragEvent);
         }
 
-        public void RemoveEventListerener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
+        public bool RemoveEventListener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
         {
-            mouseDragEvents[button][dragEventType].Remove(mouseDragEvent);
+            return mouseDragEvents[button][dragEventType].Remove(mouseDragEvent.Id);
+        }
+
+        public bool RemoveEventListener(MouseButton button, MouseDragEventType dragEventType, Guid dragEventId)
+        {
+            return mouseDragEvents[button][dragEventType].Remove(dragEventId);
         }
 
         public Vector3 MouseWorldPosition
@@ -163,6 +175,48 @@ namespace Game.Input
                     UnityEngine.Input.mousePosition.y,
                     CameraManager.Instance.CurrentCamera.transform.position.z
                 ));
+            }
+        }
+
+        public int ClickListenerCount
+        {
+            get {
+                int count = 0;
+                foreach(KeyValuePair<MouseButton, MouseClickEventListener> pair in mouseClickEvents) {
+                    count += pair.Value.Events.Count;
+                }
+                return count;
+            }
+        }
+
+        public int NothingClickListenerCount
+        {
+            get {
+                int count = 0;
+                foreach (KeyValuePair<MouseButton, MouseNothingClickEventListener> pair in mouseNothingClickEvents) {
+                    count += pair.Value.Events.Count;
+                }
+                return count;
+            }
+        }
+
+        public int DragListenerCount
+        {
+            get {
+                int count = 0;
+                foreach (KeyValuePair<MouseButton, Dictionary<MouseDragEventType, MouseDragEventListener>> pair in mouseDragEvents) {
+                    foreach(KeyValuePair<MouseDragEventType, MouseDragEventListener> pair2 in pair.Value) {
+                        count += pair2.Value.Events.Count;
+                    }
+                }
+                return count;
+            }
+        }
+
+        public int TotalListenerCount
+        {
+            get {
+                return ClickListenerCount + NothingClickListenerCount + DragListenerCount;
             }
         }
 
@@ -216,9 +270,13 @@ namespace Game.Input
                 Events = Events.OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
             }
 
-            public void Remove(MouseEvent oldEvent)
+            public bool Remove(Guid eventId)
             {
-                Events = Events.Where(mouseEvent => !mouseEvent.Equals(oldEvent)).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                if(Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
+                    Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                    return true;
+                }
+                return false;
             }
         }
 
@@ -248,9 +306,13 @@ namespace Game.Input
                 Events = Events.OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
             }
 
-            public void Remove(MouseNothingClickEvent oldEvent)
+            public bool Remove(Guid eventId)
             {
-                Events = Events.Where(mouseEvent => !mouseEvent.Equals(oldEvent)).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                if (Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
+                    Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                    return true;
+                }
+                return false;
             }
         }
 
@@ -300,9 +362,13 @@ namespace Game.Input
                 Events = Events.OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
             }
 
-            public void Remove(MouseDragEvent oldEvent)
+            public bool Remove(Guid eventId)
             {
-                Events = Events.Where(mouseEvent => !mouseEvent.Equals(oldEvent)).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                if(Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
+                    Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                    return true;
+                }
+                return false;
             }
         }
     }

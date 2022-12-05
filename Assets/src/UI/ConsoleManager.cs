@@ -1,3 +1,4 @@
+using Game.Input;
 using Game.Utils;
 using System;
 using System.Collections.Generic;
@@ -183,6 +184,24 @@ namespace Game.UI
                 int count = Effect2DManager.Instance.ActiveEffectCount;
                 Effect2DManager.Instance.RemoveAll();
                 return string.Format("{0} effect(s) cleared", count);
+            }));
+
+            commands.Add(new Command("mouseEventListenerCounts", new List<string>() { }, "Shows current number of mouse event listeners registered", (List<string> parameters) => {
+                StringBuilder output = new StringBuilder();
+                output.AppendLine("Mouse event listener counts");
+                output.AppendLine(string.Format("Object click: {0}", MouseManager.Instance.ClickListenerCount));
+                output.AppendLine(string.Format("Nothing click: {0}", MouseManager.Instance.NothingClickListenerCount));
+                output.AppendLine(string.Format("Drag: {0}", MouseManager.Instance.DragListenerCount));
+                output.Append(string.Format("Total: {0}", MouseManager.Instance.TotalListenerCount));
+                return output.ToString();
+            }));
+
+            commands.Add(new Command("backToMenu", new List<string>() { }, "Returns game state back to main menu", (List<string> parameters) => {
+                if(Main.Instance.State == State.Running) {
+                    Main.Instance.BackToMainMenu();
+                    return "Game state set to State.MainMenu";
+                }
+                return Main.Instance.State == State.MainMenu ? "Already in main menu" : "Can't return to main menu when game state is " + Main.Instance.State;
             }));
 
             //----- TEMPLATE PROJECT DEBUGGING COMMANDS -----

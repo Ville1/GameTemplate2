@@ -23,9 +23,9 @@ namespace Game.UI {
             }
             Instance = this;
 
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, new MouseNothingClickEvent(CloseAllWindows));
-            MouseManager.Instance.AddEventListerener(MouseButton.Middle, new MouseNothingClickEvent(CloseAllWindows));
-            MouseManager.Instance.AddEventListerener(MouseButton.Right, new MouseNothingClickEvent(CloseAllWindows));
+            MouseManager.Instance.AddEventListener(MouseButton.Left, new MouseNothingClickEvent(CloseAllWindows));
+            MouseManager.Instance.AddEventListener(MouseButton.Middle, new MouseNothingClickEvent(CloseAllWindows));
+            MouseManager.Instance.AddEventListener(MouseButton.Right, new MouseNothingClickEvent(CloseAllWindows));
         }
 
         /// <summary>

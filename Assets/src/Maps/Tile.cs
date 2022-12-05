@@ -1,6 +1,9 @@
 using Game.Input;
 using Game.Pathfinding;
 using Game.UI;
+using Game.Utils;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,6 +11,8 @@ namespace Game.Maps
 {
     public class Tile : Object2D
     {
+        private static readonly MouseButton DRAG_MOUSE_BUTTON = MouseButton.Left;
+
         public Map Map { get; private set; }
         public Coordinates Coordinates { get; private set; }
         public int X { get { return Coordinates == null ? 0 : Coordinates.X; } }
@@ -18,6 +23,7 @@ namespace Game.Maps
 
         private GameObject rectangleGameObject = null;
         private bool rectangleNotFound = false;
+        private Dictionary<MouseDragEventType, List<Guid>> dragEvents = DictionaryHelper.CreateNewFromEnum((MouseDragEventType type) => { return new List<Guid>(); });
 
         public Tile(Map map, int x, int y, Tile prototype) : base(
             prototype,
@@ -122,6 +128,29 @@ namespace Game.Maps
             saveData.Y = Y;
             saveData.Name = Name;
             return saveData;
+        }
+
+        public void RegisterDragEventListener(MouseDragEventType dragEventType, MouseDragEvent.OnDragDelegateClickable listener)
+        {
+            MouseDragEvent dragEvent = new MouseDragEvent(this, listener);
+            MouseManager.Instance.AddEventListener(DRAG_MOUSE_BUTTON, dragEventType, dragEvent);
+            dragEvents[dragEventType].Add(dragEvent.Id);
+        }
+
+        public void UnregisterDragEventListeners()
+        {
+            foreach(KeyValuePair<MouseDragEventType, List<Guid>> pair in dragEvents) {
+                foreach(Guid id in pair.Value) {
+                    MouseManager.Instance.RemoveEventListener(DRAG_MOUSE_BUTTON, pair.Key, id);
+                }
+                pair.Value.Clear();
+            }
+        }
+
+        public override void Destroy()
+        {
+            UnregisterDragEventListeners();
+            base.Destroy();
         }
 
         public static Tile Load(Map map, Saving.Data.Tile saveData)

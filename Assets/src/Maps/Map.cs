@@ -188,20 +188,18 @@ namespace Game.Maps
             return Tiles[y][x];
         }
 
-        private void Clear()
+        public void Clear()
         {
             if (State == MapState.Ready) {
                 //If map already has tiles, clear old tiles
                 foreach (Tile tile in this) {
                     tile.Destroy();
-                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile));
-                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile));
-                    MouseManager.Instance.RemoveEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile));
                 }
                 Tiles.Clear();
             }
             Active = true;
             Tiles = new List<List<Tile>>();
+            State = MapState.Uninitialized;
         }
 
         private void Generate()
@@ -257,9 +255,9 @@ namespace Game.Maps
 
         private void SetEventListeners(Tile tile)
         {
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Start, new MouseDragEvent(tile, StartDragging));
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.Move, new MouseDragEvent(tile, Drag));
-            MouseManager.Instance.AddEventListerener(MouseButton.Left, MouseDragEventType.End, new MouseDragEvent(tile, EndDragging));
+            tile.RegisterDragEventListener(MouseDragEventType.Start, StartDragging);
+            tile.RegisterDragEventListener(MouseDragEventType.Move, Drag);
+            tile.RegisterDragEventListener(MouseDragEventType.End, EndDragging);
         }
 
         private void EndGeneration()
