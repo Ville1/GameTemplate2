@@ -27,6 +27,7 @@ namespace Game
         public List<EventListenerDelegate> OnMovement { get; set; } = new List<EventListenerDelegate>();
         public List<EventListenerDelegate> OnMovementEnd { get; set; } = new List<EventListenerDelegate>();
         public bool IsPlayingAnimation { get { return currentAnimation != null && currentAnimation.IsPlaying; } }
+        public bool AnimationIsPaused { get { return currentAnimation != null && currentAnimation.IsPaused; } }
         public string CurrentAnimation { get { return IsPlayingAnimation ? currentAnimation.Name : null; } }
 
         protected Object2DListener updateListener = null;
@@ -238,6 +239,32 @@ namespace Game
                     animationQueue.Clear();
                 } else {
                     ProcessAnimationQueue();
+                }
+            }
+        }
+
+        public void PauseAnimation()
+        {
+            if (IsPlayingAnimation) {
+                currentAnimation.IsPaused = true;
+            }
+        }
+
+        public void ResumeAnimation()
+        {
+            if (IsPlayingAnimation) {
+                currentAnimation.IsPaused = false;
+            }
+        }
+
+        public float CurrentAnimationSpeed
+        {
+            get {
+                return IsPlayingAnimation ? currentAnimation.SpeedMultiplier : 1.0f;
+            }
+            set {
+                if (IsPlayingAnimation) {
+                    currentAnimation.SpeedMultiplier = value;
                 }
             }
         }

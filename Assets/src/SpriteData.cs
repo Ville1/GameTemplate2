@@ -86,7 +86,7 @@ namespace Game
         public delegate void AnimationDelegate();
 
         public string Name { get; set; }
-        public float FramesPerSecond { get; private set; }
+        public float FramesPerSecond { get { return currentFramesPerSecond; } private set { baseFramesPerSecond = value; CalculateCurrentFramesPerSecond(); } }
         /// <summary>
         /// Index of sprite where animation restarts, if set to loop. This can be used to skip begining of the animation on successive loops.
         /// Set to 0 to play full animation or -1 to have animation not loop.
@@ -100,14 +100,18 @@ namespace Game
         public bool FlipY { get; private set; }
         public int CurrentSpriteIndex { get; private set; } = -1;
         public bool IsPlaying { get { return CurrentSpriteIndex >= 0; } }
+        public bool IsPaused { get; set; } = false;
         public string CurrentSprite { get { return IsPlaying ? CurrentSprites[CurrentSpriteIndex] : Sprites[0]; } }
         public SpriteData CurrentTarget { get; private set; } = null;
         public AnimationDelegate UpdateCallback { get; private set; } = null;
         public AnimationDelegate EndCallback { get; private set; } = null;
 
+        private float currentFramesPerSecond;
+        private float baseFramesPerSecond;
         private SpriteData originalSprite;
         private float currentFrameTimeLeft;
         private bool startRemoved;
+        private float speedMultipler = 1.0f; 
 
         /// <summary>
         /// </summary>
@@ -162,8 +166,14 @@ namespace Game
         /// <param name="target">If provided, this object gets updated with new data as animation progresses</param>
         /// <param name="updateCallback">If provided, this gets called then sprite changes. (You can use this to update SpriteRenderer, or you can check return value of Update())</param>
         /// <param name="endCallback">If provided, this gets called then animation ends. (Note: If animation is set to loop, this only gets called on Stop())</param>
-        public void Start(SpriteData target = null, AnimationDelegate updateCallback = null, AnimationDelegate endCallback = null)
+        /// <param name="resetSpeed">If true, SpeedMultiplier is set to 1.0f</param>
+        public void Start(SpriteData target = null, AnimationDelegate updateCallback = null, AnimationDelegate endCallback = null, bool resetSpeed = true)
         {
+            if (resetSpeed) {
+                SpeedMultiplier = 1.0f;
+            }
+
+            IsPaused = false;
             CurrentSpriteIndex = 0;
             currentFrameTimeLeft = 1.0f / FramesPerSecond;
             startRemoved = false;
@@ -190,7 +200,7 @@ namespace Game
         /// <returns>True if sprite has changed</returns>
         public bool Update()
         {
-            if (!IsPlaying) {
+            if (!IsPlaying || IsPaused) {
                 return false;
             }
             currentFrameTimeLeft -= Time.deltaTime;
@@ -259,6 +269,31 @@ namespace Game
             UpdateCallback = null;
             EndCallback = null;
             CurrentSpriteIndex = -1;
+        }
+
+        public void TogglePause()
+        {
+            IsPaused = !IsPaused;
+        }
+
+        public float SpeedMultiplier
+        {
+            get {
+                return speedMultipler;
+            }
+            set {
+                if(value <= 0.0f) {
+                    throw new ArgumentException("SpeedMultiplier <= 0.0f");
+                }
+                speedMultipler = value;
+                CalculateCurrentFramesPerSecond();
+            }
+        }
+
+        private void CalculateCurrentFramesPerSecond()
+        {
+            //Note: This is propably unnecessary optimization, this multiplication could be done in FramesPerSecond getter
+            currentFramesPerSecond = baseFramesPerSecond * speedMultipler;
         }
     }
 }

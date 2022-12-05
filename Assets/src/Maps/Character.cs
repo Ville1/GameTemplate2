@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace Game.Maps
 {
+    /// <summary>
+    /// Test character
+    /// </summary>
     public class Character : Object2D, IHasStats, IHasStatModifiers
     {
         public enum MovementType { Grid, Free, FreeNoRotation };
@@ -125,6 +128,31 @@ namespace Game.Maps
                 PlayAnimation("stop", hasMovementAnimation ? AnimationQueue.QueueOne : AnimationQueue.StopCurrent);
             } else {
                 PlayAnimation("stop");
+            }
+        }
+
+        public void SpeedUpAnimation()
+        {
+            if (IsPlayingAnimation) {
+                CurrentAnimationSpeed += 0.1f;
+            }
+        }
+
+        public void SlowDownAnimation()
+        {
+            if (IsPlayingAnimation && CurrentAnimationSpeed > 0.1f) {
+                CurrentAnimationSpeed -= 0.1f;
+            }
+        }
+
+        public void ToggleAnimationPause()
+        {
+            if (IsPlayingAnimation) {
+                if (AnimationIsPaused) {
+                    ResumeAnimation();
+                } else {
+                    PauseAnimation();
+                }
             }
         }
 
