@@ -98,6 +98,34 @@ MonoBehaviour:
     m_Localized: Loading
     m_Metadata:
       m_Items: []
+  - m_Id: 66753934329737216
+    m_Localized: Controls
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66753964268679168
+    m_Localized: Key bindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66766820171149312
+    m_Localized: Filter key bindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66777435270901760
+    m_Localized: Close window
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66777589487071232
+    m_Localized: Accept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66780560153210880
+    m_Localized: 'Press new key for:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66783778799185920
+    m_Localized: 'This key is already used for:'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

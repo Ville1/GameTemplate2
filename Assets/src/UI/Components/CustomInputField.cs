@@ -51,6 +51,12 @@ namespace Game.UI.Components
                     if (child.name == placeholderName) {
                         Placeholder = child.GetComponent<TMP_Text>();
                     }
+                    for (int j = 0; j < child.transform.childCount && Placeholder == null; j++) {
+                        GameObject child2 = child.transform.GetChild(j).gameObject;
+                        if (child2.name == placeholderName) {
+                            Placeholder = child2.GetComponent<TMP_Text>();
+                        }
+                    }
                 }
             }
 

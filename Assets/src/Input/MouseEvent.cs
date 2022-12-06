@@ -26,6 +26,9 @@ namespace Game.Input
         public OnClickDelegate Listener { get; private set; }
         public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
         public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
+        /// <summary>
+        /// TODO: This and MouseEventTag.IgnoreUI are both used for similar stuff, maybe one of these needs to be removed
+        /// </summary>
         public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
         public MouseEventData EventData { get; private set; }
 

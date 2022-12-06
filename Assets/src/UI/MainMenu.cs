@@ -33,6 +33,7 @@ namespace Game.UI
                 { "{NewGame}", NewGame },
                 { "{Load}", Load },
                 { "{Save}", Save },
+                { "{Controls}", KeyBindings },
                 { "{Quit}", Quit }
             };
 
@@ -89,6 +90,11 @@ namespace Game.UI
         private void Save()
         {
             SavesWindowManager.Instance.OpenSavingWindow();
+        }
+
+        private void KeyBindings()
+        {
+            KeyBindingsWindowManager.Instance.Active = true;
         }
 
         private void Quit()

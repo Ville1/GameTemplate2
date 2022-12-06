@@ -9,7 +9,7 @@ namespace Game.Input
 {
     public class KeyboardManager : MonoBehaviour
     {
-        protected enum KeyEventType { Down, Up, Held }
+        public enum KeyEventType { Down, Up, Held }
 
         public delegate void OnKeyDownDelegate();
 
@@ -60,6 +60,16 @@ namespace Game.Input
             return AddEventListener(keyDownEvents, key, onKeyDown, priority, tags);
         }
 
+        public Guid AddOnKeyDownEventListener(KeyBinding keyBinding, OnKeyDownDelegate onKeyDown, KeyEventTag tag)
+        {
+            return AddOnKeyDownEventListener(keyBinding, onKeyDown, 0, new List<KeyEventTag>() { tag });
+        }
+
+        public Guid AddOnKeyDownEventListener(KeyBinding keyBinding, OnKeyDownDelegate onKeyDown, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            return AddEventListener(keyDownEvents, KeyEventType.Down, keyBinding, onKeyDown, priority, tags);
+        }
+
         //----- Key up -----
         public Guid AddOnKeyUpEventListener(KeyCode key, OnKeyDownDelegate onKeyUp, KeyEventTag tag)
         {
@@ -71,6 +81,16 @@ namespace Game.Input
             return AddEventListener(keyUpEvents, key, onKeyUp, priority, tags);
         }
 
+        public Guid AddOnKeyUpEventListener(KeyBinding keyBinding, OnKeyDownDelegate onKeyUp, KeyEventTag tag)
+        {
+            return AddOnKeyUpEventListener(keyBinding, onKeyUp, 0, new List<KeyEventTag>() { tag });
+        }
+
+        public Guid AddOnKeyUpEventListener(KeyBinding keyBinding, OnKeyDownDelegate onKeyUp, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            return AddEventListener(keyUpEvents, KeyEventType.Up, keyBinding, onKeyUp, priority, tags);
+        }
+
         //----- Key held -----
         public Guid AddKeyHeldEventListener(KeyCode key, OnKeyDownDelegate onKeyHeld, KeyEventTag tag)
         {
@@ -80,6 +100,16 @@ namespace Game.Input
         public Guid AddKeyHeldEventListener(KeyCode key, OnKeyDownDelegate onKeyHeld, int priority = 0, List<KeyEventTag> tags = null)
         {
             return AddEventListener(keyHeldEvents, key, onKeyHeld, priority, tags);
+        }
+
+        public Guid AddKeyHeldEventListener(KeyBinding keyBinding, OnKeyDownDelegate onKeyHeld, KeyEventTag tag)
+        {
+            return AddKeyHeldEventListener(keyBinding, onKeyHeld, 0, new List<KeyEventTag>() { tag });
+        }
+
+        public Guid AddKeyHeldEventListener(KeyBinding keyBinding, OnKeyDownDelegate onKeyHeld, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            return AddEventListener(keyHeldEvents, KeyEventType.Held, keyBinding, onKeyHeld, priority, tags);
         }
 
         //##### Remove event listeners #####
@@ -162,11 +192,38 @@ namespace Game.Input
             RemoveEventListeners(keyHeldEvents, key, eventId);
         }
 
+        //----- Rebinding keys -----
+        public void Rebind(KeyEventType type, Guid eventListenerId, KeyCode oldKeyCode, KeyCode newKeyCode)
+        {
+            switch (type) {
+                case KeyEventType.Down:
+                    keyDownEvents.Rebind(oldKeyCode, newKeyCode, eventListenerId);
+                    break;
+                case KeyEventType.Up:
+                    keyUpEvents.Rebind(oldKeyCode, newKeyCode, eventListenerId);
+                    break;
+                case KeyEventType.Held:
+                    keyHeldEvents.Rebind(oldKeyCode, newKeyCode, eventListenerId);
+                    break;
+            }
+        }
+
         private Guid AddEventListener(KeyEventListenerContainer listeners, KeyCode key, OnKeyDownDelegate onKeyDown, int priority = 0, List<KeyEventTag> tags = null)
         {
             KeyEvent keyEvent = new KeyEvent(onKeyDown, priority, tags);
             listeners.Add(key, keyEvent);
             return keyEvent.Id;
+        }
+
+        private Guid AddEventListener(KeyEventListenerContainer listeners, KeyEventType type, KeyBinding keyBinding, OnKeyDownDelegate onKeyDown, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            if (keyBinding.EventListenerId.HasValue) {
+                CustomLogger.Warning("{KeyBindingAlreadyRegistered}", keyBinding.InternalName);
+                return Guid.Empty;
+            }
+            keyBinding.EventListenerId = AddEventListener(listeners, keyBinding.KeyCode, onKeyDown, priority, tags);
+            keyBinding.EventListenerType = type;
+            return keyBinding.EventListenerId.Value;
         }
 
         private void RemoveEventListeners(KeyEventListenerContainer listeners, KeyCode key, List<KeyEventTag> tags = null)
@@ -240,6 +297,13 @@ namespace Game.Input
                         Listeners[key].Remove(id);
                     }
                 }
+            }
+
+            public void Rebind(KeyCode oldKey, KeyCode newKey, Guid id)
+            {
+                KeyEvent keyEvent = Listeners[oldKey].Get(id);
+                Remove(oldKey, id);
+                Add(newKey, keyEvent);
             }
 
             public void Activate()
@@ -319,6 +383,11 @@ namespace Game.Input
             public bool Has(Guid eventId)
             {
                 return Events.Any(keyEvent => keyEvent.Id == eventId);
+            }
+
+            public KeyEvent Get(Guid eventId)
+            {
+                return Events.FirstOrDefault(keyEvent => keyEvent.Id == eventId);
             }
 
             public void Add(KeyEvent keyEvent)

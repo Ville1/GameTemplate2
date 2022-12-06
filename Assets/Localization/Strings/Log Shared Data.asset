@@ -195,6 +195,18 @@ MonoBehaviour:
     m_Key: EffectRequiresLoopingAnimation
     m_Metadata:
       m_Items: []
+  - m_Id: 66764293509836800
+    m_Key: KeyBindingNotFound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66795454269321216
+    m_Key: KeyBindingAlreadyRegistered
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66798274410278912
+    m_Key: KeyBindingNotRegistered
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

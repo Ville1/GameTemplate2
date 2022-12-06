@@ -95,6 +95,34 @@ MonoBehaviour:
     m_Key: Loading
     m_Metadata:
       m_Items: []
+  - m_Id: 66753934329737216
+    m_Key: Controls
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66753964268679168
+    m_Key: KeyBindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66766820171149312
+    m_Key: FilterKeyBindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66777435270901760
+    m_Key: KeyBindingCloseWindow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66777589487071232
+    m_Key: KeyBindingAccept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66780560153210880
+    m_Key: PressNewKeyForBinding
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66783778799185920
+    m_Key: BindingAlreadyUsed
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

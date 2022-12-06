@@ -203,6 +203,18 @@ MonoBehaviour:
     m_Localized: Effect can't have a set duration without looping animation
     m_Metadata:
       m_Items: []
+  - m_Id: 66764293509836800
+    m_Localized: Key binding '{0}' does not exist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66795454269321216
+    m_Localized: Key binding '{0}' has already been registered
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66798274410278912
+    m_Localized: Key binding '{0}' has not been registered
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

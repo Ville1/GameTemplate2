@@ -19,10 +19,8 @@ namespace Game.Input
             }
             Instance = this;
 
-            //TODO: Load from file
-
-            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Escape, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Close); }, KeyEventTag.IgnoreUI);
-            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Return, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Accept); }, KeyEventTag.IgnoreUI);
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.CloseWindow, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Close); }, KeyEventTag.IgnoreUI);
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.AcceptWindow, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Accept); }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.F12, () => { ConsoleManager.Instance.Active = !ConsoleManager.Instance.Active; }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.UpArrow, () => { ConsoleManager.Instance.HistoryUp(); }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.DownArrow, () => { ConsoleManager.Instance.HistoryDown(); }, KeyEventTag.IgnoreUI);
@@ -36,7 +34,7 @@ namespace Game.Input
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.Keypad1, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Move(Direction.SouthWest); } });
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.Keypad4, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Move(Direction.West); } });
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.Keypad7, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Move(Direction.NorthWest); } });
-            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha1, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Wave(); } });
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.Wave, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Wave(); } });
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha2, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Horn(); } });
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha3, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.Stop(); } });
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.Alpha8, () => { if (Main.Instance.State == State.Running) { Main.Instance.PlayerCharacter.SlowDownAnimation(); } });
