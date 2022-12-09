@@ -53,7 +53,7 @@ namespace Game
 
         public SpriteData Copy
         {
-            get{
+            get {
                 return new SpriteData(this);
             }
         }
@@ -63,6 +63,12 @@ namespace Game
     {
         public float? PixelsPerUnitMultiplier { get; set; }
         public Image.Type? ImageType { get; set; }
+
+        public UISpriteData() : base()
+        {
+            PixelsPerUnitMultiplier = null;
+            ImageType = null;
+        }
 
         public UISpriteData(string sprite, TextureDirectory spriteDirectory, float? pixelsPerUnitMultiplier = null, Image.Type? imageType = null) : base(sprite, spriteDirectory, 0, false, false)
         {
@@ -78,6 +84,12 @@ namespace Game
         {
             PixelsPerUnitMultiplier = data.PixelsPerUnitMultiplier;
             ImageType = data.ImageType;
+        }
+
+        public UISpriteData(SpriteData data) : base(data)
+        {
+            PixelsPerUnitMultiplier = null;
+            ImageType = null;
         }
     }
 

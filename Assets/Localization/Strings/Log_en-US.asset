@@ -215,6 +215,22 @@ MonoBehaviour:
     m_Localized: Key binding '{0}' has not been registered
     m_Metadata:
       m_Items: []
+  - m_Id: 67867901689163776
+    m_Localized: 'Key bindings loaded: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67868008606167040
+    m_Localized: 'Key bindings saved: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67868700225925120
+    m_Localized: 'Failed to save key bindings. Exception: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67868379512664064
+    m_Localized: 'Failed to load key bindings. Exception: {0}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

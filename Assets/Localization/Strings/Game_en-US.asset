@@ -126,6 +126,14 @@ MonoBehaviour:
     m_Localized: 'This key is already used for:'
     m_Metadata:
       m_Items: []
+  - m_Id: 67839156144140288
+    m_Localized: Windows
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67839220518318080
+    m_Localized: Gameplay
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

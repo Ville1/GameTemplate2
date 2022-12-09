@@ -29,9 +29,17 @@ namespace Game.Input
             return binding;
         }
 
+        public static void SaveChanges()
+        {
+            Initialize();
+            Utils.Config.KeyBindingsFileManager.Save(bindings);
+        }
+
         public static KeyBinding CloseWindow { get { return Get("CloseWindow"); } }
         public static KeyBinding AcceptWindow { get { return Get("AcceptWindow"); } }
         public static KeyBinding Wave { get { return Get("Wave"); } }
+        public static KeyBinding Horn { get { return Get("Horn"); } }
+        public static KeyBinding Stop { get { return Get("Stop"); } }
 
         private static void Initialize()
         {
@@ -40,9 +48,11 @@ namespace Game.Input
             }
             bindings = new List<KeyBinding>();
 
-            bindings.Add(KeyBinding.Load("CloseWindow", "{KeyBindingCloseWindow}", KeyCode.Escape));
-            bindings.Add(KeyBinding.Load("AcceptWindow", "{KeyBindingAccept}", KeyCode.Return));
-            bindings.Add(KeyBinding.Load("Wave", "Wave", KeyCode.Alpha1));
+            bindings.Add(KeyBinding.Load("CloseWindow", "{KeyBindingCloseWindow}", KeyCode.Escape, KeyBindingCategories.Window));
+            bindings.Add(KeyBinding.Load("AcceptWindow", "{KeyBindingAccept}", KeyCode.Return, KeyBindingCategories.Window));
+            bindings.Add(KeyBinding.Load("Wave", "Wave", KeyCode.Alpha1, KeyBindingCategories.Gameplay));
+            bindings.Add(KeyBinding.Load("Horn", "Horn", KeyCode.Alpha2, KeyBindingCategories.Gameplay));
+            bindings.Add(KeyBinding.Load("Stop", "Stop", KeyCode.Alpha3, KeyBindingCategories.Gameplay));
         }
     }
 
@@ -51,15 +61,32 @@ namespace Game.Input
         public string InternalName { get; private set; }
         public LString Name { get; private set; }
         public KeyCode KeyCode { get; set; }
+        /// <summary>
+        /// Keybindings are grouped by these in the settings window. Also used to check for conflicts.
+        /// </summary>
+        public KeyBindingCategory Category { get; private set; }
+        /// <summary>
+        /// Settings window does not allow duplicates in these categories. If null or empty list, conflicts are not checked. Use new List<KeyBindingCategory>() { KeyBindingCategories.Any }, to check all.
+        /// </summary>
+        public List<KeyBindingCategory> ConflictingCategories { get; private set; }
+        /// <summary>
+        /// Can this keybinding conflict with others?
+        /// </summary>
+        public bool HasConflictingCategories { get { return ConflictingCategories != null && ConflictingCategories.Count != 0; } }
         public Guid? EventListenerId { get; set; }
         public KeyboardManager.KeyEventType? EventListenerType { get; set; }
 
-        public KeyBinding(string internalName, LString name, KeyCode keyCode)
+        public KeyBinding(string internalName, LString name, KeyCode keyCode, KeyBindingCategory category, List<KeyBindingCategory> conflictingCategories = null)
         {
             InternalName = internalName;
             Name = name;
             KeyCode = keyCode;
+            Category = category;
+            //If conflictingCategories has KeyBindingCategories.Any, it does not need to have any other categories in it, as Any already matches them all 
+            ConflictingCategories = conflictingCategories != null ? (conflictingCategories.Contains(KeyBindingCategories.Any) ?
+                new List<KeyBindingCategory>() { KeyBindingCategories.Any } : conflictingCategories) : new List<KeyBindingCategory>() { category };
             EventListenerId = null;
+            EventListenerType = null;
         }
 
         public KeyBinding(KeyBinding keyBinding)
@@ -67,7 +94,10 @@ namespace Game.Input
             InternalName = keyBinding.InternalName;
             Name = keyBinding.Name;
             KeyCode = keyBinding.KeyCode;
+            Category = keyBinding.Category;
+            ConflictingCategories = keyBinding.ConflictingCategories.Select(category => category).ToList();
             EventListenerId = null;
+            EventListenerType = null;
         }
 
         public void Rebind(KeyCode keyCode)
@@ -81,15 +111,63 @@ namespace Game.Input
             }
         }
 
-        public static KeyBinding Load(string internalName, LString name, KeyCode defaultKeyCode)
+        public static KeyBinding Load(string internalName, LString name, KeyCode defaultKeyCode, KeyBindingCategory category, List<KeyBindingCategory> conflictingCategories = null)
         {
-            //TODO: Load from file (if file exists)
-            return new KeyBinding(internalName, name, defaultKeyCode);
+            KeyBinding keyBinding = new KeyBinding(internalName, name, defaultKeyCode, category, conflictingCategories);
+            Utils.Config.KeyBindingsFileManager.Load(keyBinding);
+            return keyBinding;
         }
 
         public override string ToString()
         {
             return string.Format("{0}: {1}", InternalName, KeyCode);
+        }
+    }
+
+    public class KeyBindingCategory
+    {
+        /// <summary>
+        /// Order in UI, ascending. If < 0, this is not shown in UI.
+        /// </summary>
+        public int Order { get; private set; }
+        public string InternalName { get; private set; }
+        public LString Name { get; private set; }
+        public bool IsInternal { get { return Order < 0; } }
+
+        public KeyBindingCategory(int order, string internalName, LString name)
+        {
+            Order = order;
+            InternalName = internalName;
+            Name = name;
+        }
+    }
+
+    public class KeyBindingCategories
+    {
+        private static List<KeyBindingCategory> categories = null;
+
+        public static KeyBindingCategory Any { get { return Get("Any"); } }
+        public static KeyBindingCategory Window { get { return Get("Windows"); } }
+        public static KeyBindingCategory Gameplay { get { return Get("Gameplay"); } }
+
+        public static List<KeyBindingCategory> All { get { Initialize(); return categories; } }
+
+        private static void Initialize()
+        {
+            if(categories != null) {
+                return;
+            }
+            categories = new List<KeyBindingCategory>() {
+                new KeyBindingCategory(-1, "Any", null),
+                new KeyBindingCategory(0, "Windows", "{Windows}"),
+                new KeyBindingCategory(1, "Gameplay", "{Gameplay}")
+            };
+        }
+
+        private static KeyBindingCategory Get(string internalName)
+        {
+            Initialize();
+            return categories.FirstOrDefault(catogory => catogory.InternalName == internalName);
         }
     }
 }

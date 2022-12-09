@@ -207,6 +207,22 @@ MonoBehaviour:
     m_Key: KeyBindingNotRegistered
     m_Metadata:
       m_Items: []
+  - m_Id: 67867901689163776
+    m_Key: KeyBindingsLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67868008606167040
+    m_Key: KeyBindingsSaved
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67868379512664064
+    m_Key: FailedToLoadKeyBindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 67868700225925120
+    m_Key: FailedToSaveKeyBindings
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -8,6 +8,8 @@ namespace Game.UI
 {
     public class UIHelper
     {
+        private static Image.Type DEFAULT_IMAGE_TYPE = Image.Type.Simple;
+
         public static GameObject Find(Transform parent, string name)
         {
             return Find(parent.gameObject.name, name);
@@ -56,7 +58,7 @@ namespace Game.UI
         public static CustomButton SetButton(string parentGameObjectName, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
         {
             //Find GameObject
-            GameObject buttonGameObject = UIHelper.Find(parentGameObjectName, buttonGameObjectName);
+            GameObject buttonGameObject = Find(parentGameObjectName, buttonGameObjectName);
             if (buttonGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, buttonGameObjectName));
             }
@@ -71,6 +73,48 @@ namespace Game.UI
             CustomButton button = new CustomButton(buttonComponent, null, onClick);
             button.Text = text;
             return button;
+        }
+
+        public static void SetImage(GameObject parentGameObject, string imageGameObjectName, UISpriteData spriteData)
+        {
+            SetImage(parentGameObject.name, imageGameObjectName, spriteData);
+        }
+
+        public static void SetImage(string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
+        {
+            //Find GameObject
+            GameObject imageGameObject = Find(parentGameObjectName, imageGameObjectName);
+            if (imageGameObject == null) {
+                throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, imageGameObjectName));
+            }
+
+            //Get component
+            Image imageComponent = imageGameObject.GetComponent<Image>();
+            if (imageComponent == null) {
+                throw new ArgumentException(string.Format("GameObject '{0}/{1}' does not contain a Image component", parentGameObjectName, imageGameObjectName));
+            }
+
+            //Make GameObject active
+            if (!imageGameObject.activeSelf) {
+                imageGameObject.SetActive(true);
+            }
+
+            //Set sprite
+            imageComponent.sprite = TextureManager.GetSprite(spriteData);
+
+            //Flips
+            RectTransform rectTransform = imageGameObject.GetComponent<RectTransform>();
+            if (spriteData.FlipX) {
+                rectTransform.localScale = new Vector3(-1.0f * rectTransform.localScale.x, rectTransform.localScale.y, rectTransform.localScale.z);
+            }
+            if (spriteData.FlipY) {
+                rectTransform.localScale = new Vector3(rectTransform.localScale.x, -1.0f * rectTransform.localScale.y, rectTransform.localScale.z);
+            }
+
+            if (spriteData.PixelsPerUnitMultiplier.HasValue) {
+                imageComponent.pixelsPerUnitMultiplier = spriteData.PixelsPerUnitMultiplier.Value;
+            }
+            imageComponent.type = spriteData.ImageType.HasValue ? spriteData.ImageType.Value : DEFAULT_IMAGE_TYPE;
         }
     }
 }

@@ -27,7 +27,8 @@ namespace Game.UI
         public TMP_Text RebindAlreadyUsedPanelText;
 
         private List<KeyBinding> keyBindings = new List<KeyBinding>();
-        private List<string> changedBindings = new List<string>();
+        private Dictionary<string, KeyCode> changedBindings = new Dictionary<string, KeyCode>();//Key binding name / old key code
+        private List<KeyBindingCategory> closedCategories = new List<KeyBindingCategory>();
         private ScrollableList list = null;
         private CustomButton closeButton = null;
         private CustomButton saveButton = null;
@@ -94,6 +95,7 @@ namespace Game.UI
                     SetConflictingKeyBinding(null);
                     keyBindings = KeyBindings.All.Select(keyBinding => new KeyBinding(keyBinding)).ToList();
                     changedBindings.Clear();
+                    closedCategories.Clear();
                 }
                 base.Active = value;
             }
@@ -102,12 +104,36 @@ namespace Game.UI
         public override void UpdateUI()
         {
             list.Clear();
-            foreach(KeyBinding keyBinding in keyBindings.Where(b => b.Name.ToString().ToLower().Contains(searchInputField.Text.ToLower()))) {
-                list.AddRow(keyBinding.InternalName, new List<UIElementData>() {
-                    UIElementData.Text("Binding Name Text", keyBinding.Name + (changedBindings.Contains(keyBinding.InternalName) ? "*" : ""), null),
-                    UIElementData.Text("Key Text", keyBinding.KeyCode.ToString(), null),
-                    UIElementData.Button("Hidden Button", null, null, () => { SetRebindKeyBinding(keyBinding); })
+
+            IEnumerable<KeyBinding> bindings = keyBindings.Where(b => (string.IsNullOrEmpty(searchInputField.Text) || b.Name.ToString().ToLower().Contains(searchInputField.Text.ToLower()))
+                && !b.Category.IsInternal);
+            IEnumerable<IGrouping<KeyBindingCategory, KeyBinding>> groupings = bindings.GroupBy(b => b.Category).OrderBy(g => g.Key.Order);
+
+            foreach (IGrouping<KeyBindingCategory, KeyBinding> grouping in groupings) {
+                list.AddRow(string.Format("Category_{0}", grouping.Key.InternalName), new List<UIElementData>() {
+                    UIElementData.Text("Binding Name Text", "    " + grouping.Key.Name + (closedCategories.Contains(grouping.Key) ? string.Format(" ({0})", grouping.Count()) : string.Empty), null),
+                    UIElementData.Text("Key Text", string.Empty, null),
+                    UIElementData.Image("Chevron Image", new SpriteData("icon chevron down", TextureDirectory.UI, 0, false, closedCategories.Contains(grouping.Key))),
+                    UIElementData.Button("Hidden Button", null, null, () => {
+                        if (closedCategories.Contains(grouping.Key)) {
+                            closedCategories.Remove(grouping.Key);
+                        } else {
+                            closedCategories.Add(grouping.Key);
+                        }
+                        UpdateUI();
+                    })
                 });
+
+                if (!closedCategories.Contains(grouping.Key)) {
+                    foreach (KeyBinding keyBinding in grouping) {
+                        list.AddRow(string.Format("Binding_{0}", keyBinding.InternalName), new List<UIElementData>() {
+                            UIElementData.Text("Binding Name Text", keyBinding.Name + (changedBindings.ContainsKey(keyBinding.InternalName) ? "*" : ""), null),
+                            UIElementData.Text("Key Text", keyBinding.KeyCode.ToString(), null),
+                            UIElementData.Image("Chevron Image", new SpriteData()),
+                            UIElementData.Button("Hidden Button", null, null, () => { SetRebindKeyBinding(keyBinding); })
+                        });
+                    }
+                }
             }
             saveButton.Interactable = changedBindings.Count != 0;
         }
@@ -140,12 +166,33 @@ namespace Game.UI
             }
         }
 
+        private void FindConflictingKeyBinding(KeyCode keyCode)
+        {
+            KeyBinding conflictingKeyBinding = null;
+            if (currentKeyBinding.HasConflictingCategories) {
+                List<KeyBindingCategory> bindingCategories = currentKeyBinding.ConflictingCategories.Contains(KeyBindingCategories.Any) ? KeyBindingCategories.All : currentKeyBinding.ConflictingCategories;
+                foreach (KeyBindingCategory category in bindingCategories) {
+                    conflictingKeyBinding = keyBindings.FirstOrDefault(binding => binding.Category == category && binding.KeyCode == keyCode && binding.InternalName != currentKeyBinding.InternalName);
+                    if(conflictingKeyBinding != null) {
+                        break;
+                    }
+                }
+            }
+            SetConflictingKeyBinding(conflictingKeyBinding);
+        }
+
         private void TryChangeKeyBinding(KeyCode keyCode)
         {
-            SetConflictingKeyBinding(keyBindings.FirstOrDefault(keyBinding => keyBinding.KeyCode == keyCode && keyBinding.InternalName != currentKeyBinding.InternalName));
-            if(conflictKeyBinding == null) {
+            FindConflictingKeyBinding(keyCode);
+            if (conflictKeyBinding == null) {
                 if(currentKeyBinding.KeyCode != keyCode) {
-                    changedBindings.Add(currentKeyBinding.InternalName);
+                    if (changedBindings.ContainsKey(currentKeyBinding.InternalName) && changedBindings[currentKeyBinding.InternalName] == keyCode) {
+                        //Key binding was changed back to it's old key code
+                        changedBindings.Remove(currentKeyBinding.InternalName);
+                    } else if(!changedBindings.ContainsKey(currentKeyBinding.InternalName)) {
+                        //Newly changed key binding
+                        changedBindings.Add(currentKeyBinding.InternalName, currentKeyBinding.KeyCode);
+                    }
                 }
                 currentKeyBinding.KeyCode = keyCode;
                 SetRebindKeyBinding(null);
@@ -171,6 +218,7 @@ namespace Game.UI
             foreach(KeyBinding keyBinding in keyBindings) {
                 KeyBindings.Get(keyBinding.InternalName).Rebind(keyBinding.KeyCode);
             }
+            KeyBindings.SaveChanges();
             Active = false;
         }
 

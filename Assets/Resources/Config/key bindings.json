@@ -1,0 +1,24 @@
+{
+    "Bindings": [
+        {
+            "Name": "CloseWindow",
+            "Value": 27
+        },
+        {
+            "Name": "AcceptWindow",
+            "Value": 13
+        },
+        {
+            "Name": "Wave",
+            "Value": 49
+        },
+        {
+            "Name": "Horn",
+            "Value": 50
+        },
+        {
+            "Name": "Stop",
+            "Value": 51
+        }
+    ]
+}
