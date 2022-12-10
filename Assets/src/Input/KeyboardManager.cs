@@ -19,6 +19,10 @@ namespace Game.Input
         private KeyEventListenerContainer keyUpEvents = new KeyEventListenerContainer(KeyEventType.Up);
         private KeyEventListenerContainer keyHeldEvents = new KeyEventListenerContainer(KeyEventType.Held);
 
+        private AnyKeyEventListenerContainer anyKeyDownEvents = new AnyKeyEventListenerContainer(KeyEventType.Down);
+        private AnyKeyEventListenerContainer anyKeyUpEvents = new AnyKeyEventListenerContainer(KeyEventType.Up);
+        private AnyKeyEventListenerContainer anyKeyHeldEvents = new AnyKeyEventListenerContainer(KeyEventType.Held);
+
         protected bool running = false;
 
         /// <summary>
@@ -46,6 +50,10 @@ namespace Game.Input
             keyDownEvents.Activate();
             keyUpEvents.Activate();
             keyHeldEvents.Activate();
+
+            anyKeyDownEvents.Activate();
+            anyKeyUpEvents.Activate();
+            anyKeyHeldEvents.Activate();
         }
 
         //##### Add event listeners #####
@@ -208,6 +216,56 @@ namespace Game.Input
             }
         }
 
+        //##### Any key listeners #####
+        //----- Any key down -----
+        public Guid AddOnKeyDownEventListener(OnKeyDownDelegate onKeyDown, KeyEventTag tag)
+        {
+            return AddOnKeyDownEventListener(onKeyDown, 0, new List<KeyEventTag>() { tag });
+        }
+
+        public Guid AddOnKeyDownEventListener(OnKeyDownDelegate onKeyDown, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            return AddEventListener(anyKeyDownEvents, onKeyDown, priority, tags);
+        }
+
+        //----- Any key up -----
+        public Guid AddOnKeyUpEventListener(OnKeyDownDelegate onKeyUp, KeyEventTag tag)
+        {
+            return AddOnKeyUpEventListener(onKeyUp, 0, new List<KeyEventTag>() { tag });
+        }
+
+        public Guid AddOnKeyUpEventListener(OnKeyDownDelegate onKeyUp, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            return AddEventListener(anyKeyUpEvents, onKeyUp, priority, tags);
+        }
+
+        //----- Any key held -----
+        public Guid AddOnKeyHeldEventListener(OnKeyDownDelegate onKeyHeld, KeyEventTag tag)
+        {
+            return AddOnKeyHeldEventListener(onKeyHeld, 0, new List<KeyEventTag>() { tag });
+        }
+
+        public Guid AddOnKeyHeldEventListener(OnKeyDownDelegate onKeyHeld, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            return AddEventListener(anyKeyHeldEvents, onKeyHeld, priority, tags);
+        }
+
+        //##### Remove any key event listeners #####
+        public void RemoveOnKeyDownEventListeners(Guid id)
+        {
+            RemoveEventListener(anyKeyDownEvents, id);
+        }
+
+        public void RemoveOnKeyUpEventListeners(Guid id)
+        {
+            RemoveEventListener(anyKeyUpEvents, id);
+        }
+
+        public void RemoveOnKeyHeldEventListeners(Guid id)
+        {
+            RemoveEventListener(anyKeyHeldEvents, id);
+        }
+
         private Guid AddEventListener(KeyEventListenerContainer listeners, KeyCode key, OnKeyDownDelegate onKeyDown, int priority = 0, List<KeyEventTag> tags = null)
         {
             KeyEvent keyEvent = new KeyEvent(onKeyDown, priority, tags);
@@ -234,6 +292,18 @@ namespace Game.Input
         private void RemoveEventListeners(KeyEventListenerContainer listeners, KeyCode key, Guid id)
         {
             listeners.Remove(key, id);
+        }
+
+        private Guid AddEventListener(AnyKeyEventListenerContainer listeners, OnKeyDownDelegate eventDelegate, int priority = 0, List<KeyEventTag> tags = null)
+        {
+            KeyEvent keyEvent = new KeyEvent(eventDelegate, priority, tags);
+            listeners.Add(keyEvent);
+            return keyEvent.Id;
+        }
+
+        private void RemoveEventListener(AnyKeyEventListenerContainer listeners, Guid id)
+        {
+            listeners.Remove(id);
         }
 
         private class KeyEventListenerContainer
@@ -414,6 +484,81 @@ namespace Game.Input
                     return true;
                 }
                 return false;
+            }
+        }
+
+        private class AnyKeyEventListenerContainer
+        {
+            public KeyEventType KeyEvent { get; private set; }
+            public KeyEventListener Listener { get; private set; }
+            public List<KeyEvent> AddQueue { get; private set; }
+            public List<Guid> RemoveQueueIds { get; private set; }
+
+            public AnyKeyEventListenerContainer(KeyEventType keyEvent)
+            {
+                KeyEvent = keyEvent;
+                Listener = new KeyEventListener();
+                AddQueue = new List<KeyEvent>();
+                RemoveQueueIds = new List<Guid>();
+            }
+
+            public void Add(KeyEvent keyEvent)
+            {
+                if (Instance.running) {
+                    AddQueue.Add(keyEvent);
+                } else {
+                    Listener.Add(keyEvent);
+                }
+            }
+
+            public void Remove(Guid id)
+            {
+                if (Instance.running) {
+                    RemoveQueueIds.Add(id);
+                } else {
+                    Listener.Remove(id);
+                }
+            }
+
+            public void Activate()
+            {
+                //Process queues
+
+                //Remove events by id
+                foreach (Guid id in RemoveQueueIds) {
+                    Listener.Remove(id);
+                }
+                RemoveQueueIds.Clear();
+
+                //Add events
+                foreach (KeyEvent keyEvent in AddQueue) {
+                    Listener.Add(keyEvent);
+                }
+                AddQueue.Clear();
+
+                //Activate events
+                bool active = false;
+                foreach(KeyCode keyCode in Enum.GetValues(typeof(KeyCode))) {
+                    switch (KeyEvent) {
+                        case KeyEventType.Down:
+                            active = UnityEngine.Input.GetKeyDown(keyCode);
+                            break;
+                        case KeyEventType.Up:
+                            active = UnityEngine.Input.GetKeyUp(keyCode);
+                            break;
+                        case KeyEventType.Held:
+                            active = UnityEngine.Input.GetKey(keyCode);
+                            break;
+                        default:
+                            throw new NotImplementedException(KeyEvent.ToString());
+                    }
+                    if (active) {
+                        break;
+                    }
+                }
+                if (active) {
+                    Listener.Activate();
+                }
             }
         }
 

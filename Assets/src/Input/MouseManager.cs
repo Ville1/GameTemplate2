@@ -122,6 +122,13 @@ namespace Game.Input
             buttonsHeldLastFrame = buttonsHeldThisFrame;
         }
 
+        public void AddEventListener(MouseEvent mouseEvent)
+        {
+            foreach(MouseButton button in Enum.GetValues(typeof(MouseButton))) {
+                AddEventListener(button, mouseEvent);
+            }
+        }
+
         public void AddEventListener(MouseButton button, MouseEvent mouseEvent)
         {
             mouseClickEvents[button].Add(mouseEvent);
@@ -135,6 +142,13 @@ namespace Game.Input
         public bool RemoveEventListener(MouseButton button, Guid eventId)
         {
             return mouseClickEvents[button].Remove(eventId);
+        }
+
+        public void AddEventListener(MouseNothingClickEvent mouseEvent)
+        {
+            foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
+                AddEventListener(button, mouseEvent);
+            }
         }
 
         public void AddEventListener(MouseButton button, MouseNothingClickEvent mouseEvent)

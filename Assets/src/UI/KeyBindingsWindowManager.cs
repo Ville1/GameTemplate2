@@ -60,12 +60,8 @@ namespace Game.UI
             RebindAlreadyUsedPanel.SetActive(false);
             RebindAlreadyUsedPanelText.faceColor = Color.red;
 
-            MouseManager.Instance.AddEventListener(MouseButton.Left, new MouseEvent((GameObject target) => { ClosePanels(); }, 0, new List<MouseEventTag>() { MouseEventTag.IgnoreUI }, false));
-            MouseManager.Instance.AddEventListener(MouseButton.Middle, new MouseEvent((GameObject target) => { ClosePanels(); }, 0, new List<MouseEventTag>() { MouseEventTag.IgnoreUI }, false));
-            MouseManager.Instance.AddEventListener(MouseButton.Right, new MouseEvent((GameObject target) => { ClosePanels(); }, 0, new List<MouseEventTag>() { MouseEventTag.IgnoreUI }, false));
-            MouseManager.Instance.AddEventListener(MouseButton.Left, new MouseNothingClickEvent(() => { ClosePanels(); }, 0, new List<MouseEventTag>() { MouseEventTag.IgnoreUI }, false));
-            MouseManager.Instance.AddEventListener(MouseButton.Middle, new MouseNothingClickEvent(() => { ClosePanels(); }, 0, new List<MouseEventTag>() { MouseEventTag.IgnoreUI }, false));
-            MouseManager.Instance.AddEventListener(MouseButton.Right, new MouseNothingClickEvent(() => { ClosePanels(); }, 0, new List<MouseEventTag>() { MouseEventTag.IgnoreUI }, false));
+            MouseManager.Instance.AddEventListener(new MouseEvent((GameObject target) => { ClosePanels(); }, 0, MouseEventTag.IgnoreUI, false));
+            MouseManager.Instance.AddEventListener(new MouseNothingClickEvent(() => { ClosePanels(); }, 0, MouseEventTag.IgnoreUI, false));
         }
 
         /// <summary>

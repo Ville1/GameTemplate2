@@ -50,6 +50,11 @@ namespace Game.Input
             Initialize(null, listener, priority, tags, isBlockedByUI);
         }
 
+        public MouseEvent(OnClickDelegate listener, int priority, MouseEventTag tag, bool isBlockedByUI = true)
+        {
+            Initialize(null, listener, priority, new List<MouseEventTag>() { tag }, isBlockedByUI);
+        }
+
         private void Initialize(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             Id = Guid.NewGuid();
@@ -111,6 +116,16 @@ namespace Game.Input
             Id = Guid.NewGuid();
             Listener = listener;
             EventData = new MouseEventData(priority, tags, isBlockedByUI);
+        }
+
+        public MouseNothingClickEvent(OnClickDelegate listener, int priority, MouseEventTag tag, bool isBlockedByUI = true)
+        {
+            if (listener == null) {
+                throw new NullReferenceException();
+            }
+            Id = Guid.NewGuid();
+            Listener = listener;
+            EventData = new MouseEventData(priority, new List<MouseEventTag>() { tag }, isBlockedByUI);
         }
     }
 
