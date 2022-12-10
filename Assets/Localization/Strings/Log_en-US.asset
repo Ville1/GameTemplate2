@@ -231,6 +231,10 @@ MonoBehaviour:
     m_Localized: 'Failed to load key bindings. Exception: {0}'
     m_Metadata:
       m_Items: []
+  - m_Id: 68170190765256704
+    m_Localized: GameObject  '{0}' already has a tooltip registered
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

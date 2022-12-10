@@ -223,6 +223,10 @@ MonoBehaviour:
     m_Key: FailedToSaveKeyBindings
     m_Metadata:
       m_Items: []
+  - m_Id: 68170190765256704
+    m_Key: TooltipAlreadyRegistered
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
