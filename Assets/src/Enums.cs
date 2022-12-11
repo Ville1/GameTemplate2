@@ -12,7 +12,7 @@ namespace Game
     }
     public enum MouseEventTag {
         /// <summary>
-        /// Event can't be blocked by ui
+        /// Event can't be blocked by an open window. (Note: this checks for open windows, while MouseEventData.IsBlockedByUI checks for any ui element) (TODO: rename this to IgnoreWindows?)
         /// </summary>
         IgnoreUI,
         Map

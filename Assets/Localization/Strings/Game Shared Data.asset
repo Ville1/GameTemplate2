@@ -131,6 +131,18 @@ MonoBehaviour:
     m_Key: Gameplay
     m_Metadata:
       m_Items: []
+  - m_Id: 68556200544137216
+    m_Key: KeyBindingNotificationHistory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68561671220981760
+    m_Key: KeyBindingCloseAllNotifications
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68562411494666240
+    m_Key: Misc
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

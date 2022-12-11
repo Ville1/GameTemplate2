@@ -134,6 +134,18 @@ MonoBehaviour:
     m_Localized: Gameplay
     m_Metadata:
       m_Items: []
+  - m_Id: 68556200544137216
+    m_Localized: Notification history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68561671220981760
+    m_Localized: Close all notifications
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68562411494666240
+    m_Localized: Misc
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

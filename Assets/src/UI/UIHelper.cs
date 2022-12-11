@@ -25,6 +25,22 @@ namespace Game.UI
             return GameObject.Find(string.Format("{0}/{1}", parent, name));
         }
 
+        public static bool IsChild(GameObject parent, GameObject potentialChild)
+        {
+            int maxIterations = 100;
+            GameObject currentParent = potentialChild;
+            int iteration = 0;
+            do {
+                currentParent = currentParent.transform.parent != null ? currentParent.transform.parent.gameObject : null;
+                if(currentParent == parent) {
+                    return true;
+                }
+                iteration++;
+            } while (currentParent != null && iteration < maxIterations);
+
+            return false;
+        }
+
         public static void SetText(GameObject parent, string textGameObjectName, LString text, Color? color = null)
         {
             SetText(parent.name, textGameObjectName, text, color);
@@ -92,6 +108,12 @@ namespace Game.UI
             Image imageComponent = imageGameObject.GetComponent<Image>();
             if (imageComponent == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' does not contain a Image component", parentGameObjectName, imageGameObjectName));
+            }
+
+            if (spriteData.IsEmpty) {
+                //Hide image
+                imageGameObject.SetActive(false);
+                return;
             }
 
             //Make GameObject active

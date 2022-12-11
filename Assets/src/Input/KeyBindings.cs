@@ -37,6 +37,9 @@ namespace Game.Input
 
         public static KeyBinding CloseWindow { get { return Get("CloseWindow"); } }
         public static KeyBinding AcceptWindow { get { return Get("AcceptWindow"); } }
+        public static KeyBinding NotificationHistory { get { return Get("NotificationHistory"); } }
+        public static KeyBinding CloseAllNotifications { get { return Get("CloseAllNotifications"); } }
+
         public static KeyBinding Wave { get { return Get("Wave"); } }
         public static KeyBinding Horn { get { return Get("Horn"); } }
         public static KeyBinding Stop { get { return Get("Stop"); } }
@@ -50,6 +53,10 @@ namespace Game.Input
 
             bindings.Add(KeyBinding.Load("CloseWindow", "{KeyBindingCloseWindow}", KeyCode.Escape, KeyBindingCategories.Window));
             bindings.Add(KeyBinding.Load("AcceptWindow", "{KeyBindingAccept}", KeyCode.Return, KeyBindingCategories.Window));
+            bindings.Add(KeyBinding.Load("NotificationHistory", "{KeyBindingNotificationHistory}", KeyCode.N, KeyBindingCategories.Window));
+            bindings.Add(KeyBinding.Load("CloseAllNotifications", "{KeyBindingCloseAllNotifications}", KeyCode.Delete, KeyBindingCategories.Misc,
+                new List<KeyBindingCategory>() { KeyBindingCategories.Any }));
+
             bindings.Add(KeyBinding.Load("Wave", "Wave", KeyCode.Alpha1, KeyBindingCategories.Gameplay));
             bindings.Add(KeyBinding.Load("Horn", "Horn", KeyCode.Alpha2, KeyBindingCategories.Gameplay));
             bindings.Add(KeyBinding.Load("Stop", "Stop", KeyCode.Alpha3, KeyBindingCategories.Gameplay));
@@ -149,6 +156,7 @@ namespace Game.Input
         public static KeyBindingCategory Any { get { return Get("Any"); } }
         public static KeyBindingCategory Window { get { return Get("Windows"); } }
         public static KeyBindingCategory Gameplay { get { return Get("Gameplay"); } }
+        public static KeyBindingCategory Misc { get { return Get("Misc"); } }
 
         public static List<KeyBindingCategory> All { get { Initialize(); return categories; } }
 
@@ -160,7 +168,8 @@ namespace Game.Input
             categories = new List<KeyBindingCategory>() {
                 new KeyBindingCategory(-1, "Any", null),
                 new KeyBindingCategory(0, "Windows", "{Windows}"),
-                new KeyBindingCategory(1, "Gameplay", "{Gameplay}")
+                new KeyBindingCategory(1, "Gameplay", "{Gameplay}"),
+                new KeyBindingCategory(2, "Misc", "{Misc}")
             };
         }
 

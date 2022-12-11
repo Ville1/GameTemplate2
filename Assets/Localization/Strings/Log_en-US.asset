@@ -235,6 +235,15 @@ MonoBehaviour:
     m_Localized: GameObject  '{0}' already has a tooltip registered
     m_Metadata:
       m_Items: []
+  - m_Id: 68524498945929216
+    m_Localized: Notification '{0}' does not have an open card
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68556629113925632
+    m_Localized: Custom tooltip panel '{0}' does not have it's layer set to 2 (Ignore
+      Raycast), so it does not block mouse clicks
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -13,6 +13,10 @@ namespace Game.UI
         private static readonly float HOVER_TIME = 1.0f;
         private static readonly float MAX_MOUSE_DISTANCE = 0.1f;
         private static readonly string CUSTOM_PANEL_NAME = "Custom Tooltip";
+        private static readonly float MARGIN_HORIZONTAL = 10.0f;
+        private static readonly float MARGIN_VERTICAL = 5.0f;
+        private static readonly float POSITION_DELTA_X = 8.0f;
+        private static readonly float POSITION_DELTA_Y = 0.0f;
 
         public static TooltipManager Instance;
 
@@ -26,8 +30,6 @@ namespace Game.UI
         private UnityEngine.UI.GraphicRaycaster raycaster;
         private List<Tooltip> tooltips;
         private Tooltip currentTooltip;
-        private float defaultWidth;
-        private float defaultHeight;
         private float timeLeft;
         private Vector3 lastMousePosition = Vector3.zero;
 
@@ -45,8 +47,6 @@ namespace Game.UI
 
             currentTooltipPanel = TooltipPanel;
             rectTransform = TooltipPanel.GetComponent<RectTransform>();
-            defaultWidth = rectTransform.rect.width;
-            defaultHeight = rectTransform.rect.height;
             TooltipPanel.SetActive(false);
 
             raycaster = Canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>();
@@ -64,6 +64,7 @@ namespace Game.UI
             Tooltip newTooltip = null;
 
             Vector3 currentMousePosition = UnityEngine.Input.mousePosition;
+            Vector3 tooltipPosition = new Vector3(currentMousePosition.x + POSITION_DELTA_X, currentMousePosition.y + POSITION_DELTA_Y, currentMousePosition.z);
             float distance = Vector3.Distance(lastMousePosition, currentMousePosition);
 
             if (distance <= MAX_MOUSE_DISTANCE) {
@@ -105,14 +106,14 @@ namespace Game.UI
                 //Same tooltip
                 if (currentTooltipPanel.activeSelf) {
                     //Tooltip is open, update position
-                    currentTooltipPanel.transform.position = currentMousePosition;
+                    currentTooltipPanel.transform.position = tooltipPosition;
                 } else {
                     if (timeLeft > 0.0f) {
                         //Tooltip is not yet visible, reduce timeLeft
                         timeLeft = Math.Max(timeLeft - Time.deltaTime, 0.0f);
                     } else {
                         //Show tooltip
-                        OpenTooltip(newTooltip, currentMousePosition);
+                        OpenTooltip(newTooltip, tooltipPosition);
                     }
                 }
             }
@@ -137,8 +138,13 @@ namespace Game.UI
 
         public bool UnregisterTooltip(GameObject target)
         {
-            if(tooltips.Any(t => t.Target == target)) {
-                tooltips = tooltips.Where(t => t.Target != target).ToList();
+            Tooltip tooltip = tooltips.FirstOrDefault(t => t.Target == target);
+            if (tooltip != null) {
+                if(currentTooltip == tooltip) {
+                    currentTooltip = null;
+                    CloseTooltip();
+                }
+                tooltips.Remove(tooltip);
                 return true;
             }
             return false;
@@ -163,8 +169,8 @@ namespace Game.UI
                 currentTooltipPanel.SetActive(true);
                 TooltipText.text = currentTooltip.Text;
                 currentTooltipPanel.transform.position = currentMousePosition;
-                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentTooltip.Width ?? defaultWidth);
-                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentTooltip.Height ?? defaultHeight);
+                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentTooltip.Width ?? (TooltipText.preferredWidth + MARGIN_HORIZONTAL));
+                rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentTooltip.Height ?? (TooltipText.preferredHeight + MARGIN_VERTICAL));
             } else {
                 TooltipPanel.SetActive(false);
                 currentTooltipPanel = Instantiate(
@@ -179,6 +185,9 @@ namespace Game.UI
                 );
                 currentTooltipPanel.name = CUSTOM_PANEL_NAME;
                 currentTooltipPanel.SetActive(true);
+                if(currentTooltipPanel.layer != 2) {
+                    CustomLogger.Warning("{CustomTooltipLayerWarning}", tooltip.CustomTooltipPanel.name);
+                }
             }
         }
     }

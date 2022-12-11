@@ -68,6 +68,9 @@ namespace Game.Input
     {
         public int Priority { get; set; }
         public List<MouseEventTag> Tags { get; set; }
+        /// <summary>
+        /// Stops event from firing, if there is any ui elements under cursor
+        /// </summary>
         public bool IsBlockedByUI { get; private set; }
 
         public MouseEventData(int priority, List<MouseEventTag> tags, bool isBlockedByUI)

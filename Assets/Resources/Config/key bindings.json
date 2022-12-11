@@ -19,6 +19,14 @@
         {
             "Name": "Stop",
             "Value": 51
+        },
+        {
+            "Name": "NotificationHistory",
+            "Value": 110
+        },
+        {
+            "Name": "CloseAllNotifications",
+            "Value": 127
         }
     ]
 }

@@ -180,6 +180,11 @@ namespace Game.UI
                 return string.Format("Debug window {0}", DebugWindowManager.Instance.Active ? "opened" : "closed");
             }));
 
+            commands.Add(new Command("debugMouse", new List<string>() { "mouse_debug_log", "debug_mouse" }, "Toggles MouseManager debug log level", (List<string> parameters) => {
+                MouseManager.Instance.DebugLogLevel = MouseManager.Instance.DebugLogLevel.Shift(1);
+                return string.Format("Mouse debug log: {0}", MouseManager.Instance.DebugLogLevel);
+            }));
+
             commands.Add(new Command("clearEffects", new List<string>() { "clear_effects", "ce" }, "Clears all effects", (List<string> parameters) => {
                 int count = Effect2DManager.Instance.ActiveEffectCount;
                 Effect2DManager.Instance.RemoveAll();

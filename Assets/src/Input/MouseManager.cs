@@ -4,15 +4,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Game.Input
 {
 
     public class MouseManager : MonoBehaviour
     {
+        public enum LogLevel { None, Basic, Verbose }
+
         public delegate void OnClickNothingDelegate();
 
         public static MouseManager Instance;
+
+        public GameObject Canvas;
+
+        public LogLevel DebugLogLevel = LogLevel.None;
 
         private Dictionary<MouseButton, MouseClickEventListener> mouseClickEvents = DictionaryHelper.CreateNewFromEnum((MouseButton button) => { return new MouseClickEventListener(button); });
         private Dictionary<MouseButton, MouseNothingClickEventListener> mouseNothingClickEvents = DictionaryHelper.CreateNewFromEnum((MouseButton button) => { return new MouseNothingClickEventListener(button); });
@@ -22,6 +29,7 @@ namespace Game.Input
         private Dictionary<MouseButton, GameObject> draggedObjects = DictionaryHelper.CreateNewFromEnum<MouseButton, GameObject>((MouseButton b) => { return null; });
         private Vector2 mouseScreenPositionLastFrame = new Vector2(0.0f, 0.0f);
         private Vector3 mouseWorldPositionLastFrame = new Vector3(0.0f, 0.0f, 0.0f);
+        private UnityEngine.UI.GraphicRaycaster uiRaycaster;
 
         /// <summary>
         /// Initializiation
@@ -37,6 +45,7 @@ namespace Game.Input
             foreach(MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                 mouseDragEvents.Add(button, DictionaryHelper.CreateNewFromEnum((MouseDragEventType drag) => { return new MouseDragEventListener(button, drag); }));
             }
+            uiRaycaster = Canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>();
         }
 
         /// <summary>
@@ -62,13 +71,14 @@ namespace Game.Input
                 buttonsUpThisFrame[button] = UnityEngine.Input.GetMouseButtonUp((int)button);
             }
 
-            //Ray cast
+            //Raycast
             RaycastHit hit;
             if (Physics.Raycast(CameraManager.Instance.Camera.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit)) {
                 foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                     if (buttonsDownThisFrame[button]) {
                         //Click events
                         mouseClickEvents[button].Activate(hit.transform.gameObject);
+                        Log("{0} click -> {1}", button, hit.transform.gameObject.name);
                     }
                     rayCastHits[button] = hit.transform.gameObject;
                 }
@@ -77,18 +87,38 @@ namespace Game.Input
                 foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                     if (buttonsDownThisFrame[button]) {
                         mouseNothingClickEvents[button].Activate();
+                        Log("{0} click -> NOTHING", button);
                     }
                 }
             }
 
+            //UI raycast
+            PointerEventData pointerEventData = new PointerEventData(null);
+            pointerEventData.position = UnityEngine.Input.mousePosition;
+            List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
+            uiRaycaster.Raycast(pointerEventData, uiRaycastResults);
+            List<GameObject> uiRaycastResultObjects = uiRaycastResults.Select(hit => hit.gameObject).ToList();
+            foreach (GameObject uiRaycastResult in uiRaycastResultObjects) {
+                foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
+                    if (buttonsDownThisFrame[button]) {
+                        //Click events
+                        mouseClickEvents[button].Activate(uiRaycastResult, uiRaycastResultObjects);
+                        Log("{0} ui click -> {1}", button, uiRaycastResult.name);
+                    }
+                }
+            }
+            //TODO: UI dragging
+
             //Drag events
-            foreach(MouseButton button in Enum.GetValues(typeof(MouseButton))) {
+            foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                 //Start events
                 if (buttonsDownLastFrame[button] && buttonsHeldThisFrame[button]) {
                     //Untargeted events
                     mouseDragEvents[button][MouseDragEventType.Start].Activate(mouseWorldPositionLastFrame);
+                    LogVerbose("{0} drag start", button);
                     if (rayCastHits[button] != null) {
                         //Targeted events
+                        LogVerbose("{0} drag start -> {1}", button, rayCastHits[button].name);
                         mouseDragEvents[button][MouseDragEventType.Start].Activate(mouseWorldPositionLastFrame, rayCastHits[button], null);
                         draggedObjects[button] = rayCastHits[button];
                     }
@@ -97,8 +127,10 @@ namespace Game.Input
                 if (buttonsUpThisFrame[button] && buttonsHeldLastFrame[button]) {
                     //Untargeted events
                     mouseDragEvents[button][MouseDragEventType.End].Activate(MouseWorldPosition);
+                    LogVerbose("{0} drag end", button);
                     if (draggedObjects[button] != null) {
                         //Targeted events
+                        LogVerbose("{0} drag end -> \"{1}\" dropped on \"{2}\"", button, draggedObjects[button].name, rayCastHits[button].name);
                         mouseDragEvents[button][MouseDragEventType.End].Activate(MouseWorldPosition, draggedObjects[button], rayCastHits[button]);
                         draggedObjects[button] = null;
                     }
@@ -108,9 +140,11 @@ namespace Game.Input
                     //Untargeted events
                     Vector3 difference = mouseWorldPositionLastFrame - MouseWorldPosition;
                     mouseDragEvents[button][MouseDragEventType.Move].Activate(difference);
+                    LogVerbose("{0} drag move -> difference: ({1}, {2}, {3})", button, difference.x, difference.y, difference.z);
                     if (draggedObjects[button] != null) {
                         //Targeted events
                         mouseDragEvents[button][MouseDragEventType.Move].Activate(difference, draggedObjects[button], rayCastHits[button]);
+                        LogVerbose("{0} drag move -> \"{1}\" hover on \"{2}\"", button, draggedObjects[button].name, rayCastHits[button].name);
                     }
                 }
             }
@@ -122,16 +156,18 @@ namespace Game.Input
             buttonsHeldLastFrame = buttonsHeldThisFrame;
         }
 
-        public void AddEventListener(MouseEvent mouseEvent)
+        public Guid AddEventListener(MouseEvent mouseEvent)
         {
             foreach(MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                 AddEventListener(button, mouseEvent);
             }
+            return mouseEvent.Id;
         }
 
-        public void AddEventListener(MouseButton button, MouseEvent mouseEvent)
+        public Guid AddEventListener(MouseButton button, MouseEvent mouseEvent)
         {
             mouseClickEvents[button].Add(mouseEvent);
+            return mouseEvent.Id;
         }
 
         public bool RemoveEventListener(MouseButton button, MouseEvent mouseEvent)
@@ -144,16 +180,18 @@ namespace Game.Input
             return mouseClickEvents[button].Remove(eventId);
         }
 
-        public void AddEventListener(MouseNothingClickEvent mouseEvent)
+        public Guid AddEventListener(MouseNothingClickEvent mouseEvent)
         {
             foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                 AddEventListener(button, mouseEvent);
             }
+            return mouseEvent.Id;
         }
 
-        public void AddEventListener(MouseButton button, MouseNothingClickEvent mouseEvent)
+        public Guid AddEventListener(MouseButton button, MouseNothingClickEvent mouseEvent)
         {
             mouseNothingClickEvents[button].Add(mouseEvent);
+            return mouseEvent.Id;
         }
 
         public bool RemoveEventListener(MouseButton button, MouseNothingClickEvent mouseEvent)
@@ -166,9 +204,10 @@ namespace Game.Input
             return mouseNothingClickEvents[button].Remove(eventId);
         }
 
-        public void AddEventListener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
+        public Guid AddEventListener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
         {
             mouseDragEvents[button][dragEventType].Add(mouseDragEvent);
+            return mouseDragEvent.Id;
         }
 
         public bool RemoveEventListener(MouseButton button, MouseDragEventType dragEventType, MouseDragEvent mouseDragEvent)
@@ -234,6 +273,20 @@ namespace Game.Input
             }
         }
 
+        private void Log(string message, params object[] arguments)
+        {
+            if(DebugLogLevel >= LogLevel.Basic) {
+                CustomLogger.Debug(string.Format(message, arguments));
+            }
+        }
+
+        private void LogVerbose(string message, params object[] arguments)
+        {
+            if (DebugLogLevel >= LogLevel.Verbose) {
+                CustomLogger.Debug(string.Format(message, arguments));
+            }
+        }
+
         private class MouseClickEventListener
         {
             public MouseButton Button { get; set; }
@@ -245,7 +298,11 @@ namespace Game.Input
                 Events = new List<MouseEvent>();
             }
 
-            public void Activate(GameObject target)
+            /// <summary>
+            /// </summary>
+            /// <param name="target"></param>
+            /// <param name="otherUIEventHits">If checking for ui click events, this contains list of other ui elements under cursor, target being one of them.</param>
+            public void Activate(GameObject target, List<GameObject> otherUIEventHits = null)
             {
                 IClickListenerComponent component = target.GetComponent<IClickListenerComponent>();
                 IClickListener listener = component != null ? component.Listener : null;
@@ -266,7 +323,7 @@ namespace Game.Input
                             }
                             onClickProced = true;
                         }
-                        if ((target == mouseEvent.Target || mouseEvent.Target == null) && UIManager.Instance.CanFire(mouseEvent.EventData)) {
+                        if ((target == mouseEvent.Target || mouseEvent.Target == null) && UIManager.Instance.CanFire(mouseEvent.EventData, target, otherUIEventHits)) {
                             //Call event listener
                             mouseEvent.Listener(target);
                         }

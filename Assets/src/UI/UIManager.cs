@@ -105,7 +105,30 @@ namespace Game.UI {
             return (
                 !eventData.IsBlockedByUI ||
                 !EventSystem.current.IsPointerOverGameObject()
-            ) && !windows.Any(
+            ) && !IsBlockedByWindow(eventData);
+        }
+
+        public bool CanFire(MouseEventData eventData, GameObject uiElement, List<GameObject> otherUIEventHits)
+        {
+            bool isBlockedByWindow = IsBlockedByWindow(eventData);
+            if (!eventData.IsBlockedByUI) {
+                //Ignore other ui elements
+                return !isBlockedByWindow;
+            }
+
+            //eventData.IsBlockedByUI = true => Check otherUIEventHits for ui elements, that are not children of uiElement
+            foreach(GameObject gameObject in otherUIEventHits) {//Layer 2 = Ignore raycast
+                if(gameObject != uiElement && gameObject.layer != 2 && !UIHelper.IsChild(uiElement, gameObject)) {
+                    return false;
+                }
+            }
+
+            return !isBlockedByWindow;
+        }
+
+        private bool IsBlockedByWindow(MouseEventData eventData)
+        {
+            return windows.Any(
                 window =>
                     window.Active &&
                     window.BlockMouseEvents &&
