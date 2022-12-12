@@ -227,10 +227,6 @@ MonoBehaviour:
     m_Key: TooltipAlreadyRegistered
     m_Metadata:
       m_Items: []
-  - m_Id: 68524498945929216
-    m_Key: NotificationHasNoCard
-    m_Metadata:
-      m_Items: []
   - m_Id: 68556629113925632
     m_Key: CustomTooltipLayerWarning
     m_Metadata:

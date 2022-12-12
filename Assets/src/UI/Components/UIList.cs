@@ -65,6 +65,11 @@ namespace Game.UI.Components
             return AddRow(new Row() { KeyString = key, ElementData = elementData });
         }
 
+        public GameObject AddRow(Guid key, List<UIElementData> elementData)
+        {
+            return AddRow(key.ToString(), elementData);
+        }
+
         private GameObject AddRow(Row row)
         {
             GameObject gameObject = GameObject.Instantiate(
@@ -108,6 +113,11 @@ namespace Game.UI.Components
             return rows.Any(row => row.KeyString == key);
         }
 
+        public bool HasRow(Guid key)
+        {
+            return HasRow(key.ToString());
+        }
+
         private bool HasRow(Row row)
         {
             if (row.KeyInt.HasValue) {
@@ -132,6 +142,11 @@ namespace Game.UI.Components
         public void SetRow(string key, List<UIElementData> elementData)
         {
             SetRow(new Row() { KeyString = key, ElementData = elementData });
+        }
+
+        public void SetRow(Guid key, List<UIElementData> elementData)
+        {
+            SetRow(key.ToString(), elementData);
         }
 
         private void SetRow(Row row)
@@ -161,7 +176,7 @@ namespace Game.UI.Components
         public void Clear()
         {
             foreach (Row row in rows) {
-                GameObject.Destroy(row.GameObject);
+                row.Destroy();
             }
             rows.Clear();
         }
@@ -203,6 +218,16 @@ namespace Game.UI.Components
                     }
                     return KeyString;
                 }
+            }
+
+            public void Destroy()
+            {
+                if(ElementData != null) {
+                    foreach(UIElementData tooltipData in ElementData.Where(elementData => elementData.Type == UIElementData.ElementType.Tooltip)) {
+                        TooltipManager.Instance.UnregisterTooltip(UIHelper.Find(GameObject, tooltipData.GameObjectName));
+                    }
+                }
+                UnityEngine.GameObject.Destroy(GameObject);
             }
         }
     }

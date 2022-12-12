@@ -12,28 +12,36 @@ namespace Game.UI.Components
         public Scrollbar HorizontalScrollbar { get; private set; }
         public Scrollbar VerticalScrollbar { get; private set; }
         public ScrollRect ScrollRect { get; private set; }
+        public ScrollRect.ScrollbarVisibility VerticalScrollbarVisibility { get; private set; }
+        public ScrollRect.ScrollbarVisibility HorizontalScrollbarVisibility { get; private set; }
 
-        public ScrollableList(GameObject rowPrototype, GameObject scrollView, GameObject scrollViewContent, float? rowSpacing = null) : base(rowPrototype, scrollViewContent, rowSpacing)
+        public ScrollableList(GameObject rowPrototype, GameObject scrollView, GameObject scrollViewContent, float? rowSpacing = null,
+            ScrollRect.ScrollbarVisibility? verticalScrollbarVisibility = null, ScrollRect.ScrollbarVisibility? horizontalScrollbarVisibility = null) : base(rowPrototype, scrollViewContent, rowSpacing)
         {
-            Initialize(scrollView);
+            Initialize(scrollView, verticalScrollbarVisibility, horizontalScrollbarVisibility);
         }
 
         public ScrollableList(GameObject rowPrototype, GameObject scrollView, float? rowSpacing = null) : base(rowPrototype, FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
         {
-            Initialize(scrollView);
+            Initialize(scrollView, null, null);
         }
 
         public ScrollableList(string rowPrototypeName, GameObject scrollView, float? rowSpacing = null) : base(rowPrototypeName, FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
         {
-            Initialize(scrollView);
+            Initialize(scrollView, null, null);
         }
 
         public ScrollableList(GameObject scrollView, float? rowSpacing = null) : base(FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
         {
-            Initialize(scrollView);
+            Initialize(scrollView, null, null);
         }
 
-        private void Initialize(GameObject scrollView)
+        public ScrollableList(GameObject scrollView, float? rowSpacing, ScrollRect.ScrollbarVisibility? verticalScrollbarVisibility, ScrollRect.ScrollbarVisibility? horizontalScrollbarVisibility) : base(FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
+        {
+            Initialize(scrollView, verticalScrollbarVisibility, horizontalScrollbarVisibility);
+        }
+
+        private void Initialize(GameObject scrollView, ScrollRect.ScrollbarVisibility? verticalScrollbarVisibility, ScrollRect.ScrollbarVisibility? horizontalScrollbarVisibility)
         {
             //Find scroll bars
             Scrollbar[] scrollbars = scrollView.GetComponentsInChildren<Scrollbar>();
@@ -43,6 +51,10 @@ namespace Game.UI.Components
             //Set sensitivity
             ScrollRect = scrollView.GetComponent<ScrollRect>();
             ScrollRect.scrollSensitivity = DEFAULT_SENSITIVITY;
+
+            //Visibility
+            ScrollRect.verticalScrollbarVisibility = verticalScrollbarVisibility.HasValue ? verticalScrollbarVisibility.Value : ScrollRect.verticalScrollbarVisibility;
+            ScrollRect.horizontalScrollbarVisibility = horizontalScrollbarVisibility.HasValue ? horizontalScrollbarVisibility.Value : ScrollRect.horizontalScrollbarVisibility;
         }
 
         private static GameObject FindContent(GameObject scrollView, string name)

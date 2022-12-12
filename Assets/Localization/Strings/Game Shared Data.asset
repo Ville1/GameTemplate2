@@ -147,6 +147,22 @@ MonoBehaviour:
     m_Key: Names
     m_Metadata:
       m_Items: []
+  - m_Id: 68969055743471616
+    m_Key: NotificationHistory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68972003559043072
+    m_Key: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68972034047438848
+    m_Key: FilterNotifications
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68978184000204800
+    m_Key: Notification
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

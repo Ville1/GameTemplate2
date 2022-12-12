@@ -9,8 +9,8 @@ namespace Game.UI
 {
     public class NotificationManager : MonoBehaviour
     {
-        private static readonly LString TIME_STAMP_PREFIX = null;//For example "{Turn}"
-        private static readonly bool SHOW_TIME_STAMP = true;
+        public static readonly LString TIME_STAMP_PREFIX = null;//For example "{Turn} "
+        public static readonly bool SHOW_TIME_STAMP = true;
 
         private static readonly float ANIMATE_MOVE_SPEED = 150.0f;//-1.0f = no animation
         private static readonly bool ANIMATE_SLIDE_NEW_CARDS = true;//If true, new cards are placed on the last possible position. Does nothing, if animations are off.
@@ -25,9 +25,11 @@ namespace Game.UI
         public GameObject NotificationPrototype;
 
         private bool showNotifications = true;
-        private List<Notification> notificationsAddedWhenNotVisible = new List<Notification>();
-        private List<Notification> notificationQueue = new List<Notification>();
         private List<Notification> notifications = new List<Notification>();
+        private List<Notification> addQueue = new List<Notification>();
+        private List<Notification> deleteQueue = new List<Notification>();
+        private List<Notification> cardAddQueue = new List<Notification>();
+        private List<Notification> cardCloseQueue = new List<Notification>();
         private List<NotificationCard> notificationCards = new List<NotificationCard>();
         private float notificationWidth;
         private float updateCooldown = 0.0f;
@@ -54,13 +56,14 @@ namespace Game.UI
         /// </summary>
         private void Update()
         {
-            if(ShowNotifications && Animate) {
+            ProcessQueues();
+            if (ShowNotifications) {
                 if (Animate) {
                     foreach (NotificationCard card in notificationCards) {
                         card.Update();
                     }
                 }
-                while (ProcessQueue()) { };
+                while (ProcessAddCardQueue()) { };
             }
         }
 
@@ -74,10 +77,6 @@ namespace Game.UI
                 showNotifications = value;
                 CardsSetActive(showNotifications);
                 if(!oldValue && showNotifications) {
-                    foreach(Notification notification in notificationsAddedWhenNotVisible) {
-                        notificationQueue.Add(notification);
-                    }
-                    notificationsAddedWhenNotVisible.Clear();
                     updateCooldown = 0.0f;
                 }
             }
@@ -85,25 +84,47 @@ namespace Game.UI
 
         public void Add(Notification notification)
         {
-            if (ShowNotifications) {
-                notificationQueue.Add(notification);
-            } else {
-                notificationsAddedWhenNotVisible.Add(notification);
+            if(!addQueue.Any(added => added.Id == notification.Id)) {
+                addQueue.Add(notification);
             }
+            deleteQueue = deleteQueue.Where(deleted => deleted.Id != notification.Id).ToList();
+        }
+
+        public void Delete(Notification notification)
+        {
+            if(!deleteQueue.Any(deleted => deleted.Id == notification.Id)) {
+                deleteQueue.Add(notification);
+            }
+            addQueue = addQueue.Where(added => added.Id != notification.Id).ToList();
+            cardAddQueue = cardAddQueue.Where(newCard => newCard.Id != notification.Id).ToList();
+        }
+
+        public void Close(Notification notification)
+        {
+            if (!cardCloseQueue.Any(close => close.Id == notification.Id)) {
+                cardCloseQueue.Add(notification);
+            }
+            cardAddQueue = cardAddQueue.Where(newCard => newCard.Id != notification.Id).ToList();
         }
 
         public void CloseAll()
         {
             foreach(NotificationCard card in notificationCards) {
-                CloseNotification(card.Notification, true);
+                Close(card.Notification);
             }
-            notificationCards.Clear();
         }
 
         public void SkipAnimation()
         {
             foreach (NotificationCard card in notificationCards) {
                 card.SkipMovement();
+            }
+        }
+
+        public List<Notification> Notifications
+        {
+            get {
+                return notifications.Select(notification => notification).ToList();
             }
         }
 
@@ -167,11 +188,7 @@ namespace Game.UI
 
             //Add to lists
             notificationCards.Add(notificationCard);
-            notifications.Add(notification);
-
-            if (notificationQueue.Contains(notification)) {
-                notificationQueue.Remove(notification);
-            }
+            cardAddQueue = cardAddQueue.Where(queuedNotification => queuedNotification.Id != notification.Id).ToList();
         }
 
         private void CardsSetActive(bool active)
@@ -191,11 +208,10 @@ namespace Game.UI
             }
         }
 
-        private void CloseNotification(Notification notification, bool closingAllNotifications = false)
+        private void CloseNotification(Notification notification)
         {
             NotificationCard card = notificationCards.FirstOrDefault(c => c.Notification.Id == notification.Id);
             if (card == null) {
-                CustomLogger.Warning("{NotificationHasNoCard}", notification.Id);
                 return;
             }
 
@@ -206,15 +222,14 @@ namespace Game.UI
 
             Destroy(card.GameObject);
 
-            if (!closingAllNotifications) {
-                for (int i = card.Index + 1; i < notificationCards.Count; i++) {
-                    notificationCards[i].Move(-1);
-                }
-                notificationCards.Remove(card);
+            for (int i = card.Index + 1; i < notificationCards.Count; i++) {
+                notificationCards[i].Move(-1);
             }
+            notificationCards.Remove(card);
         }
 
-        private bool ProcessQueue()
+        //TODO: This function could be merged with CreateNotification, by moving checks there and having it return bool. But maybe this looks cleaner?
+        private bool ProcessAddCardQueue()
         {
             if (updateCooldown > 0.0f) {
                 updateCooldown = Math.Max(updateCooldown - Time.deltaTime, 0.0f);
@@ -223,12 +238,12 @@ namespace Game.UI
             }
             updateCooldown += QUEUE_UPDATE_FREQUENCY;
 
-            if (notificationQueue.Count == 0) {
+            if (cardAddQueue.Count == 0) {
                 //No queue
                 return false;
             }
 
-            Notification nextNotification = notificationQueue[0];
+            Notification nextNotification = cardAddQueue[0];
             if (notificationCards.Count == 0) {
                 //No pre-existing cards
                 CreateNotification(nextNotification);
@@ -264,6 +279,31 @@ namespace Game.UI
 
             CreateNotification(nextNotification);
             return true;
+        }
+
+        private void ProcessQueues()
+        {
+            bool hasChanges = addQueue.Count != 0 || deleteQueue.Count != 0;
+            foreach (Notification newNotification in addQueue) {
+                cardAddQueue.Add(newNotification);
+                notifications.Add(newNotification);
+            }
+            addQueue.Clear();
+
+            foreach(Notification deleteNotification in deleteQueue) {
+                CloseNotification(deleteNotification);
+                notifications = notifications.Where(notification => notification.Id != deleteNotification.Id).ToList();
+            }
+            deleteQueue.Clear();
+
+            foreach(Notification closeNotification in cardCloseQueue) {
+                CloseNotification(closeNotification);
+            }
+            cardCloseQueue.Clear();
+
+            if (hasChanges && NotificationHistoryWindowManager.Instance.Active) {
+                NotificationHistoryWindowManager.Instance.UpdateUI();
+            }
         }
 
         private NotificationCard LastCard {

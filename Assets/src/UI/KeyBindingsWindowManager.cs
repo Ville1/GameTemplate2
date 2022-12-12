@@ -99,6 +99,7 @@ namespace Game.UI
 
         public override void UpdateUI()
         {
+            base.UpdateUI();
             list.Clear();
 
             IEnumerable<KeyBinding> bindings = keyBindings.Where(b => (string.IsNullOrEmpty(searchInputField.Text) || b.Name.ToString().ToLower().Contains(searchInputField.Text.ToLower()))

@@ -5,7 +5,7 @@ namespace Game.UI.Components
 {
     public class UIElementData
     {
-        public enum ElementType { Text, Button, Image }
+        public enum ElementType { Text, Button, Image, Tooltip }
 
         public ElementType Type { get; private set; }
         public string GameObjectName { get; private set; }
@@ -54,6 +54,11 @@ namespace Game.UI.Components
             return new UIElementData(ElementType.Image, gameObjectName, null, null, null, new UISpriteData(spriteData));
         }
 
+        public static UIElementData Tooltip(string gameObjectName, LString tooltip)
+        {
+            return new UIElementData(ElementType.Tooltip, gameObjectName, tooltip, null, null, new UISpriteData());
+        }
+
         public void Set(GameObject parentGameObject)
         {
             switch (Type) {
@@ -73,6 +78,13 @@ namespace Game.UI.Components
                         UIHelper.Find(parentGameObject, GameObjectName).SetActive(false);
                     } else {
                         UIHelper.SetImage(parentGameObject, GameObjectName, SpriteData);
+                    }
+                    break;
+                case ElementType.Tooltip:
+                    GameObject gameObject = UIHelper.Find(parentGameObject, GameObjectName);
+                    TooltipManager.Instance.UnregisterTooltip(gameObject);
+                    if (!string.IsNullOrEmpty(ElementText)) {
+                        TooltipManager.Instance.RegisterTooltip(new Tooltip(gameObject, ElementText));
                     }
                     break;
                 default:

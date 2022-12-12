@@ -86,6 +86,11 @@ namespace Game.UI
             }
         }
 
+        public void ToggleActive()
+        {
+            Active = !Active;
+        }
+
         public RectTransform RectTransform
         {
             get {
