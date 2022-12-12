@@ -244,6 +244,19 @@ MonoBehaviour:
       Raycast), so it does not block mouse clicks
     m_Metadata:
       m_Items: []
+  - m_Id: 68930700288815104
+    m_Localized: 'Failed to load name list ''{0}''. Exception: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68938812257300480
+    m_Localized: Deserialized type '{0}' has field '{1}' with NameListAttribute,
+      but field's type is not List<string>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68940148763881472
+    m_Localized: Name list '{0}' loaded
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

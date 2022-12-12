@@ -40,4 +40,6 @@ namespace Game
         /// </summary>
         QueueUnlimited
     }
+
+    public enum NameType { City, Village, Test }//City names are used as a example for this template project
 }

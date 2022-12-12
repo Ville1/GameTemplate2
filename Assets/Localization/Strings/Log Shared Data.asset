@@ -235,6 +235,18 @@ MonoBehaviour:
     m_Key: CustomTooltipLayerWarning
     m_Metadata:
       m_Items: []
+  - m_Id: 68930700288815104
+    m_Key: FailedToLoadNameList
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68938812257300480
+    m_Key: NameListDeserializationAttributeError
+    m_Metadata:
+      m_Items: []
+  - m_Id: 68940148763881472
+    m_Key: NameListLoaded
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
