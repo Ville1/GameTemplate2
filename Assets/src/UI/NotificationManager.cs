@@ -1,4 +1,6 @@
 using Game.Input;
+using Game.Saving;
+using Game.Saving.Data;
 using Game.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,7 @@ using UnityEngine;
 
 namespace Game.UI
 {
-    public class NotificationManager : MonoBehaviour
+    public class NotificationManager : MonoBehaviour, ISaveable
     {
         public static readonly LString TIME_STAMP_PREFIX = null;//For example "{Turn} "
         public static readonly bool SHOW_TIME_STAMP = true;
@@ -33,6 +35,8 @@ namespace Game.UI
         private List<NotificationCard> notificationCards = new List<NotificationCard>();
         private float notificationWidth;
         private float updateCooldown = 0.0f;
+        private bool isSaving = false;
+        private int saveIndex = 0;
 
         /// <summary>
         /// Initializiation
@@ -56,14 +60,16 @@ namespace Game.UI
         /// </summary>
         private void Update()
         {
-            ProcessQueues();
-            if (ShowNotifications) {
-                if (Animate) {
-                    foreach (NotificationCard card in notificationCards) {
-                        card.Update();
+            if(!isSaving) {
+                ProcessQueues();
+                if (ShowNotifications) {
+                    if (Animate) {
+                        foreach (NotificationCard card in notificationCards) {
+                            card.Update();
+                        }
                     }
+                    while (ProcessAddCardQueue()) { };
                 }
-                while (ProcessAddCardQueue()) { };
             }
         }
 
@@ -126,6 +132,81 @@ namespace Game.UI
             get {
                 return notifications.Select(notification => notification).ToList();
             }
+        }
+
+        public float Load(ISaveData data)
+        {
+            NotificationListData saveData = data as NotificationListData;
+            if(saveData.List.Count == 0) {
+                EndSaveDataProcessing();
+                return 1.0f;
+            }
+
+            NotificationData notificationData = saveData.List[saveIndex];
+            Notification notification = new Notification(notificationData);
+            notifications.Add(notification);
+            if (notificationData.HasCard) {
+                cardAddQueue.Add(notification);
+            }
+            saveIndex++;
+
+            if (saveIndex == saveData.List.Count) {
+                EndSaveDataProcessing();
+                return 1.0f;
+            }
+
+            return saveIndex / (float)saveData.List.Count;
+        }
+
+        public float Save(ref ISaveData data)
+        {
+            if (notifications.Count == 0) {
+                EndSaveDataProcessing();
+                return 1.0f;
+            }
+
+            NotificationListData saveData = data as NotificationListData;
+            Notification notification = notifications[saveIndex];
+            saveIndex++;
+
+            saveData.List.Add(notification.Save(notificationCards.Any(card => card.Notification.Id == notification.Id)));
+
+            if(saveIndex == notifications.Count) {
+                EndSaveDataProcessing();
+                return 1.0f;
+            }
+
+            return saveIndex / (float)notifications.Count;
+        }
+
+        public void StartLoading(ISaveData data)
+        {
+            CloseAll();
+            notifications.Clear();
+            addQueue.Clear();
+            deleteQueue.Clear();
+            cardAddQueue.Clear();
+            cardCloseQueue.Clear();
+            NotificationListData saveData = data as NotificationListData;
+            saveData.List = saveData.List ?? new List<NotificationData>();
+            StartSaveDataProcessing();
+        }
+
+        public void StartSaving(ref ISaveData data)
+        {
+            (data as NotificationListData).List = new List<NotificationData>();
+            StartSaveDataProcessing();
+        }
+
+        private void StartSaveDataProcessing()
+        {
+            isSaving = true;
+            saveIndex = 0;
+        }
+
+        private void EndSaveDataProcessing()
+        {
+            isSaving = false;
         }
 
         private void CreateNotification(Notification notification)
@@ -201,7 +282,7 @@ namespace Game.UI
         private void NotificationClick(Notification notification)
         {
             if(notification.OnClick != null) {
-                notification.OnClick();
+                notification.OnClick(notification);
             }
             if (notification.CloseOnClick) {
                 CloseNotification(notification);
@@ -404,9 +485,10 @@ namespace Game.UI
         private static readonly string DEFAULT_NO_IMAGE_CARD_TEXT = "!";
         private static readonly bool DEFAULT_CLOSE_ON_CLICK = false;
 
-        public delegate void NotificationCallback();
+        public delegate void NotificationCallback(Notification notification);
 
         public Guid Id { get; private set; }
+        public NotificationType Type { get; private set; }
         public LString Title { get; private set; }
         public bool HasTitle { get { return !string.IsNullOrEmpty(Title); } }
         public LString Description { get; private set; }
@@ -419,41 +501,88 @@ namespace Game.UI
         public string CardText { get; private set; }
         public NotificationCallback OnClick { get; private set; }
         public bool CloseOnClick { get; private set; }
+        public object NotificationSpecificData { get; private set; }
 
-        public Notification(LString title, LString description, string timeStamp, UISpriteData imageData, string cardText = null, bool? closeOnClick = null, NotificationCallback onClick = null)
+        public Notification(NotificationType type, LString title, LString description, string timeStamp, UISpriteData imageData, string cardText = null, bool? closeOnClick = null, object notificationSpecificData = null, NotificationCallback onClick = null)
         {
-            Initialize(title, description, timeStamp, imageData, cardText, closeOnClick, onClick);
+            Initialize(type, title, description, timeStamp, imageData, cardText, closeOnClick, notificationSpecificData, onClick, null);
         }
 
-        public Notification(LString title, LString description, UISpriteData imageData, NotificationCallback onClick = null)
+        public Notification(NotificationType type, LString title, LString description, UISpriteData imageData, object notificationSpecificData = null, NotificationCallback onClick = null)
         {
-            Initialize(title, description, null, imageData, null, null, onClick);
+            Initialize(type, title, description, null, imageData, null, null, notificationSpecificData, onClick, null);
         }
 
-        public Notification(LString title, LString description, string cardText, NotificationCallback onClick = null)
+        public Notification(NotificationType type, LString title, LString description, string cardText, object notificationSpecificData = null, NotificationCallback onClick = null)
         {
-            Initialize(title, description, null, null, cardText, null, onClick);
+            Initialize(type, title, description, null, null, cardText, null, notificationSpecificData, onClick, null);
         }
 
-        public Notification(LString title, LString description, NotificationCallback onClick = null)
+        public Notification(NotificationType type, LString title, LString description, object notificationSpecificData = null, NotificationCallback onClick = null)
         {
-            Initialize(title, description, null, null, null, null, onClick);
+            Initialize(type, title, description, null, null, null, null, notificationSpecificData, onClick, null);
         }
 
-        private void Initialize(LString title, LString description, string timeStamp, UISpriteData imageData, string cardText, bool? closeOnClick, NotificationCallback onClick)
+        public Notification(NotificationData saveData)
         {
-            Id = Guid.NewGuid();
+            Initialize((NotificationType)saveData.Type, saveData.Title, saveData.Description, saveData.TimeStamp, null, null, null, null, null, Guid.Parse(saveData.Id));
+            Load(saveData);
+        }
+
+        private void Initialize(NotificationType type, LString title, LString description, string timeStamp, UISpriteData imageData, string cardText, bool? closeOnClick,
+            object notificationSpecificData, NotificationCallback onClick, Guid? id)
+        {
+            Id = id.HasValue ? id.Value : Guid.NewGuid();
+            Type = type;
             Title = title;
             Description = description;
             TimeStamp = timeStamp;
             ImageData = imageData ?? new UISpriteData();
             CardText = cardText;
             CloseOnClick = closeOnClick.HasValue ? closeOnClick.Value : DEFAULT_CLOSE_ON_CLICK;
+            NotificationSpecificData = notificationSpecificData;
             OnClick = onClick;
 
             if(ImageData.IsEmpty && string.IsNullOrEmpty(CardText)) {
                 CardText = DEFAULT_NO_IMAGE_CARD_TEXT;
             }
+        }
+
+        /// <summary>
+        /// TODO: Implement real NotificationTypes here in a real game
+        /// </summary>
+        private void Load(NotificationData saveData)
+        {
+            switch (Type) {
+                case NotificationType.TestType:
+                    string[] split = saveData.Data.Split(";");
+                    NotificationSpecificData = Main.Instance.WorldMap.GetTileAt(int.Parse(split[0]), int.Parse(split[1]));
+                    OnClick = (Notification notification) => { CameraManager.Instance.Center(NotificationSpecificData as Maps.Tile); };
+                    ImageData = new UISpriteData("horn/stick figure horn 4", TextureDirectory.Sprites);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// TODO: Implement real NotificationTypes here in a real game
+        /// </summary>
+        public NotificationData Save(bool hasCard)
+        {
+            NotificationData data = new NotificationData() {
+                Id = Id.ToString(),
+                Type = (int)Type,
+                Title = Title.IsLocalized ? string.Format("{{0}}", Title.Key) : Title,
+                Description = Description.IsLocalized ? string.Format("{{0}}", Description.Key) : Description,
+                TimeStamp = TimeStamp,
+                Data = null,
+                HasCard = hasCard
+            };
+            switch (Type) {
+                case NotificationType.TestType:
+                    data.Data = (NotificationSpecificData as Maps.Tile).X + ";" + (NotificationSpecificData as Maps.Tile).Y;
+                    break;
+            }
+            return data;
         }
     }
 }

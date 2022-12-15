@@ -90,9 +90,11 @@ namespace Game.UI {
             }
         }
 
-        public bool CanFire(List<KeyEventTag> tags)
+        public bool CanFire(List<KeyEventTag> tags, bool inputFieldIsFocussed)
         {
-            return !windows.Any(window =>
+            return
+                (!inputFieldIsFocussed || tags.Contains(KeyEventTag.IgnoreUI)) &&
+                !windows.Any(window =>
                 window.Active &&
                 window.BlockKeyboardInputs &&
                 !window.Tags.Contains(WindowBase.Tag.HUD) &&

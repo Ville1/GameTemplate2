@@ -96,7 +96,8 @@ namespace Game
             State = State.Saving;
             List<ISaveable> saveables = new List<ISaveable>() {
                 WorldMap,
-                NameManager.SaveHelper
+                NameManager.SaveHelper,
+                NotificationManager.Instance
             };
             saveManager = new SaveManager<Saving.Data.SaveData>(folder, saveables);
             saveManager.StartSaving(fileName);
@@ -113,7 +114,8 @@ namespace Game
             }
             List<ISaveable> saveables = new List<ISaveable>() {
                 WorldMap,
-                NameManager.SaveHelper
+                NameManager.SaveHelper,
+                NotificationManager.Instance
             };
             saveManager = new SaveManager<Saving.Data.SaveData>(folder, saveables);
             saveManager.StartLoading(fileName);

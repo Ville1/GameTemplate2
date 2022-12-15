@@ -11,5 +11,8 @@ namespace Game.Saving.Data
 
         [DataProperty("NameManagerSaveHelper", 0.01f, "Names", "Game")]
         public NameManagerData Names;
+
+        [DataProperty("NotificationManager", 0.01f, "Notifications", "Game")]
+        public NotificationListData Notifications;
     }
 }

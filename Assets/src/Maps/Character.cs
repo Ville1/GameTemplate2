@@ -43,7 +43,7 @@ namespace Game.Maps
                 DebugWindowManager.Instance.SetValue("Player position", Position.ToString());
             }
 
-            NotificationManager.Instance.Add(new Notification("Player spawned", "Player has been spawned into the world!", System.DateTime.Now.ToString("dd.MM.yyyy"), null, null, true, null));
+            NotificationManager.Instance.Add(new Notification(NotificationType.TestType2, "Player spawned", "Player has been spawned into the world!", System.DateTime.Now.ToString("dd.MM.yyyy"), null, null, true, null, null));
 
             AddAnimation(new SpriteAnimation("wave", 10.0f, 2, "wave/stick figure wave {0}".Replicate(1, 4), TextureDirectory.Sprites));
             AddAnimation(new SpriteAnimation("horn", 10.0f, null, "horn/stick figure horn {0}".Replicate(1, 5), TextureDirectory.Sprites));
@@ -116,7 +116,8 @@ namespace Game.Maps
         public void Horn()
         {
             PlayAnimation("horn", AnimationQueue.QueueUnlimited);
-            NotificationManager.Instance.Add(new Notification("Toot", "Honk", System.DateTime.Now.ToString("dd.MM.yyyy"), new UISpriteData("horn/stick figure horn 4", TextureDirectory.Sprites)));
+            NotificationManager.Instance.Add(new Notification(NotificationType.TestType, "Toot", "Honk", System.DateTime.Now.ToString("dd.MM.yyyy"),
+                new UISpriteData("horn/stick figure horn 4", TextureDirectory.Sprites), null, null, Tile, (Notification notification) => { CameraManager.Instance.Center(notification.NotificationSpecificData as Tile); }));
         }
 
         public void Stop()

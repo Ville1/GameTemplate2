@@ -163,6 +163,10 @@ MonoBehaviour:
     m_Key: Notification
     m_Metadata:
       m_Items: []
+  - m_Id: 70037289183834112
+    m_Key: Notifications
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

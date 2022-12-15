@@ -139,7 +139,7 @@ namespace Game.Maps
             Game.Saving.Data.Map saveData = (Game.Saving.Data.Map)data;
             Game.Saving.Data.Tile tileSaveData = saveData.Tiles[loadingPosition];
             Tile tile = Tile.Load(this, tileSaveData);
-            Tiles[tileSaveData.X][tileSaveData.Y] = tile;
+            Tiles[tileSaveData.Y][tileSaveData.X] = tile;
             SetEventListeners(tile);
             loadingPosition++;
             float progress = loadingPosition / (float)saveData.Tiles.Count;
@@ -275,12 +275,17 @@ namespace Game.Maps
 
         private void StartDragging(Vector3 vector, IClickListener draggedObject, IClickListener targetObject)
         {
-            draggedTile = draggedObject as Tile;
-            draggedTile.RectangleColor = Color.gray;
+            if(draggedObject is Tile) {
+                draggedTile = draggedObject as Tile;
+                draggedTile.RectangleColor = Color.gray;
+            }
         }
 
         private void Drag(Vector3 vector, IClickListener draggedObject, IClickListener targetObject)
         {
+            if(draggedTile == null) {
+                return;
+            }
             if(targetObject == null) {
                 if(dragOverTile != null) {
                     dragOverTile.RectangleColor = null;
@@ -293,7 +298,7 @@ namespace Game.Maps
                 return;
             }
             targetTile.RectangleColor = draggedTile.Name == targetTile.Name ? Color.yellow : Color.blue;
-            if(dragOverTile != null) {
+            if (dragOverTile != null) {
                 dragOverTile.RectangleColor = null;
             }
             dragOverTile = targetTile;
@@ -301,7 +306,10 @@ namespace Game.Maps
 
         private void EndDragging(Vector3 vector, IClickListener draggedObject, IClickListener targetObject)
         {
-            if(dragOverTile != null) {
+            if (draggedTile == null) {
+                return;
+            }
+            if (dragOverTile != null) {
                 //Swap
                 string draggedName = draggedTile.Name;
                 string targetName = dragOverTile.Name;

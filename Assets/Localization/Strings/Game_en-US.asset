@@ -166,6 +166,10 @@ MonoBehaviour:
     m_Localized: Notification
     m_Metadata:
       m_Items: []
+  - m_Id: 70037289183834112
+    m_Localized: Notifications
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -1,7 +1,5 @@
-using Game.Input;
 using Game.UI.Components;
 using Game.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -82,7 +80,7 @@ namespace Game.UI
         private void HandleNotificationClick(Notification notification)
         {
             if(notification.OnClick != null) {
-                notification.OnClick();
+                notification.OnClick(notification);
             }
         }
 

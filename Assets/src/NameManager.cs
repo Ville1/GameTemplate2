@@ -194,6 +194,7 @@ namespace Game
 
             public float Save(ref ISaveData data)
             {
+                Initialize();
                 NameManagerData saveData = data as NameManagerData;
                 foreach (KeyValuePair<NameType, List<UsedName>> pair in namesUsed) {
                     NameManagerUsedNameListData list = saveData.UsedNames.First(l => l.Type == (int)pair.Key);

@@ -42,4 +42,6 @@ namespace Game
     }
 
     public enum NameType { City, Village, Test }//City names are used as a example for this template project
+
+    public enum NotificationType { TestType, TestType2 }
 }

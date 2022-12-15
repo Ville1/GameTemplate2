@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Game.Input
 {
@@ -47,13 +48,15 @@ namespace Game.Input
             //If events are added or removed then game is running, operations need to be added to a queue to avoid this:
             //InvalidOperationException: Collection was modified; enumeration operation may not execute.
 
-            keyDownEvents.Activate();
-            keyUpEvents.Activate();
-            keyHeldEvents.Activate();
+            bool inputFieldIsFocussed = EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null;
 
-            anyKeyDownEvents.Activate();
-            anyKeyUpEvents.Activate();
-            anyKeyHeldEvents.Activate();
+            keyDownEvents.Activate(inputFieldIsFocussed);
+            keyUpEvents.Activate(inputFieldIsFocussed);
+            keyHeldEvents.Activate(inputFieldIsFocussed);
+
+            anyKeyDownEvents.Activate(inputFieldIsFocussed);
+            anyKeyUpEvents.Activate(inputFieldIsFocussed);
+            anyKeyHeldEvents.Activate(inputFieldIsFocussed);
         }
 
         //##### Add event listeners #####
@@ -376,7 +379,7 @@ namespace Game.Input
                 Add(newKey, keyEvent);
             }
 
-            public void Activate()
+            public void Activate(bool inputFieldIsFocussed)
             {
                 //Process queues
                 //Remove events by tag list
@@ -431,7 +434,7 @@ namespace Game.Input
                             throw new NotImplementedException(KeyEvent.ToString());
                     }
                     if (active) {
-                        keyListener.Value.Activate();
+                        keyListener.Value.Activate(inputFieldIsFocussed);
                     }
                 }
             }
@@ -441,10 +444,10 @@ namespace Game.Input
         {
             public List<KeyEvent> Events { get; set; } = new List<KeyEvent>();
 
-            public void Activate()
+            public void Activate(bool inputFieldIsFocussed)
             {
                 foreach (KeyEvent keyEvent in Events) {
-                    if(UIManager.Instance.CanFire(keyEvent.Tags)) {
+                    if(UIManager.Instance.CanFire(keyEvent.Tags, inputFieldIsFocussed)) {
                         keyEvent.Listener();
                     }
                 }
@@ -520,7 +523,7 @@ namespace Game.Input
                 }
             }
 
-            public void Activate()
+            public void Activate(bool inputFieldIsFocussed)
             {
                 //Process queues
 
@@ -557,7 +560,7 @@ namespace Game.Input
                     }
                 }
                 if (active) {
-                    Listener.Activate();
+                    Listener.Activate(inputFieldIsFocussed);
                 }
             }
         }
