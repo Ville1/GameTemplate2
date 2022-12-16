@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.Objects;
 using Game.Pathfinding;
 using Game.UI;
 using Game.Utils;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 namespace Game.Maps
 {
-    public class Tile : Object2D
+    public class Tile : Object2D, IPrototypeable
     {
         private static readonly MouseButton DRAG_MOUSE_BUTTON = MouseButton.Left;
 
@@ -18,6 +19,7 @@ namespace Game.Maps
         public int X { get { return Coordinates == null ? 0 : Coordinates.X; } }
         public int Y { get { return Coordinates == null ? 0 : Coordinates.Y; } }
         public string Name { get; private set; }
+        public string InternalName { get { return Name; } }
         public float MovementCost { get; private set; }
         public PathfindingNode<Tile> PathfindingNode { get; set; }
 
@@ -63,6 +65,13 @@ namespace Game.Maps
         {
             Name = name;
             MovementCost = movementCost;
+        }
+
+        public IPrototypeable Clone
+        {
+            get {
+                return new Tile(Name, Sprite, MovementCost);
+            }
         }
 
         public void ChangeTo(Tile prototype)
@@ -156,7 +165,7 @@ namespace Game.Maps
         public static Tile Load(Map map, Saving.Data.Tile saveData)
         {
             //TODO: Error handling. Save file can have tile names that don't match any prototypes
-            return new Tile(map, saveData.X, saveData.Y, Map.TilePrototypes.First(prototype => prototype.Name == saveData.Name));
+            return new Tile(map, saveData.X, saveData.Y, Prototypes.Tiles.Get(saveData.Name));
         }
 
         private void FindRectangle()

@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.Objects;
 using Game.Pathfinding;
 using Game.Saving;
 using Game.Saving.Data;
@@ -82,8 +83,8 @@ namespace Game.Maps
             generationTilesPerFrame = GENERATION_TILES_PER_FRAME_DEFAULT;
 
             tileRandomizer = new WeightedRandomizer<Tile>();
-            tileRandomizer.Add(TilePrototypes[0], 100);
-            tileRandomizer.Add(TilePrototypes[1], 10);
+            tileRandomizer.Add(Prototypes.Tiles.Get("Grass"), 100);
+            tileRandomizer.Add(Prototypes.Tiles.Get("House"), 10);
         }
 
         public void StartSaving(ref ISaveData data)
@@ -313,8 +314,8 @@ namespace Game.Maps
                 //Swap
                 string draggedName = draggedTile.Name;
                 string targetName = dragOverTile.Name;
-                dragOverTile.ChangeTo(TilePrototypes.First(tile => tile.Name == draggedName));
-                draggedTile.ChangeTo(TilePrototypes.First(tile => tile.Name == targetName));
+                dragOverTile.ChangeTo(Prototypes.Tiles.Get(draggedName));
+                draggedTile.ChangeTo(Prototypes.Tiles.Get(targetName));
 
                 dragOverTile.RectangleColor = null;
                 dragOverTile = null;
@@ -355,7 +356,7 @@ namespace Game.Maps
             );
         }
 
-        public static List<Tile> TilePrototypes
+        /*public static List<Tile> TilePrototypes
         {
             get {
                 if(tilePrototypes != null) {
@@ -368,7 +369,7 @@ namespace Game.Maps
 
                 return tilePrototypes;
             }
-        }
+        }*/
     }
 
     public class MapEnumerator : IEnumerator

@@ -209,6 +209,42 @@ namespace Game.UI
                 return Main.Instance.State == State.MainMenu ? "Already in main menu" : "Can't return to main menu when game state is " + Main.Instance.State;
             }));
 
+            commands.Add(new Command("playSoundEffect", new List<string>() { "playSfx" }, "Play a sound effect", (List<string> parameters) => {
+                LString errorMessage;
+                CommandParameters commandParameters = new CommandParameters(new List<CommandParameter>() {
+                    new CommandParameter(typeof(string), "Name"),
+                    new CommandParameter(typeof(SoundEffectType), "Type", "Sound effect type"),
+                    new CommandParameter(typeof(float), "Volume")
+                });
+                if(!ParseParameters(parameters, commandParameters, out errorMessage)) {
+                    return errorMessage;
+                }
+                return AudioManager.Instance.PlaySoundEffect(commandParameters.Get<string>("Name"), commandParameters.Get<float>("Volume"), commandParameters.Get<SoundEffectType>("Type"))
+                    ? string.Format("'{0}' played", commandParameters.Get<string>("Name")) : "Error!";
+            }));
+
+            commands.Add(new Command("playMusic", new List<string>() { }, "Play a music track", (List<string> parameters) => {
+                LString errorMessage;
+                CommandParameters commandParameters = new CommandParameters(new List<CommandParameter>() {
+                    new CommandParameter(typeof(string), "Name"),
+                    new CommandParameter(typeof(float), "Volume")
+                });
+                if (!ParseParameters(parameters, commandParameters, out errorMessage)) {
+                    return errorMessage;
+                }
+                return AudioManager.Instance.PlayMusic(commandParameters.Get<string>("Name"), commandParameters.Get<float>("Volume"))
+                    ? string.Format("Now playing '{0}'", commandParameters.Get<string>("Name")) : "Error!";
+            }));
+
+            commands.Add(new Command("currentMusic", new List<string>() { }, "Displayes name of music track", (List<string> parameters) => {
+                string name = AudioManager.Instance.CurrentMusic();
+                return string.IsNullOrEmpty(name) ? "There is no music playing" : name;
+            }));
+
+            commands.Add(new Command("stopMusic", new List<string>() { }, "Stop current music track", (List<string> parameters) => {
+                return AudioManager.Instance.StopMusic() ? "Music stopped" : "There is no music playing";
+            }));
+
             //----- TEMPLATE PROJECT DEBUGGING COMMANDS -----
             commands.Add(new Command("togglePlayerMovement", null, "Changes players movement type (DELETE THIS: TEMPLATE PROJECT DEBUGGING ONLY)", (List<string> parameters) => {
                 Main.Instance.PlayerCharacter.Movement = Main.Instance.PlayerCharacter.Movement.Shift(1);
@@ -458,6 +494,170 @@ namespace Game.UI
             object variableValue = variables[name];
             string quotes = variableValue.GetType() == typeof(string) ? "\"" : string.Empty;
             return string.Format("{0} = {1}{2}{3}", name, quotes, variableValue.ToString(), quotes);
+        }
+
+        private bool ParseParameters(List<string> parameters, CommandParameters output, out LString errorMessage)
+        {
+            errorMessage = string.Empty;
+            if (output == null || output.Parameters.Count == 0) {
+                return true;
+            }
+
+            if(parameters == null || parameters.Count != output.Parameters.Count) {
+                errorMessage = new LString("ConsoleCommandInvalidArgumentCount", LTables.Game, 1);//TODO: Should console localization be in Game table?
+                return false;
+            }
+
+            for(int i = 0; i < output.Parameters.Count; i++) {
+                CommandParameter commandParameter = output.Parameters[i];
+                string input = parameters[i];
+                bool error = false;
+
+                if (commandParameter.Type == typeof(string)) {
+                    //String parameter
+                    commandParameter.Value = input;
+                } else if (commandParameter.Type == typeof(int)) {
+                    //Integer parameter
+                    int value;
+                    if (int.TryParse(input, out value)) {
+                        commandParameter.Value = value;
+                    } else {
+                        error = true;
+                    }
+                } else if (commandParameter.Type == typeof(long)) {
+                    //long parameter
+                    long value;
+                    if (long.TryParse(input, out value)) {
+                        commandParameter.Value = value;
+                    } else {
+                        error = true;
+                    }
+                } else if (commandParameter.Type == typeof(short)) {
+                    //short parameter
+                    short value;
+                    if (short.TryParse(input, out value)) {
+                        commandParameter.Value = value;
+                    } else {
+                        error = true;
+                    }
+                } else if (commandParameter.Type == typeof(float)) {
+                    //short parameter
+                    float value;
+                    if (float.TryParse(input, out value)) {
+                        commandParameter.Value = value;
+                    } else {
+                        error = true;
+                    }
+                } else if (commandParameter.Type == typeof(double)) {
+                    //short parameter
+                    double value;
+                    if (double.TryParse(input, out value)) {
+                        commandParameter.Value = value;
+                    } else {
+                        error = true;
+                    }
+                } else if (commandParameter.Type == typeof(decimal)) {
+                    //short parameter
+                    decimal value;
+                    if (decimal.TryParse(input, out value)) {
+                        commandParameter.Value = value;
+                    } else {
+                        error = true;
+                    }
+                } else if (commandParameter.Type == typeof(bool)) {
+                    //Boolean parameter
+                    if (input == "1") {
+                        commandParameter.Value = true;
+                    } else if (input == "0") {
+                        commandParameter.Value = false;
+                    } else {
+                        bool value;
+                        if (bool.TryParse(input, out value)) {
+                            commandParameter.Value = value;
+                        } else {
+                            error = true;
+                        }
+                    }
+                } else if (commandParameter.Type.IsEnum) {
+                    object value;
+                    if(Enum.TryParse(commandParameter.Type, input, out value)) {
+                        if (Enum.IsDefined(commandParameter.Type, value)) {
+                            commandParameter.Value = value;
+                        } else {
+                            error = true;
+                        }
+                    } else {
+                        error = true;
+                    }
+                } else {
+                    throw new NotImplementedException("Parameter parsing is not implemented for type " + commandParameter.Type.ToString());
+                }
+
+                if (error) {
+                    errorMessage = new LString("ConsoleCommandInvalidArgument", LTables.Game,
+                        (i + 1),
+                        string.IsNullOrEmpty(commandParameter.Description) ? commandParameter.Name : commandParameter.Description,
+                        commandParameter.Type.ToString()
+                    );
+                    return false;
+                }
+            }
+
+            errorMessage = "";
+            return true;
+        }
+
+        private class CommandParameters
+        {
+            public List<CommandParameter> Parameters { get; set; }
+
+            public CommandParameters(List<CommandParameter> parameters)
+            {
+                Parameters = parameters;
+            }
+
+            public CommandParameters(CommandParameter parameter)
+            {
+                Parameters = new List<CommandParameter>() { parameter };
+            }
+
+            public CommandParameters(Type type, string name, LString description = null)
+            {
+                Parameters = new List<CommandParameter>() { new CommandParameter(type, name, description) };
+            }
+
+            public T Get<T>(string name)
+            {
+                CommandParameter parameter = Parameters.FirstOrDefault(p => p.Name == name && p.Type == typeof(T));
+                if(parameter == null) {
+                    throw new ArgumentException("Invalid parameter name");
+                }
+                return (T)parameter.Value;
+            }
+        }
+
+        private class CommandParameter
+        {
+            public string Name { get; set; }
+            public LString Description { get; set; }
+            public Type Type { get; set; }
+            public object Value { get; set; }
+
+            public CommandParameter(Type type, string name, LString description)
+            {
+                Type = type;
+                Name = name;
+                Value = null;
+                Description = description;
+            }
+
+            public CommandParameter(Type type, string name)
+            {
+                Type = type;
+                Name = name;
+                Value = null;
+                Description = null;
+            }
         }
 
         private class ArchivedCommand

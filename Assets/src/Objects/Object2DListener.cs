@@ -1,7 +1,7 @@
 using Game.Input;
 using UnityEngine;
 
-namespace Game
+namespace Game.Objects
 {
     public class Object2DListener : MonoBehaviour, IClickListenerComponent
     {

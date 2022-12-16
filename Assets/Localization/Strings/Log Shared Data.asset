@@ -243,6 +243,30 @@ MonoBehaviour:
     m_Key: NameListLoaded
     m_Metadata:
       m_Items: []
+  - m_Id: 70374381873098752
+    m_Key: PrototypeDoesNotExist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387377257148416
+    m_Key: SoundEffectLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387494584414208
+    m_Key: MusicTrackLoaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387609726447616
+    m_Key: SoundEffectDoesNotExist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387681868476416
+    m_Key: MusicTrackDoesNotExist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70400763231563776
+    m_Key: SoundEffectConfigError
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

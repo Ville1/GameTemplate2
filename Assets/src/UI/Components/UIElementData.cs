@@ -1,3 +1,4 @@
+using Game.Utils;
 using System;
 using UnityEngine;
 
@@ -75,13 +76,13 @@ namespace Game.UI.Components
                     break;
                 case ElementType.Image:
                     if (SpriteData.IsEmpty) {
-                        UIHelper.Find(parentGameObject, GameObjectName).SetActive(false);
+                        GameObjectHelper.Find(parentGameObject, GameObjectName).SetActive(false);
                     } else {
                         UIHelper.SetImage(parentGameObject, GameObjectName, SpriteData);
                     }
                     break;
                 case ElementType.Tooltip:
-                    GameObject gameObject = UIHelper.Find(parentGameObject, GameObjectName);
+                    GameObject gameObject = GameObjectHelper.Find(parentGameObject, GameObjectName);
                     TooltipManager.Instance.UnregisterTooltip(gameObject);
                     if (!string.IsNullOrEmpty(ElementText)) {
                         TooltipManager.Instance.RegisterTooltip(new Tooltip(gameObject, ElementText));

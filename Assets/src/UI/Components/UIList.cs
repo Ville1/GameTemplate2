@@ -1,3 +1,4 @@
+using Game.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,7 +85,7 @@ namespace Game.UI.Components
             );
             gameObject.SetActive(true);
             string name = string.Format("Row {0} (#{1})", row.Key, currentId);
-            if (UIHelper.Find(container, name) != null) {
+            if (GameObjectHelper.Find(container, name) != null) {
                 throw new Exception(string.Format("List container already contains a row with name: '{0}'", name));
             }
             gameObject.name = name;
@@ -224,7 +225,7 @@ namespace Game.UI.Components
             {
                 if(ElementData != null) {
                     foreach(UIElementData tooltipData in ElementData.Where(elementData => elementData.Type == UIElementData.ElementType.Tooltip)) {
-                        TooltipManager.Instance.UnregisterTooltip(UIHelper.Find(GameObject, tooltipData.GameObjectName));
+                        TooltipManager.Instance.UnregisterTooltip(GameObjectHelper.Find(GameObject, tooltipData.GameObjectName));
                     }
                 }
                 UnityEngine.GameObject.Destroy(GameObject);

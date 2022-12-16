@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.Objects;
 using Game.Pathfinding;
 using Game.UI;
 using Game.Utils;
@@ -133,6 +134,7 @@ namespace Game.Maps
             } else {
                 PlayAnimation("stop");
             }
+            AudioManager.Instance.PlaySoundEffect("clink");
         }
 
         public void SpeedUpAnimation()

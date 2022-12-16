@@ -253,6 +253,31 @@ MonoBehaviour:
     m_Localized: Name list '{0}' loaded
     m_Metadata:
       m_Items: []
+  - m_Id: 70374381873098752
+    m_Localized: '''{0}'' prototype with InternalName ''{1}'' does not exist'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387377257148416
+    m_Localized: Sound effect '{0}' loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387494584414208
+    m_Localized: Music track '{0}' loaded
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387609726447616
+    m_Localized: Sound effect '{0}' does not exist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70387681868476416
+    m_Localized: Music track '{0}' does not exist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70400763231563776
+    m_Localized: 'Config file has an invalid sound effect configuration for type
+      ''{0}'': {1}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

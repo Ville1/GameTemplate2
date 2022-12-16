@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Game
+namespace Game.Objects
 {
     /// <summary>
     /// TODO: allow spriteless objects

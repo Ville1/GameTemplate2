@@ -120,7 +120,7 @@ namespace Game.UI {
 
             //eventData.IsBlockedByUI = true => Check otherUIEventHits for ui elements, that are not children of uiElement
             foreach(GameObject gameObject in otherUIEventHits) {//Layer 2 = Ignore raycast
-                if(gameObject != uiElement && gameObject.layer != 2 && !UIHelper.IsChild(uiElement, gameObject)) {
+                if(gameObject != uiElement && gameObject.layer != 2 && !GameObjectHelper.IsChild(uiElement, gameObject)) {
                     return false;
                 }
             }

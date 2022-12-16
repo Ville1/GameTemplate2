@@ -4,5 +4,15 @@
 	"LogPrefix": true,
 	"LogMethod": true,
 	"SaveFolder": "C:/Users/Ville/GameTemplateSaves",
-	"ConsoleEnabled": true
+	"SavingTargetFPS": 60,
+	"ConsoleEnabled": true,
+	"MusicVolume": 0.5,
+	"MuteMusic": false,
+	"SoundEffectVolume": 0.5,
+	"MuteSoundEffects": false,
+	"SoundEffects": [{
+		"Type": 1,
+		"Volume": 0.3,
+		"Mute": false
+	}]
 }

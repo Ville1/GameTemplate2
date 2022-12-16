@@ -21,7 +21,7 @@ namespace Game.Input
 
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.CloseWindow, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Close); }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.AcceptWindow, () => { UIManager.Instance.HandleWindowEventKeydown(WindowEvent.Accept); }, KeyEventTag.IgnoreUI);
-            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.NotificationHistory, () => { NotificationHistoryWindowManager.Instance.ToggleActive(); }, KeyEventTag.IgnoreUI);
+            KeyboardManager.Instance.AddOnKeyDownEventListener(KeyBindings.NotificationHistory, () => { NotificationHistoryWindowManager.Instance.ToggleActive(); });
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.F12, () => { ConsoleManager.Instance.Active = !ConsoleManager.Instance.Active; }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.UpArrow, () => { ConsoleManager.Instance.HistoryUp(); }, KeyEventTag.IgnoreUI);
             KeyboardManager.Instance.AddOnKeyDownEventListener(KeyCode.DownArrow, () => { ConsoleManager.Instance.HistoryDown(); }, KeyEventTag.IgnoreUI);

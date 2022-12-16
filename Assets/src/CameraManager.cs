@@ -1,5 +1,6 @@
 using Game.Input;
 using Game.Utils;
+using Game.Objects;
 using UnityEngine;
 
 namespace Game

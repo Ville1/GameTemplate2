@@ -1,4 +1,5 @@
 using Game.UI.Components;
+using Game.Utils;
 using System;
 using TMPro;
 using UnityEngine;
@@ -10,37 +11,6 @@ namespace Game.UI
     {
         private static Image.Type DEFAULT_IMAGE_TYPE = Image.Type.Simple;
 
-        public static GameObject Find(Transform parent, string name)
-        {
-            return Find(parent.gameObject.name, name);
-        }
-
-        public static GameObject Find(GameObject parent, string name)
-        {
-            return Find(parent.name, name);
-        }
-
-        public static GameObject Find(string parent, string name)
-        {
-            return GameObject.Find(string.Format("{0}/{1}", parent, name));
-        }
-
-        public static bool IsChild(GameObject parent, GameObject potentialChild)
-        {
-            int maxIterations = 100;
-            GameObject currentParent = potentialChild;
-            int iteration = 0;
-            do {
-                currentParent = currentParent.transform.parent != null ? currentParent.transform.parent.gameObject : null;
-                if(currentParent == parent) {
-                    return true;
-                }
-                iteration++;
-            } while (currentParent != null && iteration < maxIterations);
-
-            return false;
-        }
-
         public static void SetText(GameObject parent, string textGameObjectName, LString text, Color? color = null)
         {
             SetText(parent.name, textGameObjectName, text, color);
@@ -49,7 +19,7 @@ namespace Game.UI
         public static void SetText(string parentGameObjectName, string textGameObjectName, LString text, Color? color = null)
         {
             //Find GameObject
-            GameObject textGameObject = Find(parentGameObjectName, textGameObjectName);
+            GameObject textGameObject = GameObjectHelper.Find(parentGameObjectName, textGameObjectName);
             if(textGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, textGameObjectName));
             }
@@ -74,7 +44,7 @@ namespace Game.UI
         public static CustomButton SetButton(string parentGameObjectName, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
         {
             //Find GameObject
-            GameObject buttonGameObject = Find(parentGameObjectName, buttonGameObjectName);
+            GameObject buttonGameObject = GameObjectHelper.Find(parentGameObjectName, buttonGameObjectName);
             if (buttonGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, buttonGameObjectName));
             }
@@ -99,7 +69,7 @@ namespace Game.UI
         public static void SetImage(string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
         {
             //Find GameObject
-            GameObject imageGameObject = Find(parentGameObjectName, imageGameObjectName);
+            GameObject imageGameObject = GameObjectHelper.Find(parentGameObjectName, imageGameObjectName);
             if (imageGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, imageGameObjectName));
             }
