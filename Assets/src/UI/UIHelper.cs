@@ -13,20 +13,26 @@ namespace Game.UI
 
         public static void SetText(GameObject parent, string textGameObjectName, LString text, Color? color = null)
         {
-            SetText(parent.name, textGameObjectName, text, color);
+            SetTextObject(parent, null, textGameObjectName, text, color);
         }
 
         public static void SetText(string parentGameObjectName, string textGameObjectName, LString text, Color? color = null)
         {
+            SetTextObject(null, parentGameObjectName, textGameObjectName, text, color);
+        }
+
+        private static void SetTextObject(GameObject parent, string parentGameObjectName, string textGameObjectName, LString text, Color? color)
+        {
             //Find GameObject
-            GameObject textGameObject = GameObjectHelper.Find(parentGameObjectName, textGameObjectName);
-            if(textGameObject == null) {
+            GameObject textGameObject = parent != null ? GameObjectHelper.Find(parent, textGameObjectName) : GameObjectHelper.Find(parentGameObjectName, textGameObjectName);
+            parentGameObjectName = parent != null ? parent.name : parentGameObjectName;
+            if (textGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, textGameObjectName));
             }
 
             //Get component
             TMP_Text textComponent = textGameObject.GetComponent<TMP_Text>();
-            if(textComponent == null) {
+            if (textComponent == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' does not contain a TMP_Text component", parentGameObjectName, textGameObjectName));
             }
 
@@ -36,15 +42,22 @@ namespace Game.UI
                 textComponent.color = color.Value;
             }
         }
+
         public static CustomButton SetButton(GameObject parentGameObject, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
         {
-            return SetButton(parentGameObject.name, buttonGameObjectName, text, onClick);
+            return SetButtonObject(parentGameObject, null, buttonGameObjectName, text, onClick);
         }
 
         public static CustomButton SetButton(string parentGameObjectName, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
         {
+            return SetButtonObject(null, parentGameObjectName, buttonGameObjectName, text, onClick);
+        }
+
+        public static CustomButton SetButtonObject(GameObject parent, string parentGameObjectName, string buttonGameObjectName, LString text, CustomButton.OnClick onClick)
+        {
             //Find GameObject
-            GameObject buttonGameObject = GameObjectHelper.Find(parentGameObjectName, buttonGameObjectName);
+            GameObject buttonGameObject = parent != null ? GameObjectHelper.Find(parent, buttonGameObjectName) : GameObjectHelper.Find(parentGameObjectName, buttonGameObjectName);
+            parentGameObjectName = parent != null ? parent.name : parentGameObjectName;
             if (buttonGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, buttonGameObjectName));
             }
@@ -63,13 +76,19 @@ namespace Game.UI
 
         public static void SetImage(GameObject parentGameObject, string imageGameObjectName, UISpriteData spriteData)
         {
-            SetImage(parentGameObject.name, imageGameObjectName, spriteData);
+            SetImageObject(parentGameObject, null, imageGameObjectName, spriteData);
         }
 
-        public static void SetImage(string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
+        public static void SetImageObject(string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
+        {
+            SetImageObject(null, parentGameObjectName, imageGameObjectName, spriteData);
+        }
+
+        public static void SetImageObject(GameObject parent, string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
         {
             //Find GameObject
-            GameObject imageGameObject = GameObjectHelper.Find(parentGameObjectName, imageGameObjectName);
+            GameObject imageGameObject = parent != null ? GameObjectHelper.Find(parent, imageGameObjectName) : GameObjectHelper.Find(parentGameObjectName, imageGameObjectName);
+            parentGameObjectName = parent != null ? parent.name : parentGameObjectName;
             if (imageGameObject == null) {
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' not found", parentGameObjectName, imageGameObjectName));
             }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -37,6 +38,22 @@ namespace Game.UI.Components
         }
 
         public ScrollableList(GameObject scrollView, float? rowSpacing, ScrollRect.ScrollbarVisibility? verticalScrollbarVisibility, ScrollRect.ScrollbarVisibility? horizontalScrollbarVisibility) : base(FindContent(scrollView, DEFAULT_CONTENT_NAME), rowSpacing)
+        {
+            Initialize(scrollView, verticalScrollbarVisibility, horizontalScrollbarVisibility);
+        }
+
+        public ScrollableList(Dictionary<string, GameObject> rowPrototypes, GameObject scrollView, GameObject scrollViewContent,
+            ScrollRect.ScrollbarVisibility? verticalScrollbarVisibility = null, ScrollRect.ScrollbarVisibility? horizontalScrollbarVisibility = null) : base(rowPrototypes, scrollViewContent)
+        {
+            Initialize(scrollView, verticalScrollbarVisibility, horizontalScrollbarVisibility);
+        }
+
+        public ScrollableList(Dictionary<string, GameObject> rowPrototypes, GameObject scrollView) : base(rowPrototypes, FindContent(scrollView, DEFAULT_CONTENT_NAME))
+        {
+            Initialize(scrollView, null, null);
+        }
+
+        public ScrollableList(Dictionary<string, GameObject> rowPrototypes, GameObject scrollView, ScrollRect.ScrollbarVisibility? verticalScrollbarVisibility, ScrollRect.ScrollbarVisibility? horizontalScrollbarVisibility) : base(rowPrototypes, FindContent(scrollView, DEFAULT_CONTENT_NAME))
         {
             Initialize(scrollView, verticalScrollbarVisibility, horizontalScrollbarVisibility);
         }

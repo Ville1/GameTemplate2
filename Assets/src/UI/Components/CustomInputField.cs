@@ -5,40 +5,46 @@ namespace Game.UI.Components
 {
     public class CustomInputField
     {
-        private static readonly string DEFAULT_PLACEHOLDER_GAMEOBJECT_NAME = "Placeholder";
+        protected static readonly string DEFAULT_PLACEHOLDER_GAMEOBJECT_NAME = "Placeholder";
 
         public delegate void OnChange(string val);
 
-        public TMP_InputField InputBase { get; private set; }
-        public TMP_Text Placeholder { get; private set; }
+        public TMP_InputField InputBase { get; protected set; }
+        public TMP_Text Placeholder { get; protected set; }
+        public int MaxLenght { get; protected set; }
+        public bool IsDisabled { get; protected set; }
+        public OnChange ChangeCallback { get; protected set; }
 
-        private LString placeholderText;
+        protected LString placeholderText;
+        protected bool skipCallbacks = false;
 
-        public CustomInputField(TMP_InputField input, OnChange onChange)
+        public CustomInputField(TMP_InputField input, OnChange onChange, int maxLenght = int.MaxValue, bool isDisabled = false)
         {
-            Initialize(input, null, null, null, onChange);
+            Initialize(input, null, null, null, onChange, maxLenght, isDisabled);
         }
 
-        public CustomInputField(TMP_InputField input, LString placeholderText, OnChange onChange)
+        public CustomInputField(TMP_InputField input, LString placeholderText, OnChange onChange, int maxLenght = int.MaxValue, bool isDisabled = false)
         {
-            Initialize(input, null, null, placeholderText, onChange);
+            Initialize(input, null, null, placeholderText, onChange, maxLenght, isDisabled);
         }
 
-        public CustomInputField(TMP_InputField input, TMP_Text placeholder, LString placeholderText, OnChange onChange)
+        public CustomInputField(TMP_InputField input, TMP_Text placeholder, LString placeholderText, OnChange onChange, int maxLenght = int.MaxValue, bool isDisabled = false)
         {
-            Initialize(input, null, placeholder, placeholderText, onChange);
+            Initialize(input, null, placeholder, placeholderText, onChange, maxLenght, isDisabled);
         }
 
-        public CustomInputField(TMP_InputField input, string placeholderGameObjectName, LString placeholderText, OnChange onChange)
+        public CustomInputField(TMP_InputField input, string placeholderGameObjectName, LString placeholderText, OnChange onChange, int maxLenght = int.MaxValue, bool isDisabled = false)
         {
-            Initialize(input, placeholderGameObjectName, null, placeholderText, onChange);
+            Initialize(input, placeholderGameObjectName, null, placeholderText, onChange, maxLenght, isDisabled);
         }
 
-        private void Initialize(TMP_InputField input, string placeholderGameObjectName, TMP_Text placeholder, LString placeholderText, OnChange onChange)
+        protected void Initialize(TMP_InputField input, string placeholderGameObjectName, TMP_Text placeholder, LString placeholderText, OnChange onChange, int maxLenght, bool isDisabled)
         {
             InputBase = input;
             Placeholder = null;
             this.placeholderText = placeholderText;
+            MaxLenght = maxLenght;
+            ChangeCallback = onChange;
 
             if (placeholder != null) {
                 //Direct reference to placeholder was provided
@@ -62,19 +68,15 @@ namespace Game.UI.Components
 
             if(Placeholder != null) {
                 //Update placeholder text
-                if (string.IsNullOrEmpty(placeholderText)) {
-                    this.placeholderText = Placeholder.text;
-                } else {
-                    Placeholder.text = placeholderText;
-                }
+                Placeholder.text = placeholderText;
             }
 
-            if(onChange != null) {
-                //Add event listener
-                TMP_InputField.OnChangeEvent onChangeEvent = new TMP_InputField.OnChangeEvent();
-                onChangeEvent.AddListener(new UnityEngine.Events.UnityAction<string>(onChange));
-                InputBase.onValueChanged = onChangeEvent;
-            }
+            //Add event listener
+            TMP_InputField.OnChangeEvent onChangeEvent = new TMP_InputField.OnChangeEvent();
+            onChangeEvent.AddListener(new UnityEngine.Events.UnityAction<string>(HandleChange));
+            InputBase.onValueChanged = onChangeEvent;
+
+            InputBase.interactable = !isDisabled;
         }
 
         public LString PlaceholderText
@@ -111,6 +113,31 @@ namespace Game.UI.Components
             }
             set {
                 InputBase.text = value;
+            }
+        }
+
+        /// <summary>
+        /// Set text and ignore callbacks and event listeners
+        /// </summary>
+        /// <param name="text"></param>
+        protected void SetText(string text)
+        {
+            skipCallbacks = true;
+            InputBase.text = text;
+        }
+
+        protected virtual void HandleChange(string value)
+        {
+            if(value != null && value.Length > MaxLenght) {
+                value = value.Substring(0, MaxLenght);
+                Text = value;
+            }
+            if (skipCallbacks) {
+                skipCallbacks = false;
+                return;
+            }
+            if(ChangeCallback != null) {
+                ChangeCallback(value);
             }
         }
     }

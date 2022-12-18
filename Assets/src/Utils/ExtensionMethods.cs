@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Game.Utils
 {
@@ -137,6 +138,16 @@ namespace Game.Utils
                 newIndex += values.Count;
             }
             return values[newIndex];
+        }
+
+        public static Vector2 Clone(this Vector2 vector)
+        {
+            return new Vector2(vector.x, vector.y);
+        }
+
+        public static Vector3 Clone(this Vector3 vector)
+        {
+            return new Vector3(vector.x, vector.y, vector.z);
         }
     }
 }

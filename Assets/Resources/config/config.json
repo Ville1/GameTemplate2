@@ -1,18 +1,21 @@
 {
-	"LogLevel": 0,
-	"LogConsoleLevel": 2,
-	"LogPrefix": true,
-	"LogMethod": true,
-	"SaveFolder": "C:/Users/Ville/GameTemplateSaves",
-	"SavingTargetFPS": 60,
-	"ConsoleEnabled": true,
-	"MusicVolume": 0.25,
-	"MuteMusic": false,
-	"SoundEffectVolume": 0.5,
-	"MuteSoundEffects": false,
-	"SoundEffects": [{
-		"Type": 1,
-		"Volume": 0.3,
-		"Mute": false
-	}]
+    "LogLevel": 0,
+    "LogConsoleLevel": 2,
+    "LogPrefix": true,
+    "LogMethod": true,
+    "SaveFolder": "C:/Users/Ville/GameTemplateSaves",
+    "SavingTargetFPS": 60.0,
+    "ConsoleEnabled": true,
+    "MusicVolume": 0.25,
+    "MuteMusic": false,
+    "SoundEffectVolume": 0.15000000596046449,
+    "MuteSoundEffects": false,
+    "SoundEffects": [
+        {
+            "Type": 1,
+            "Volume": 0.30000001192092898,
+            "Mute": false
+        }
+    ],
+    "TestValue": 1.0
 }

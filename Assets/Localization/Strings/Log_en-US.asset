@@ -278,6 +278,14 @@ MonoBehaviour:
       ''{0}'': {1}'
     m_Metadata:
       m_Items: []
+  - m_Id: 70708403115487232
+    m_Localized: List does not have multiple prototypes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70709265636356096
+    m_Localized: List does not have prototype with name '{0}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

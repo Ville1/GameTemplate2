@@ -15,9 +15,12 @@ namespace Game.UI.Components
         private static long currentId = 0;
 
         protected GameObject rowPrototype;
+        protected Dictionary<string, GameObject> rowPrototypes;
         protected GameObject container;
         protected List<Row> rows;
         protected float rowSpacing;
+
+        public bool HasMultiplePrototypes { get { return rowPrototypes != null && rowPrototypes.Count != 0; } }
 
         public UIList(GameObject rowPrototype, GameObject container, float? rowSpacing = null)
         {
@@ -34,10 +37,18 @@ namespace Game.UI.Components
             Initialize(FindRowPrototype(container, DEFAULT_ROW_PROTOTYPE_NAME), container, rowSpacing);
         }
 
+        public UIList(Dictionary<string, GameObject> rowPrototypes, GameObject container)
+        {
+            Initialize(rowPrototypes, container);
+        }
+
         private void Initialize(GameObject rowPrototype, GameObject container, float? rowSpacing = null)
         {
-            if (rowPrototype == null || container == null) {
-                throw new ArgumentNullException();
+            if (rowPrototype == null) {
+                throw new ArgumentNullException("Missing rowPrototype");
+            }
+            if (container == null) {
+                throw new ArgumentNullException("Missing container");
             }
             this.rowPrototype = rowPrototype;
             this.container = container;
@@ -46,39 +57,70 @@ namespace Game.UI.Components
             rowPrototype.SetActive(false);
         }
 
-        public GameObject AddRow(List<UIElementData> elementData)
+        private void Initialize(Dictionary<string, GameObject> rowPrototypes, GameObject container)
         {
-            return AddRow(new Row() { KeyInt = rows.Count, ElementData = elementData });
+            if (rowPrototypes == null || rowPrototypes.Count == 0) {
+                throw new ArgumentNullException("Missing rowPrototypes");
+            }
+            if (container == null) {
+                throw new ArgumentNullException("Missing container");
+            }
+            rowPrototype = null;
+            this.rowPrototypes = DictionaryHelper.Copy(rowPrototypes);
+            this.container = container;
+            rows = new List<Row>();
+            rowSpacing = -1.0f;
         }
 
-        public GameObject AddRow(int key, List<UIElementData> elementData)
+        public GameObject AddRow(List<UIElementData> elementData, string prototypeName = null)
         {
-            return AddRow(new Row() { KeyInt = key, ElementData = elementData });
+            return AddRow(new Row() { KeyInt = rows.Count, ElementData = elementData }, prototypeName);
         }
 
-        public GameObject AddRow(long key, List<UIElementData> elementData)
+        public GameObject AddRow(int key, List<UIElementData> elementData, string prototypeName = null)
         {
-            return AddRow(new Row() { KeyLong = key, ElementData = elementData });
+            return AddRow(new Row() { KeyInt = key, ElementData = elementData }, prototypeName);
         }
 
-        public GameObject AddRow(string key, List<UIElementData> elementData)
+        public GameObject AddRow(long key, List<UIElementData> elementData, string prototypeName = null)
         {
-            return AddRow(new Row() { KeyString = key, ElementData = elementData });
+            return AddRow(new Row() { KeyLong = key, ElementData = elementData }, prototypeName);
         }
 
-        public GameObject AddRow(Guid key, List<UIElementData> elementData)
+        public GameObject AddRow(string key, List<UIElementData> elementData, string prototypeName = null)
         {
-            return AddRow(key.ToString(), elementData);
+            return AddRow(new Row() { KeyString = key, ElementData = elementData }, prototypeName);
         }
 
-        private GameObject AddRow(Row row)
+        public GameObject AddRow(Guid key, List<UIElementData> elementData, string prototypeName = null)
         {
+            return AddRow(new Row() { KeyString = key.ToString(), ElementData = elementData }, prototypeName);
+        }
+
+        private GameObject AddRow(Row row, string prototypeName = null)
+        {
+            //Check parameters
+            if(!string.IsNullOrEmpty(prototypeName) && !HasMultiplePrototypes) {
+                CustomLogger.Error("{ListDoesNotHaveMultiplePrototypes}");
+                return null;
+            }
+
+            if(HasMultiplePrototypes && !rowPrototypes.ContainsKey(prototypeName)) {
+                CustomLogger.Error("{ListDoesNotHavePrototypes}", prototypeName);
+                return null;
+            }
+
+            //Choose the prototype
+            GameObject prototype = HasMultiplePrototypes ? rowPrototypes[prototypeName] : rowPrototype;
+            float yDelta = HasMultiplePrototypes ?  -1.0f * rows.Select(row => row.GameObject.GetComponent<RectTransform>().rect.height).Sum() : rows.Count * -rowSpacing;
+
+            //Create a new row
             GameObject gameObject = GameObject.Instantiate(
-                rowPrototype,
+                prototype,
                 new Vector3(
-                    rowPrototype.transform.position.x,
-                    rowPrototype.transform.position.y + (rows.Count * -rowSpacing),
-                    rowPrototype.transform.position.z
+                    prototype.transform.position.x,
+                    prototype.transform.position.y + yDelta,
+                    prototype.transform.position.z
                 ),
                 Quaternion.identity,
                 container.transform
@@ -90,12 +132,15 @@ namespace Game.UI.Components
             }
             gameObject.name = name;
             currentId = currentId == long.MaxValue ? 0 : currentId + 1;
+
+            //Set elements
             foreach (UIElementData uiElementData in row.ElementData) {
                 uiElementData.Set(gameObject);
             }
+
             row.GameObject = gameObject;
             rows.Add(row);
-            container.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, rows.Count * rowSpacing);
+            container.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, -1.0f * yDelta);
             return gameObject;
         }
 

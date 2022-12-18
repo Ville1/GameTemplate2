@@ -46,4 +46,8 @@ namespace Game
     public enum NotificationType { TestType, TestType2 }
 
     public enum SoundEffectType { None, UI, Ambient }
+
+    public enum InputType { Number, Text, Slider, Toggle }
+
+    public enum ConfigCategory { General = 0, Audio = 1 }
 }

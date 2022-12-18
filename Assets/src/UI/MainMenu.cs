@@ -34,6 +34,7 @@ namespace Game.UI
                 { "{Load}", Load },
                 { "{Save}", Save },
                 { "{Controls}", KeyBindings },
+                { "{Settings}", Settings },
                 { "{Quit}", Quit }
             };
 
@@ -95,6 +96,11 @@ namespace Game.UI
         private void KeyBindings()
         {
             KeyBindingsWindowManager.Instance.Active = true;
+        }
+
+        private void Settings()
+        {
+            ConfigWindowManager.Instance.Active = true;
         }
 
         private void Quit()

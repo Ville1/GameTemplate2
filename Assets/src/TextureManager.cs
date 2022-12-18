@@ -13,6 +13,8 @@ namespace Game
 
         public static TextureManager Instance;
 
+        public Sprite DefaultUISprite;
+
         private static TextureList<Texture2D> textures = new TextureList<Texture2D>();
         private static TextureList<Sprite> sprites = new TextureList<Sprite>();
 

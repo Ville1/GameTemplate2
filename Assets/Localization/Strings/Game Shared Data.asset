@@ -171,6 +171,22 @@ MonoBehaviour:
     m_Key: ConsoleCommandInvalidArgument
     m_Metadata:
       m_Items: []
+  - m_Id: 70483857313722368
+    m_Key: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70483882651512832
+    m_Key: GeneralSettings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70483964104896512
+    m_Key: AudioSettings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70484839095431168
+    m_Key: FilterSettings
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
