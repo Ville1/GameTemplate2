@@ -13,12 +13,12 @@ namespace Game
     {
         public static Main Instance;
 
-        public State State { get; private set; }
         public Maps.Map WorldMap { get; private set; }
         public float CurrentFrameRate { get; private set; }
         public Character PlayerCharacter { get; private set; }
 
         private SaveManager<Saving.Data.SaveData> saveManager = null;
+        private State state;
 
         /// <summary>
         /// Initializiation
@@ -45,6 +45,9 @@ namespace Game
 
             //Show main menu
             MainMenu.Instance.Active = true;
+
+            //Show menu background
+            BackgroundManager.Instance.Active = true;
         }
 
         /// <summary>
@@ -63,8 +66,11 @@ namespace Game
                         ProgressBar.Instance.Description = saveManager.Description;
                         break;
                     case SaveManager<Saving.Data.SaveData>.ManagerState.Error:
-                    //TODO: Show message on screen
-                    //Localization.Game.Get("FailedToSaveGame");
+                        ProgressBar.Instance.Active = false;
+                        MessageWindowManager.Instance.ShowMessage("{FailedToSaveGame}");
+                        State = State.Running;
+                        saveManager = null;
+                        break;
                     case SaveManager<Saving.Data.SaveData>.ManagerState.Done:
                         ProgressBar.Instance.Active = false;
                         if(State == State.Loading) {
@@ -78,6 +84,17 @@ namespace Game
                     default:
                         throw new NotImplementedException(saveManager.State.ToString());
                 }
+            }
+        }
+
+        public State State
+        {
+            get {
+                return state;
+            }
+            private set {
+                state = value;
+                BackgroundManager.Instance.Active = state == State.MainMenu || state == State.GeneratingMap || state == State.Loading;
             }
         }
 

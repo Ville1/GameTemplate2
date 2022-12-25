@@ -79,12 +79,17 @@ namespace Game.UI
             SetImageObject(parentGameObject, null, imageGameObjectName, spriteData);
         }
 
-        public static void SetImageObject(string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
+        public static void SetImage(string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
         {
             SetImageObject(null, parentGameObjectName, imageGameObjectName, spriteData);
         }
 
-        public static void SetImageObject(GameObject parent, string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
+        public static void SetImage(Image image, UISpriteData spriteData)
+        {
+            SetImageObject(image.gameObject, image, spriteData);
+        }
+
+        private static void SetImageObject(GameObject parent, string parentGameObjectName, string imageGameObjectName, UISpriteData spriteData)
         {
             //Find GameObject
             GameObject imageGameObject = parent != null ? GameObjectHelper.Find(parent, imageGameObjectName) : GameObjectHelper.Find(parentGameObjectName, imageGameObjectName);
@@ -99,6 +104,11 @@ namespace Game.UI
                 throw new ArgumentException(string.Format("GameObject '{0}/{1}' does not contain a Image component", parentGameObjectName, imageGameObjectName));
             }
 
+            SetImageObject(imageGameObject, imageComponent, spriteData);
+        }
+
+        private static void SetImageObject(GameObject imageGameObject, Image imageComponent, UISpriteData spriteData)
+        {
             if (spriteData.IsEmpty) {
                 //Hide image
                 imageGameObject.SetActive(false);
