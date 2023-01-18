@@ -275,6 +275,14 @@ MonoBehaviour:
     m_Key: ListDoesNotHavePrototypes
     m_Metadata:
       m_Items: []
+  - m_Id: 82344289506783232
+    m_Key: GameObjectNotFound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82345422207938560
+    m_Key: ComponentNotFound
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

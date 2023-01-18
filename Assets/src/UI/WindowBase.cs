@@ -1,3 +1,6 @@
+using Game.UI.Components;
+using Game.Utils;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,7 +9,8 @@ namespace Game.UI
 {
     public class WindowBase : MonoBehaviour
     {
-        private static Image.Type DEFAULT_BACKGROUND_IMAGE_TYPE = Image.Type.Tiled;
+        private static readonly Image.Type DEFAULT_BACKGROUND_IMAGE_TYPE = Image.Type.Tiled;
+        private static readonly string DEFAULT_CLOSE_BUTTON_NAME = "Close Button";
 
         public enum Tag {
             /// <summary>
@@ -51,6 +55,13 @@ namespace Game.UI
         /// top most ones should have higher priority than ones in the bottom. Otherwise can be left as 0.
         /// </summary>
         public int WindowEventPriority { get; protected set; } = 0;
+        /// <summary>
+        /// If button with this name is found as a child of Panel, it gets assigned close action automatically during Start().
+        /// </summary>
+        protected string AutoAssignCloseButtonName { get; set; } = null;
+
+        private bool baseIsInitialized = false;
+        private CustomButton autoAssignedCloseButton = null;
 
         /// <summary>
         /// Initializiation
@@ -59,6 +70,22 @@ namespace Game.UI
         {
             UIManager.Instance.RegisterWindow(this);
             Active = false;
+
+            if (AutoAssignCloseButton) {
+                GameObject buttonGameObject = GameObjectHelper.Find(Panel.transform, AutoAssignCloseButtonName);
+                if(buttonGameObject == null) {
+                    CustomLogger.Warning("{GameObjectNotFound}", AutoAssignCloseButtonName, Panel.name);
+                } else {
+                    Button button = buttonGameObject.GetComponent<Button>();
+                    if (button == null) {
+                        CustomLogger.Warning("{ComponentNotFound}", AutoAssignCloseButtonName, "Button");
+                    } else {
+                        autoAssignedCloseButton = new CustomButton(button, null, () => { Active = false; });
+                    }
+                }
+            }
+
+            baseIsInitialized = true;
         }
 
         /// <summary>
@@ -156,6 +183,23 @@ namespace Game.UI
                     AllowedMouseEvents = new List<MouseEventTag>() { MouseEventTag.IgnoreUI };
                 } else {
                     AllowedMouseEvents = null;
+                }
+            }
+        }
+
+        protected bool AutoAssignCloseButton
+        {
+            get {
+                return !string.IsNullOrEmpty(AutoAssignCloseButtonName);
+            }
+            set {
+                if (baseIsInitialized) {
+                    throw new Exception("AutoAssignCloseButton should be called before base.Start();");
+                }
+                if (value) {
+                    AutoAssignCloseButtonName = DEFAULT_CLOSE_BUTTON_NAME;
+                } else {
+                    AutoAssignCloseButtonName = null;
                 }
             }
         }

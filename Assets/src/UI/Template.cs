@@ -14,6 +14,7 @@ namespace Game.UI
         /// </summary>
         protected override void Start()
         {
+            //AutoAssignCloseButton = true;
             base.Start();
             if (Instance != null) {
                 CustomLogger.Error("{AttemptingToCreateMultipleInstances}");

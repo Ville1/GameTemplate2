@@ -286,6 +286,14 @@ MonoBehaviour:
     m_Localized: List does not have prototype with name '{0}'
     m_Metadata:
       m_Items: []
+  - m_Id: 82344289506783232
+    m_Localized: No GameObject with name "{0}" found in children of GameObject "{1}".
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82345422207938560
+    m_Localized: GameObject "{0}" has no {1} component.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -46,5 +46,12 @@ namespace Game.Utils
         {
             return gameObject.transform.parent.gameObject;
         }
+
+        public static void SetAnchorAndPivot(RectTransform rectTransform, Vector2 vector)
+        {
+            rectTransform.anchorMin = vector;
+            rectTransform.anchorMax = vector;
+            rectTransform.pivot = vector;
+        }
     }
 }

@@ -19,6 +19,28 @@ namespace Game.Utils
             return str[0].ToString().ToUpper() + str.Substring(1);
         }
 
+        public static string SplitCamelCase(this string str)
+        {
+            if (str.Length <= 1) {
+                return str;
+            }
+            StringBuilder builder = new StringBuilder();
+            char first = str[0];
+            bool lastIsUpperCase = first.ToString() == first.ToString().ToUpper();
+            builder.Append(first);
+            for (int i = 1; i < str.Length; i++) {
+                char current = str[i];
+                bool currentIsUpperCase = current.ToString() == current.ToString().ToUpper();
+                if(!lastIsUpperCase && currentIsUpperCase) {
+                    builder.Append(" ");
+                }
+                builder.Append(current);
+                lastIsUpperCase = currentIsUpperCase;
+            }
+
+            return builder.ToString();
+        }
+
         public static List<string> Replicate(this string format, int count)
         {
             return format.Replicate(0, count);
