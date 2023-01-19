@@ -10,7 +10,7 @@ namespace Game.UI
 
         public TemplateObjectElement TemplateObjectElement;
 
-        private float counterCooldown = 0.0f;
+        private Timer counterTimer = null;
         private ExampleObject exampleObject = null;
 
         /// <summary>
@@ -36,11 +36,7 @@ namespace Game.UI
         {
             base.Update();
             if (Active) {
-                counterCooldown -= Time.deltaTime;
-                if (counterCooldown <= 0.0f) {
-                    counterCooldown = 1.0f;
-                    exampleObject.Increment();
-                }
+                counterTimer.Update();
             }
         }
 
@@ -54,6 +50,7 @@ namespace Game.UI
                 if (value) {
                     exampleObject = new ExampleObject();
                     TemplateObjectElement.Link(exampleObject);
+                    counterTimer = new Timer(1.0f, () => { exampleObject.Increment(); });
                 }
             }
         }
