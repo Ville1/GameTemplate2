@@ -40,19 +40,11 @@ namespace Game.UI
             }
         }
 
-        public override bool Active
+        protected override void OnOpen()
         {
-            get {
-                return base.Active;
-            }
-            set {
-                base.Active = value;
-                if (value) {
-                    exampleObject = new ExampleObject();
-                    TemplateObjectElement.Link(exampleObject);
-                    counterTimer = new Timer(1.0f, () => { exampleObject.Increment(); });
-                }
-            }
+            exampleObject = new ExampleObject();
+            TemplateObjectElement.Link(exampleObject);
+            counterTimer = new Timer(1.0f, () => { exampleObject.Increment(); });
         }
     }
 }

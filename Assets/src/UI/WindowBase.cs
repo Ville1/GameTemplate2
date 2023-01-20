@@ -108,7 +108,10 @@ namespace Game.UI
                 }
                 Panel.SetActive(value);
                 if (value) {
+                    OnOpen();
                     UpdateUI();
+                } else {
+                    OnClose();
                 }
             }
         }
@@ -221,5 +224,8 @@ namespace Game.UI
         /// Called then window opens, can be used to refresh ui
         /// </summary>
         public virtual void UpdateUI() { }
+
+        protected virtual void OnOpen() { }
+        protected virtual void OnClose() { }
     }
 }
