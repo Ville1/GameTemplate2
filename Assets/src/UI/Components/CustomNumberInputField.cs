@@ -169,11 +169,13 @@ namespace Game.UI.Components
         protected void Increase()
         {
             Number = Number.HasValue ? Number.Value + IncrementAmount : IncrementAmount;
+            HandleChange(InputBase.text);
         }
 
         protected void Decrease()
         {
             Number = Number.HasValue ? Number.Value - IncrementAmount : (-1.0f) * IncrementAmount;
+            HandleChange(InputBase.text);
         }
 
         protected NumberStyles NumberStyle

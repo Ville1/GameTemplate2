@@ -6,7 +6,7 @@
     "SaveFolder": "C:/Users/Ville/GameTemplateSaves",
     "SavingTargetFPS": 60.0,
     "ConsoleEnabled": true,
-    "MusicVolume": 0.25,
+    "MusicVolume": 0.3499999940395355,
     "MuteMusic": false,
     "SoundEffectVolume": 0.15000000596046449,
     "MuteSoundEffects": false,
@@ -17,5 +17,5 @@
             "Mute": false
         }
     ],
-    "TestValue": 1.0
+    "TestValue": 1.2000000476837159
 }

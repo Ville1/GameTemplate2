@@ -64,7 +64,7 @@ namespace Game.UI
             cancelButton = new CustomButton(CancelButton, "{Cancel}", Close);
             searchInputField = new CustomInputField(SearchInputField, "{FilterSettings}", HandleSearchInputChange);
 
-            saveButton.Interactable = false;
+            SetSaveButtonInteractable(false);
             TitleRowPrototype.SetActive(false);
             TextInputRowPrototype.SetActive(false);
             NumberInputRowPrototype.SetActive(false);
@@ -238,7 +238,7 @@ namespace Game.UI
                 }
             }
 
-            saveButton.Interactable = false;
+            SetSaveButtonInteractable(false);
         }
 
         private void HandleTextChange(ConfigCategory category, string text, FieldInfo fieldInfo)
@@ -247,7 +247,7 @@ namespace Game.UI
                 //Initialization is not finished
                 return;
             }
-            saveButton.Interactable = oldTextValues[fieldInfo.Name] != text;
+            SetSaveButtonInteractable(oldTextValues[fieldInfo.Name] != text);
             fieldInfo.SetValue(config, text);
         }
 
@@ -257,7 +257,7 @@ namespace Game.UI
                 //Initialization is not finished
                 return;
             }
-            saveButton.Interactable = oldNumberValues[fieldInfo.Name] != number;
+            SetSaveButtonInteractable(oldNumberValues[fieldInfo.Name] != number);
             fieldInfo.SetValue(config, number);
         }
 
@@ -267,8 +267,19 @@ namespace Game.UI
                 //Initialization is not finished
                 return;
             }
-            saveButton.Interactable = oldBooleanValues[fieldInfo.Name] != value;
+            SetSaveButtonInteractable(oldBooleanValues[fieldInfo.Name] != value);
             fieldInfo.SetValue(config, value);
+        }
+
+        private void SetSaveButtonInteractable(bool interactable)
+        {
+            saveButton.Interactable = interactable;
+            AcceptEnabled = interactable;
+        }
+
+        protected override void OnAccept()
+        {
+            Save();
         }
 
         private UIElementData GetTextInput(ConfigCategory category, string value, FieldInfo fieldInfo, int maxLenght)

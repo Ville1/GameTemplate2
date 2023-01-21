@@ -19,6 +19,9 @@ namespace Game.UI
         protected override void Start()
         {
             AutoAssignCloseButton = true;
+            AutoAssignAcceptButton = true;
+            AutoAssignCancelButton = true;
+            AcceptEnabled = true;
             base.Start();
             if (Instance != null) {
                 CustomLogger.Error("{AttemptingToCreateMultipleInstances}");
@@ -45,6 +48,22 @@ namespace Game.UI
             exampleObject = new ExampleObject();
             TemplateObjectElement.Link(exampleObject);
             counterTimer = new Timer(1.0f, () => { exampleObject.Increment(); });
+            CustomLogger.Debug("OPEN");
+        }
+
+        protected override void OnClose()
+        {
+            CustomLogger.Debug("CLOSE");
+        }
+
+        protected override void OnAccept()
+        {
+            CustomLogger.Debug("ACCEPT");
+        }
+
+        protected override void OnCancel()
+        {
+            CustomLogger.Debug("CANCEL");
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Game.UI
     {
         private static readonly Image.Type DEFAULT_BACKGROUND_IMAGE_TYPE = Image.Type.Tiled;
         private static readonly string DEFAULT_CLOSE_BUTTON_NAME = "Close Button";
+        private static readonly string DEFAULT_ACCEPT_BUTTON_NAME = "Ok Button";
+        private static readonly string DEFAULT_CANCEL_BUTTON_NAME = "Cancel Button";
 
         public enum Tag {
             /// <summary>
@@ -59,9 +61,14 @@ namespace Game.UI
         /// If button with this name is found as a child of Panel, it gets assigned close action automatically during Start().
         /// </summary>
         protected string AutoAssignCloseButtonName { get; set; } = null;
+        protected string AutoAssignAcceptButtonName { get; set; } = null;
+        protected string AutoAssignCancelButtonName { get; set; } = null;
+        protected bool AcceptEnabled { get; set; } = false;
 
         private bool baseIsInitialized = false;
         private CustomButton autoAssignedCloseButton = null;
+        private CustomButton autoAssignedAcceptButton = null;
+        private CustomButton autoAssignedCancelButton = null;
 
         /// <summary>
         /// Initializiation
@@ -71,21 +78,29 @@ namespace Game.UI
             UIManager.Instance.RegisterWindow(this);
             Active = false;
 
-            if (AutoAssignCloseButton) {
-                GameObject buttonGameObject = GameObjectHelper.Find(Panel.transform, AutoAssignCloseButtonName);
-                if(buttonGameObject == null) {
-                    CustomLogger.Warning("{GameObjectNotFound}", AutoAssignCloseButtonName, Panel.name);
+            autoAssignedCloseButton = InitializeAutoAssingButton(AutoAssignCloseButtonName, null, () => { HandleWindowEvent(WindowEvent.Close); });
+            autoAssignedAcceptButton = InitializeAutoAssingButton(AutoAssignAcceptButtonName, "{Ok}", () => { HandleWindowEvent(WindowEvent.Accept); });
+            autoAssignedCancelButton = InitializeAutoAssingButton(AutoAssignCancelButtonName, "{Cancel}", () => { HandleWindowEvent(WindowEvent.Cancel); });
+
+            baseIsInitialized = true;
+        }
+
+        private CustomButton InitializeAutoAssingButton(string name, LString text, CustomButton.OnClick onClick)
+        {
+            if (!string.IsNullOrEmpty(name)) {
+                GameObject buttonGameObject = GameObjectHelper.Find(Panel.transform, name);
+                if (buttonGameObject == null) {
+                    CustomLogger.Warning("{GameObjectNotFound}", name, Panel.name);
                 } else {
                     Button button = buttonGameObject.GetComponent<Button>();
                     if (button == null) {
-                        CustomLogger.Warning("{ComponentNotFound}", AutoAssignCloseButtonName, "Button");
+                        CustomLogger.Warning("{ComponentNotFound}", name, "Button");
                     } else {
-                        autoAssignedCloseButton = new CustomButton(button, null, () => { Active = false; });
+                        return new CustomButton(button, text, onClick);
                     }
                 }
             }
-
-            baseIsInitialized = true;
+            return null;
         }
 
         /// <summary>
@@ -207,15 +222,63 @@ namespace Game.UI
             }
         }
 
+        protected bool AutoAssignAcceptButton
+        {
+            get {
+                return !string.IsNullOrEmpty(AutoAssignAcceptButtonName);
+            }
+            set {
+                if (baseIsInitialized) {
+                    throw new Exception("AutoAssignAcceptButton should be called before base.Start();");
+                }
+                if (value) {
+                    AutoAssignAcceptButtonName = DEFAULT_ACCEPT_BUTTON_NAME;
+                } else {
+                    AutoAssignAcceptButtonName = null;
+                }
+            }
+        }
+
+        protected bool AutoAssignCancelButton
+        {
+            get {
+                return !string.IsNullOrEmpty(AutoAssignCancelButtonName);
+            }
+            set {
+                if (baseIsInitialized) {
+                    throw new Exception("AutoAssignCancelButton should be called before base.Start();");
+                }
+                if (value) {
+                    AutoAssignCancelButtonName = DEFAULT_CANCEL_BUTTON_NAME;
+                } else {
+                    AutoAssignCancelButtonName = null;
+                }
+            }
+        }
+
         /// <summary>
         /// Return true, if window has "consumed" this event. (Prevents other windows for also having it fire)
-        /// This default nonoverriden functionality just closes window on WindowEvent.Close, thus closing the top most window
         /// </summary>
         public virtual bool HandleWindowEvent(WindowEvent windowEvent)
         {
-            if(windowEvent == WindowEvent.Close && !Tags.Contains(Tag.ProgressBar)) {
-                Active = false;
-                return true;
+            if((windowEvent == WindowEvent.Close || windowEvent == WindowEvent.Accept || windowEvent == WindowEvent.Cancel) && !Tags.Contains(Tag.ProgressBar)) {
+                switch (windowEvent) {
+                    case WindowEvent.Close:
+                        OnClose();
+                        Panel.SetActive(false);
+                        return true;
+                    case WindowEvent.Cancel:
+                        OnCancel();
+                        Panel.SetActive(false);
+                        return true;
+                    case WindowEvent.Accept:
+                        if (!AcceptEnabled) {
+                            return false;
+                        }
+                        OnAccept();
+                        Panel.SetActive(false);
+                        return true;
+                }
             }
             return false;
         }
@@ -227,5 +290,7 @@ namespace Game.UI
 
         protected virtual void OnOpen() { }
         protected virtual void OnClose() { }
+        protected virtual void OnAccept() { }
+        protected virtual void OnCancel() { }
     }
 }

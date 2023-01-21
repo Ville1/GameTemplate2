@@ -17,7 +17,7 @@ namespace Game
         IgnoreUI,
         Map
     }
-    public enum WindowEvent { Close, Accept }
+    public enum WindowEvent { Close, Accept, Cancel }
     public enum MouseButton { Left = 0, Middle = 2, Right = 1 }//Int value should match parameter of Input.GetMouseButton - methods
     public enum MouseDragEventType { Start, Move, End }
 

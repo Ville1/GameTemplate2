@@ -116,19 +116,25 @@ namespace Game.UI
                 fileNames.Add(saveName);
             }
 
-            confirmButton.Interactable = State == WindowState.Saving && validSaveName || State == WindowState.Loading && !string.IsNullOrEmpty(InputField.text);
+            SetConfirmButtonInteractable(State == WindowState.Saving && validSaveName || State == WindowState.Loading && !string.IsNullOrEmpty(InputField.text));
         }
 
         private void HandleFileClick(string fileName)
         {
             inputField.Text = fileName;
-            confirmButton.Interactable = true;
+            SetConfirmButtonInteractable(true);
         }
 
         private void HandleInputChange(string inputText)
         {
             validSaveName = !string.IsNullOrEmpty(inputText);
-            confirmButton.Interactable = validSaveName;
+            SetConfirmButtonInteractable(validSaveName);
+        }
+
+        private void SetConfirmButtonInteractable(bool interactable)
+        {
+            confirmButton.Interactable = interactable;
+            AcceptEnabled = interactable;
         }
 
         private void Close()
@@ -171,6 +177,11 @@ namespace Game.UI
         {
             Active = false;
             Main.Instance.LoadGame(ConfigManager.Config.SaveFolder, inputField.Text);
+        }
+
+        protected override void OnAccept()
+        {
+            Confirm();
         }
     }
 }

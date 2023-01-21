@@ -133,6 +133,7 @@ namespace Game.UI
                 }
             }
             saveButton.Interactable = changedBindings.Count != 0;
+            AcceptEnabled = saveButton.Interactable;
         }
 
         private void SetRebindKeyBinding(KeyBinding keyBinding)
@@ -222,6 +223,11 @@ namespace Game.UI
         private void Close()
         {
             Active = false;
+        }
+
+        protected override void OnAccept()
+        {
+            Save();
         }
     }
 }
