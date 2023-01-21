@@ -14,7 +14,8 @@ namespace Game.UI
         private static readonly string DEFAULT_ACCEPT_BUTTON_NAME = "Ok Button";
         private static readonly string DEFAULT_CANCEL_BUTTON_NAME = "Cancel Button";
 
-        public enum Tag {
+        public enum Tag
+        {
             /// <summary>
             /// Does not get closed with UIManager.CloseWindows if Main.Instance.State == State.MainMenu
             /// </summary>
@@ -63,9 +64,10 @@ namespace Game.UI
         protected string AutoAssignCloseButtonName { get; set; } = null;
         protected string AutoAssignAcceptButtonName { get; set; } = null;
         protected string AutoAssignCancelButtonName { get; set; } = null;
-        protected bool AcceptEnabled { get; set; } = false;
+        protected bool AcceptEnabled { get { return acceptEnabled; } set { acceptEnabled = value; if (autoAssignedAcceptButton != null) { autoAssignedAcceptButton.Interactable = value; } } }
 
         private bool baseIsInitialized = false;
+        private bool acceptEnabled = false;
         protected CustomButton autoAssignedCloseButton = null;
         protected CustomButton autoAssignedAcceptButton = null;
         protected CustomButton autoAssignedCancelButton = null;
@@ -115,7 +117,7 @@ namespace Game.UI
                 return Panel.activeSelf;
             }
             set {
-                if(Panel.activeSelf == value) {
+                if (Panel.activeSelf == value) {
                     return;
                 }
                 if (value && Tags.Contains(Tag.ClosesOthers) && UIManager.Instance != null) {
@@ -167,7 +169,7 @@ namespace Game.UI
         {
             set {
                 Image image = Panel.GetComponent<Image>();
-                if(image != null) {
+                if (image != null) {
                     image.sprite = TextureManager.GetSprite(value);
                     if (value.PixelsPerUnitMultiplier.HasValue) {
                         image.pixelsPerUnitMultiplier = value.PixelsPerUnitMultiplier.Value;
@@ -261,7 +263,7 @@ namespace Game.UI
         /// </summary>
         public virtual bool HandleWindowEvent(WindowEvent windowEvent)
         {
-            if((windowEvent == WindowEvent.Close || windowEvent == WindowEvent.Accept || windowEvent == WindowEvent.Cancel) && !Tags.Contains(Tag.ProgressBar)) {
+            if ((windowEvent == WindowEvent.Close || windowEvent == WindowEvent.Accept || windowEvent == WindowEvent.Cancel) && !Tags.Contains(Tag.ProgressBar)) {
                 switch (windowEvent) {
                     case WindowEvent.Close:
                         OnClose();
