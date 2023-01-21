@@ -66,9 +66,9 @@ namespace Game.UI
         protected bool AcceptEnabled { get; set; } = false;
 
         private bool baseIsInitialized = false;
-        private CustomButton autoAssignedCloseButton = null;
-        private CustomButton autoAssignedAcceptButton = null;
-        private CustomButton autoAssignedCancelButton = null;
+        protected CustomButton autoAssignedCloseButton = null;
+        protected CustomButton autoAssignedAcceptButton = null;
+        protected CustomButton autoAssignedCancelButton = null;
 
         /// <summary>
         /// Initializiation
