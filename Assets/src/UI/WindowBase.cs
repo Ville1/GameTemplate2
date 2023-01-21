@@ -78,7 +78,7 @@ namespace Game.UI
         protected virtual void Start()
         {
             UIManager.Instance.RegisterWindow(this);
-            Active = false;
+            Panel.SetActive(false);
 
             autoAssignedCloseButton = InitializeAutoAssingButton(AutoAssignCloseButtonName, null, () => { HandleWindowEvent(WindowEvent.Close); });
             autoAssignedAcceptButton = InitializeAutoAssingButton(AutoAssignAcceptButtonName, "{Ok}", () => { HandleWindowEvent(WindowEvent.Accept); });
