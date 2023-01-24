@@ -2,6 +2,7 @@ using Game.Input;
 using Game.UI.Components;
 using Game.Utils;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,11 +15,13 @@ namespace Game.UI
         public TemplateObjectElement TemplateObjectElement;
         public GameObject GridViewScrollView;
         public Button TestButton;
+        public TMP_Dropdown Dropdown;
 
         private Timer counterTimer = null;
         private ExampleObject exampleObject = null;
         private GridView gridView = null;
         private CustomButton testButton;
+        private ObjectDropdown<TestClass> dropdown;
 
         /// <summary>
         /// Initializiation
@@ -40,6 +43,11 @@ namespace Game.UI
 
             gridView = new GridView(GridViewScrollView, new GridViewParameters() { MaxHeight = 3, FillOrder = GridView.GridFillOrder.Vertical });
             testButton = new CustomButton(TestButton, null, TestAction);
+
+            dropdown = new ObjectDropdown<TestClass>(Dropdown, (TestClass value) => { CustomLogger.Debug("dropdown: " + value); });
+            dropdown.AddOption(new TestClass() { DropdownText = "Eka" });
+            dropdown.AddOption(new TestClass() { DropdownText = "Toka" });
+            dropdown.AddOption(new TestClass() { DropdownText = "Kolmas" });
         }
 
         /// <summary>
@@ -56,6 +64,8 @@ namespace Game.UI
         private void TestAction()
         {
             gridView.AddCell(new List<UIElementData>() { UIElementData.Text("Text (TMP)", "A", null) }, new Coordinates(1, 2));
+            dropdown.SelectedIndex = 2;
+            dropdown.Interactable = !dropdown.Interactable;
         }
 
         protected override void OnOpen()
@@ -85,6 +95,12 @@ namespace Game.UI
         protected override void OnCancel()
         {
             CustomLogger.Debug("CANCEL");
+        }
+
+        public class TestClass : IDropdownOption
+        {
+            public LString DropdownText { get; set; }
+            public SpriteData DropdownSprite { get { return null; } }
         }
     }
 }

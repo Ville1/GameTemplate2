@@ -14,7 +14,11 @@ namespace Game.UI.Components
         private static readonly string DEFAULT_CELL_PROTOTYPE_NAME = "Cell Prototype";
         private static float DEFAULT_SENSITIVITY = 10.0f;
 
-        public enum GridFillOrder { Vertical, Horizontal };
+        public enum GridFillOrder { Vertical, Horizontal }
+        /// <summary>
+        /// Determines what happens, if cursor ends on top of a pre-existing cell, when using AddCell without coordinate parameters
+        /// </summary>
+        public enum CellReplaceMode { Overwrite, FindNextFreeSlot }
 
         public GameObject ScrollView { get; private set; }
         public GameObject Viewport { get; private set; }
@@ -29,14 +33,15 @@ namespace Game.UI.Components
         /// <summary>
         /// Max width in cells
         /// </summary>
-        public int MaxWidth { get; set; }
+        public int MaxWidth { get; private set; }
         /// <summary>
         /// Max height in cells
         /// </summary>
-        public int MaxHeight { get; set; }
+        public int MaxHeight { get; private set; }
+        public float CellSpacingX { get; private set; }
+        public float CellSpacingY { get; private set; }
         public GridFillOrder FillOrder { get; set; }
-        public float CellSpacingX { get; set; }
-        public float CellSpacingY { get; set; }
+        public CellReplaceMode ReplaceMode { get; set; }
 
         private Dictionary<string, GameObject> cellPrototypes;
         private List<CellData> cells;
@@ -152,6 +157,7 @@ namespace Game.UI.Components
             RectTransform prototypeRectTransform = cellPrototypes.First().Value.GetComponent<RectTransform>();
             CellSpacingX = parameters.CellSpacingX.HasValue ? parameters.CellSpacingX.Value : prototypeRectTransform.rect.width;
             CellSpacingY = parameters.CellSpacingY.HasValue ? parameters.CellSpacingY.Value : prototypeRectTransform.rect.height;
+            ReplaceMode = parameters.ReplaceMode.HasValue ? parameters.ReplaceMode.Value : CellReplaceMode.Overwrite;
 
             cells = new List<CellData>();
             lastCoordinates = null;
@@ -169,6 +175,67 @@ namespace Game.UI.Components
             }
 
             return gameObject;
+        }
+
+        /// <summary>
+        /// Position where next cell is inserted
+        /// </summary>
+        public Coordinates Cursor
+        {
+            get {
+                Coordinates cursor = lastCoordinates == null ? new Coordinates(0, 0) :
+                    (FillOrder == GridFillOrder.Horizontal ? lastCoordinates.Move(Direction.East) : lastCoordinates.Move(Direction.North));
+
+                if (cursor.X >= MaxWidth && FillOrder == GridFillOrder.Horizontal) {
+                    //New row
+                    cursor.X = 0;
+                    cursor.Y++;
+                    if (cursor.Y >= MaxHeight) {
+                        //Out of space
+                        return new Coordinates(lastCoordinates);
+                    }
+                }
+
+                if (cursor.Y >= MaxHeight && FillOrder == GridFillOrder.Vertical) {
+                    //New column
+                    cursor.Y = 0;
+                    cursor.X++;
+                    if (cursor.X >= MaxWidth) {
+                        //Out of space
+                        return new Coordinates(lastCoordinates);
+                    }
+                }
+
+                return cursor;
+            }
+            set {
+                Coordinates cursor = value == null ? new Coordinates(0, 0) : new Coordinates(value);
+                if (cursor.X < 0 || cursor.Y < 0 || cursor.X >= MaxWidth || cursor.Y >= MaxHeight) {
+                    throw new ArgumentException(string.Format("Invalid coordinates: {0}, {1}", cursor.X, cursor.Y));
+                }
+
+                if(cursor.X == 0 && cursor.Y == 0) {
+                    lastCoordinates = null;
+                    return;
+                }
+
+                //Move the coordinates, so that next cell is added on parameter (value) coordinates
+                cursor = FillOrder == GridFillOrder.Horizontal ? cursor.Move(Direction.West) : cursor.Move(Direction.South);
+
+                if (cursor.X <= 0 && FillOrder == GridFillOrder.Horizontal) {
+                    //Return to the last row
+                    cursor.X = MaxWidth - 1;
+                    cursor.Y--;
+                }
+
+                if (cursor.Y <= 0 && FillOrder == GridFillOrder.Vertical) {
+                    //Return to the last column
+                    cursor.Y = MaxHeight - 1;
+                    cursor.X--;
+                }
+
+                lastCoordinates = cursor;
+            }
         }
 
         public GameObject AddCell(List<UIElementData> elementData, string prototypeName)
@@ -198,28 +265,7 @@ namespace Game.UI.Components
             Coordinates nextCoordinates;
             if (coordinates == null) {
                 //Calculate next coordinates
-                nextCoordinates = lastCoordinates == null ? new Coordinates(0, 0) :
-                    (FillOrder == GridFillOrder.Horizontal ? lastCoordinates.Move(Direction.East) : lastCoordinates.Move(Direction.North));
-
-                if (nextCoordinates.X >= MaxWidth && FillOrder == GridFillOrder.Horizontal) {
-                    //New row
-                    nextCoordinates.X = 0;
-                    nextCoordinates.Y++;
-                    if (nextCoordinates.Y >= MaxHeight) {
-                        //Out of space
-                        return null;
-                    }
-                }
-
-                if (nextCoordinates.Y >= MaxHeight && FillOrder == GridFillOrder.Vertical) {
-                    //New column
-                    nextCoordinates.Y = 0;
-                    nextCoordinates.X++;
-                    if (nextCoordinates.X >= MaxWidth) {
-                        //Out of space
-                        return null;
-                    }
-                }
+                nextCoordinates = Cursor;
             } else {
                 //Check parameter coordinates
                 nextCoordinates = new Coordinates(coordinates);
@@ -278,7 +324,12 @@ namespace Game.UI.Components
             lastCoordinates = null;
         }
 
-        private class CellData
+        public List<CellData> GetCellList()
+        {
+            return cells;
+        }
+
+        public class CellData
         {
             public Guid Id { get; set; }
             public Coordinates Coordinates { get; set; }
@@ -302,5 +353,6 @@ namespace Game.UI.Components
         public GridView.GridFillOrder? FillOrder { get; set; } = null;
         public float? CellSpacingX { get; set; } = null;
         public float? CellSpacingY { get; set; } = null;
+        public GridView.CellReplaceMode? ReplaceMode { get; set; }
     }
 }
