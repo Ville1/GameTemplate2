@@ -212,7 +212,7 @@ namespace Game.UI.Components
         {
             AddOption(new TMP_Dropdown.OptionData() {
                 text = text,
-                image = spriteData == null ? null : TextureManager.GetSprite(spriteData)
+                image = spriteData == null || spriteData.IsEmpty ? null : TextureManager.GetSprite(spriteData)
             });
         }
 
