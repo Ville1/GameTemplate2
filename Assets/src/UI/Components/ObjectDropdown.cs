@@ -1,15 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine.UI;
 
 namespace Game.UI.Components
 {
+    /// <summary>
+    /// </summary>
+    /// <typeparam name="ObjectType">Note: It is assumed that default(ObjectType) is null</typeparam>
     public class ObjectDropdown<ObjectType> where ObjectType : IDropdownOption
     {
         public CustomDropdown BaseDropdown { get; private set; }
         public List<ObjectType> Items { get; private set; }
         public Action<ObjectType> OnChange { get; private set; }
+        public bool HasNoneOption { get { return noneOption != null; } }
+        /// <summary>
+        /// If true, option matching null value will be hidden, if not selected
+        /// </summary>
+        public bool HideNoneOption { get; set; }
+
+        private TMP_Dropdown.OptionData noneOption;
+        private bool noneOptionIsVisible;
+        private bool skipUpdateEvent;
 
         public ObjectDropdown(TMP_Dropdown baseDropdown, Action<ObjectType> onChange, List<ObjectType> items = null)
         {
@@ -36,6 +49,13 @@ namespace Game.UI.Components
             BaseDropdown = baseDropdown;
             OnChange = onChange;
             Items = items ?? new List<ObjectType>();
+            if (Items.Contains(default(ObjectType))) {
+                throw new ArgumentException("Null values should be added with AddNoneOption");
+            }
+            noneOption = null;
+            HideNoneOption = false;
+            noneOptionIsVisible = false;
+            skipUpdateEvent = false;
             foreach(ObjectType item in Items) {
                 AddBaseOption(item);
             }
@@ -56,10 +76,56 @@ namespace Game.UI.Components
             }
         }
 
+        /// <summary>
+        /// Add an option for a null value. Note: if one is already added, it will be overwriten.
+        /// </summary>
+        public void AddNoneOption(LString text, IHasSprite objectWithSprite = null)
+        {
+            AddNoneOption(new TMP_Dropdown.OptionData() {
+                text = text,
+                image = objectWithSprite == null ? null : TextureManager.GetSprite(objectWithSprite)
+            });
+        }
+
+        /// <summary>
+        /// Add an option for a null value. Note: if one is already added, it will be overwriten.
+        /// </summary>
+        public void AddNoneOption(LString text, SpriteData spriteData)
+        {
+            AddNoneOption(new TMP_Dropdown.OptionData() {
+                text = text,
+                image = spriteData == null || spriteData.IsEmpty ? null : TextureManager.GetSprite(spriteData)
+            });
+        }
+
+        /// <summary>
+        /// Add an option for a null value. Note: if one is already added, it will be overwriten.
+        /// </summary>
+        public void AddNoneOption(LString text, string spriteName)
+        {
+            AddNoneOption(new TMP_Dropdown.OptionData() {
+                text = text,
+                image = string.IsNullOrEmpty(spriteName) ? null : TextureManager.GetSprite(TextureDirectory.UI, spriteName)
+            });
+        }
+
+        /// <summary>
+        /// Add an option for a null value. Note: if one is already added, it will be overwriten.
+        /// </summary>
+        public void AddNoneOption(TMP_Dropdown.OptionData noneOption)
+        {
+            this.noneOption = noneOption;
+            BaseDropdown.AddOption(noneOption);
+            Items.Add(default(ObjectType));
+            noneOptionIsVisible = true;
+        }
+
         public void Clear()
         {
             BaseDropdown.Clear();
             Items.Clear();
+            noneOption = null;
+            noneOptionIsVisible = false;
         }
 
         public ObjectType Value
@@ -69,7 +135,13 @@ namespace Game.UI.Components
             }
             set {
                 if(Items.Count != 0) {
-                    BaseDropdown.Value = Items.IndexOf(value);
+                    if(value == null) {
+                        if (!HasNoneOption) {
+                            throw new ArgumentException("Dropdown has no value for null option");
+                        }
+                    } else {
+                        BaseDropdown.Value = Items.IndexOf(value);
+                    }
                 }
             }
         }
@@ -80,7 +152,31 @@ namespace Game.UI.Components
                 return BaseDropdown.Value;
             }
             set {
-                BaseDropdown.Value = value;
+                if(HasNoneOption && !noneOptionIsVisible) {
+                    int noneOptionIndex = Items.IndexOf(default(ObjectType));
+                    if(value == noneOptionIndex) {
+                        //Unhide none option
+                        BaseDropdown.Clear();
+                        foreach (ObjectType item in Items) {
+                            if(item == null) {
+                                BaseDropdown.AddOption(noneOption);
+                                noneOptionIsVisible = true;
+                            } else {
+                                if (item.DropdownSprite == null) {
+                                    BaseDropdown.AddOption(item.DropdownText);
+                                } else {
+                                    BaseDropdown.AddOption(item.DropdownText, item.DropdownSprite);
+                                }
+                            }
+                        }
+                        BaseDropdown.Value = value;
+                    } else if(value > noneOptionIndex) {
+                        //Shift index to match visible dropdown options
+                        BaseDropdown.Value = value - 1;
+                    }
+                } else {
+                    BaseDropdown.Value = value;
+                }
             }
         }
 
@@ -96,8 +192,23 @@ namespace Game.UI.Components
 
         private void HandleChange(int index)
         {
+            if (skipUpdateEvent) {
+                skipUpdateEvent = false;
+                return;
+            }
             if (OnChange != null) {
                 OnChange(Items[index]);
+            }
+            if(Items[index] != null && noneOptionIsVisible && HideNoneOption) {
+                //Hide none option
+                int noneOptionIndex = Items.IndexOf(default(ObjectType));
+                BaseDropdown.Clear();
+                foreach(ObjectType item in Items.Where(item => item != null)) {
+                    AddBaseOption(item);
+                }
+                noneOptionIsVisible = false;
+                skipUpdateEvent = true;
+                BaseDropdown.Value = index > noneOptionIndex ? index - 1 : index;
             }
         }
     }

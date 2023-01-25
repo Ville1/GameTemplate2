@@ -44,10 +44,12 @@ namespace Game.UI
             gridView = new GridView(GridViewScrollView, new GridViewParameters() { MaxHeight = 3, FillOrder = GridView.GridFillOrder.Vertical });
             testButton = new CustomButton(TestButton, null, TestAction);
 
-            dropdown = new ObjectDropdown<TestClass>(Dropdown, (TestClass value) => { CustomLogger.Debug("dropdown: " + value); });
+            dropdown = new ObjectDropdown<TestClass>(Dropdown, (TestClass value) => { CustomLogger.Debug("dropdown: " + (value == null ? "NULL" : value.DropdownText)); });
             dropdown.AddOption(new TestClass() { DropdownText = "Eka" });
             dropdown.AddOption(new TestClass() { DropdownText = "Toka" });
             dropdown.AddOption(new TestClass() { DropdownText = "Kolmas" });
+            dropdown.AddNoneOption("None");
+            dropdown.HideNoneOption = true;
         }
 
         /// <summary>
@@ -64,7 +66,7 @@ namespace Game.UI
         private void TestAction()
         {
             gridView.AddCell(new List<UIElementData>() { UIElementData.Text("Text (TMP)", "A", null) }, new Coordinates(1, 2));
-            dropdown.SelectedIndex = 2;
+            dropdown.SelectedIndex = 3;
             dropdown.Interactable = !dropdown.Interactable;
         }
 
