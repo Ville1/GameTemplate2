@@ -22,7 +22,6 @@ namespace Game.UI.Components
 
         private TMP_Dropdown.OptionData noneOption;
         private bool noneOptionIsVisible;
-        private bool skipUpdateEvent;
 
         public ObjectDropdown(TMP_Dropdown baseDropdown, Action<ObjectType> onChange, List<ObjectType> items = null)
         {
@@ -55,8 +54,7 @@ namespace Game.UI.Components
             noneOption = null;
             HideNoneOption = false;
             noneOptionIsVisible = false;
-            skipUpdateEvent = false;
-            foreach(ObjectType item in Items) {
+            foreach (ObjectType item in Items) {
                 AddBaseOption(item);
             }
         }
@@ -134,13 +132,15 @@ namespace Game.UI.Components
                 return Items.Count == 0 ? default(ObjectType) : Items[BaseDropdown.Value];
             }
             set {
-                if(Items.Count != 0) {
-                    if(value == null) {
+                if (Items.Count != 0) {
+                    if (value == null) {
                         if (!HasNoneOption) {
                             throw new ArgumentException("Dropdown has no value for null option");
                         }
+                        BaseDropdown.Value = Items.IndexOf(default(ObjectType));
                     } else {
-                        BaseDropdown.Value = Items.IndexOf(value);
+                        BaseDropdown.Value = Items.Any(item => item != null && item.InternalName == value.InternalName) ?
+                            Items.IndexOf(Items.First(item => item != null && item.InternalName == value.InternalName)) : 0;
                     }
                 }
             }
@@ -152,13 +152,13 @@ namespace Game.UI.Components
                 return BaseDropdown.Value;
             }
             set {
-                if(HasNoneOption && !noneOptionIsVisible) {
+                if (HasNoneOption && !noneOptionIsVisible) {
                     int noneOptionIndex = Items.IndexOf(default(ObjectType));
-                    if(value == noneOptionIndex) {
+                    if (value == noneOptionIndex) {
                         //Unhide none option
                         BaseDropdown.Clear();
                         foreach (ObjectType item in Items) {
-                            if(item == null) {
+                            if (item == null) {
                                 BaseDropdown.AddOption(noneOption);
                                 noneOptionIsVisible = true;
                             } else {
@@ -170,7 +170,7 @@ namespace Game.UI.Components
                             }
                         }
                         BaseDropdown.Value = value;
-                    } else if(value > noneOptionIndex) {
+                    } else if (value > noneOptionIndex) {
                         //Shift index to match visible dropdown options
                         BaseDropdown.Value = value - 1;
                     }
@@ -192,22 +192,17 @@ namespace Game.UI.Components
 
         private void HandleChange(int index)
         {
-            if (skipUpdateEvent) {
-                skipUpdateEvent = false;
-                return;
-            }
             if (OnChange != null) {
                 OnChange(Items[index]);
             }
-            if(Items[index] != null && noneOptionIsVisible && HideNoneOption) {
+            if (Items[index] != null && noneOptionIsVisible && HideNoneOption) {
                 //Hide none option
                 int noneOptionIndex = Items.IndexOf(default(ObjectType));
                 BaseDropdown.Clear();
-                foreach(ObjectType item in Items.Where(item => item != null)) {
+                foreach (ObjectType item in Items.Where(item => item != null)) {
                     AddBaseOption(item);
                 }
                 noneOptionIsVisible = false;
-                skipUpdateEvent = true;
                 BaseDropdown.Value = index > noneOptionIndex ? index - 1 : index;
             }
         }
@@ -215,6 +210,7 @@ namespace Game.UI.Components
 
     public interface IDropdownOption
     {
+        public string InternalName { get; }
         LString DropdownText { get; }
         /// <summary>
         /// Can be left as null, if no sprite is needed

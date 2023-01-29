@@ -21,6 +21,7 @@ namespace Game.UI.Components
 
         private TMP_Dropdown baseDropdown;
         private RectTransform rectTransform;
+        private bool skipUpdateEvent;
 
         public CustomDropdown(TMP_Dropdown baseDropdown, CustomDropdownCallback onChange)
         {
@@ -49,6 +50,7 @@ namespace Game.UI.Components
             this.baseDropdown = baseDropdown;
             this.baseDropdown.ClearOptions();
             rectTransform = this.baseDropdown.gameObject.GetComponent<RectTransform>();
+            skipUpdateEvent = false;
 
             //Set event listener
             TMP_Dropdown.DropdownEvent onChangeEvent = new TMP_Dropdown.DropdownEvent();
@@ -57,9 +59,9 @@ namespace Game.UI.Components
             OnChange = onChange;
 
             //Caption image
-            if(captionImage != null) {
+            if (captionImage != null) {
                 this.baseDropdown.captionImage = captionImage;
-            } else if(!string.IsNullOrEmpty(captionImageName)) {
+            } else if (!string.IsNullOrEmpty(captionImageName)) {
                 //Find caption image based on parameter
                 this.baseDropdown.captionImage = GetImage(this.baseDropdown.gameObject, captionImageName, null, true);
             } else if (generateCaptionImage) {
@@ -82,7 +84,7 @@ namespace Game.UI.Components
             }
 
             //Item image
-            if(itemImage != null) {
+            if (itemImage != null) {
                 this.baseDropdown.itemImage = itemImage;
             } else if (!string.IsNullOrEmpty(itemImageName)) {
                 //Find item image based on parameter
@@ -118,7 +120,7 @@ namespace Game.UI.Components
 
         private Image GetImage(GameObject parent, string name, List<string> path, bool logErrors)
         {
-            path = path ?? new List<string>();
+            path = path == null ? new List<string>() : path.Copy();
             path.Add(name);
             GameObject imageGameObject;
             string lastParentName, lastChildName;
@@ -186,7 +188,10 @@ namespace Game.UI.Components
                 return baseDropdown.value;
             }
             set {
-                baseDropdown.value = value;
+                if (baseDropdown.value != value) {
+                    skipUpdateEvent = true;
+                    baseDropdown.value = value;
+                }
             }
         }
 
@@ -226,7 +231,7 @@ namespace Game.UI.Components
 
         public void AddOption(TMP_Dropdown.OptionData optionData)
         {
-            if(optionData.image != null && baseDropdown.captionImage == null && baseDropdown.itemImage == null) {
+            if (optionData.image != null && baseDropdown.captionImage == null && baseDropdown.itemImage == null) {
                 CustomLogger.Warning("{UIElementError}", "Dropdown has neither caption image nor item image, parameter image will not be visible");
             }
             baseDropdown.AddOptions(new List<TMP_Dropdown.OptionData>() { optionData });
@@ -239,7 +244,11 @@ namespace Game.UI.Components
 
         private void HandleChange(int value)
         {
-            if(OnChange != null) {
+            if (skipUpdateEvent) {
+                skipUpdateEvent = false;
+                return;
+            }
+            if (OnChange != null) {
                 OnChange(value);
             }
         }
