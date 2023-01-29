@@ -39,7 +39,7 @@ namespace Game.UI
             //Set text
             textComponent.text = text;
             if (color.HasValue) {
-                textComponent.color = color.Value;
+                textComponent.faceColor = color.Value;
             }
         }
 
