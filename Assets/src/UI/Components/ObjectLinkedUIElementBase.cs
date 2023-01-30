@@ -1,6 +1,8 @@
 using Game.Utils;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.UI
 {
@@ -46,6 +48,45 @@ namespace Game.UI
             Selection.activeObject = component;
 
             return component;
+        }
+
+        protected static TMP_Text CreateText(GameObject parent, string name, Vector2 position, float width, float height, LString text, float fontSize)
+        {
+            GameObject textGameObject = new GameObject();
+            textGameObject.name = name;
+            textGameObject.transform.parent = parent.transform;
+
+            TMP_Text textComponent = textGameObject.AddComponent<TextMeshProUGUI>();
+            textComponent.fontSize = fontSize;
+            textComponent.text = text;
+
+            RectTransform textRectTransform = textGameObject.GetComponent<RectTransform>();
+            GameObjectHelper.SetAnchorAndPivot(textRectTransform, new Vector2(0.0f, 1.0f));
+            textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+
+            textRectTransform.anchoredPosition = position.Clone();
+
+            return textComponent;
+        }
+
+        protected static Image CreateImage(GameObject parent, string name, Vector2 position, float width, float height, SpriteData sprite)
+        {
+            GameObject imageGameObject = new GameObject();
+            imageGameObject.name = name;
+            imageGameObject.transform.parent = parent.transform;
+
+            Image image = imageGameObject.AddComponent<Image>();
+            image.sprite = sprite == null || sprite.IsEmpty ? null : TextureManager.GetSprite(sprite);
+
+            RectTransform textRectTransform = imageGameObject.GetComponent<RectTransform>();
+            GameObjectHelper.SetAnchorAndPivot(textRectTransform, new Vector2(0.0f, 1.0f));
+            textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+
+            textRectTransform.anchoredPosition = position.Clone();
+
+            return image;
         }
     }
 

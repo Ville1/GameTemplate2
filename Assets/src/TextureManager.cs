@@ -72,7 +72,7 @@ namespace Game
 
             public void LoadAll()
             {
-                if(TexturesByDirectory.Count != 0) {
+                if (TexturesByDirectory.Count != 0) {
                     throw new Exception("Already loaded");
                 }
                 foreach (TextureDirectory directory in Enum.GetValues(typeof(TextureDirectory))) {
@@ -87,12 +87,22 @@ namespace Game
 
             public TTexture Get(TextureDirectory directory, string textureName)
             {
-                if(PRELOAD_ALL && textureName.Contains('/')) {
+                if (string.IsNullOrEmpty(textureName)) {
+                    //No texture name (Note: this is not an error, as null value is sometimes desired)
+                    return null;
+                }
+
+                if (Application.isEditor && !Application.isPlaying) {
+                    //We are in unity editor and game is not actually running, thus no textures are loaded
+                    return Resources.Load<TTexture>(string.Format("{0}/{1}/{2}", BASE_PATH, directory.ToString().ToLower(), textureName));
+                }
+
+                if (PRELOAD_ALL && textureName.Contains('/')) {
                     //Remove subfolder paths if textures have been preloaded
                     textureName = textureName.Substring(textureName.LastIndexOf('/') + 1);
                 }
 
-                if(!Has(directory, textureName)) {
+                if (!Has(directory, textureName)) {
                     //Texture not found
                     if (PRELOAD_ALL) {
                         //Texture should already be loaded
@@ -101,7 +111,7 @@ namespace Game
                     } else {
                         //Load texture
                         TTexture texture = Resources.Load<TTexture>(string.Format("{0}/{1}/{2}", BASE_PATH, directory.ToString().ToLower(), textureName));
-                        if(texture == null) {
+                        if (texture == null) {
                             //NOTE: Then using PRELOAD_ALL = false, you should include possible subdirectory path in textureName
                             //Example in TemplateProject: (Character.cs)
                             //AddAnimation(new SpriteAnimation("walk east", 10.0f, 0, "walk/stick figure walk {0}".Replicate(1, 4), TextureDirectory.Sprites));
