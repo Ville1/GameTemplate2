@@ -14,14 +14,16 @@ namespace Game
         public bool FlipX { get; set; }
         public bool FlipY { get; set; }
         public bool IsEmpty { get { return string.IsNullOrEmpty(Sprite); } }
+        public Color? Color { get; set; }
 
-        public SpriteData(string sprite, TextureDirectory spriteDirectory, int order = 0, bool flipX = false, bool flipY = false)
+        public SpriteData(string sprite, TextureDirectory spriteDirectory, int order = 0, bool flipX = false, bool flipY = false, Color? color = null)
         {
             Sprite = sprite;
             SpriteDirectory = spriteDirectory;
             Order = order;
             FlipX = flipX;
             FlipY = flipY;
+            Color = color;
         }
 
         public SpriteData()
@@ -31,6 +33,7 @@ namespace Game
             Order = 0;
             FlipX = false;
             FlipY = false;
+            Color = null;
         }
 
         public SpriteData(SpriteData data)
@@ -40,6 +43,7 @@ namespace Game
             Order = data.Order;
             FlipX = data.FlipX;
             FlipY = data.FlipY;
+            Color = data.Color;
         }
 
         public void Set(SpriteData data)
@@ -49,6 +53,7 @@ namespace Game
             Order = data.Order;
             FlipX = data.FlipX;
             FlipY = data.FlipY;
+            Color = data.Color;
         }
 
         public SpriteData Copy
@@ -74,7 +79,7 @@ namespace Game
         {
             PixelsPerUnitMultiplier = pixelsPerUnitMultiplier;
             ImageType = imageType;
-            if(ImageType.HasValue && ImageType.Value != Image.Type.Sliced && ImageType.Value != Image.Type.Tiled && PixelsPerUnitMultiplier.HasValue) {
+            if (ImageType.HasValue && ImageType.Value != Image.Type.Sliced && ImageType.Value != Image.Type.Tiled && PixelsPerUnitMultiplier.HasValue) {
                 CustomLogger.Error("pixelsPerUnitMultiplier should be only used with Image.Type.Sliced or Image.Type.Tiled");
                 PixelsPerUnitMultiplier = null;
             }
@@ -123,7 +128,7 @@ namespace Game
         private SpriteData originalSprite;
         private float currentFrameTimeLeft;
         private bool startRemoved;
-        private float speedMultipler = 1.0f; 
+        private float speedMultipler = 1.0f;
 
         /// <summary>
         /// </summary>
@@ -142,7 +147,7 @@ namespace Game
                 throw new ArgumentException("framesPerSecond <= 0.0f");
             }
             int loopInd = loopIndex.HasValue ? loopIndex.Value : -1;
-            if((loopInd != -1 && loopInd < 0) || loopInd >= sprites.Count) {
+            if ((loopInd != -1 && loopInd < 0) || loopInd >= sprites.Count) {
                 throw new ArgumentException("Invalid loopIndex, set to -1 or null for a non looping animation.");
             }
             Name = name;
@@ -202,7 +207,7 @@ namespace Game
                 CurrentTarget.FlipY = FlipY;
             }
 
-            if(UpdateCallback != null) {
+            if (UpdateCallback != null) {
                 UpdateCallback();
             }
         }
@@ -218,7 +223,7 @@ namespace Game
             currentFrameTimeLeft -= Time.deltaTime;
 
             int increment = 0;
-            while(currentFrameTimeLeft <= 0.0f) {
+            while (currentFrameTimeLeft <= 0.0f) {
                 //Next frame
                 //Ideally increment should end up as 1, but if frame rate is low (currentFrameTimeLeft goes deep in negatives due to large Time.deltaTime),
                 //we might need to skip some frames
@@ -226,12 +231,12 @@ namespace Game
                 increment++;
             }
 
-            if(increment > 0) {
+            if (increment > 0) {
                 //Increase index
                 int oldIndex = CurrentSpriteIndex;
                 CurrentSpriteIndex += increment;
 
-                if(LoopIndex != 0 && IsLooping && !startRemoved && CurrentSpriteIndex >= LoopIndex) {
+                if (LoopIndex != 0 && IsLooping && !startRemoved && CurrentSpriteIndex >= LoopIndex) {
                     //Looping animation with a non zero LoopIndex has passed part that gets skipped on successive loops for the first time
                     //Remove start of animation from CurrentSprites
                     startRemoved = true;
@@ -266,15 +271,15 @@ namespace Game
 
         public void Stop()
         {
-            if(CurrentTarget != null) {
+            if (CurrentTarget != null) {
                 CurrentTarget.Set(originalSprite);
                 CurrentTarget = null;
                 originalSprite = null;
             }
-            if(UpdateCallback != null) {
+            if (UpdateCallback != null) {
                 UpdateCallback();
             }
-            if(EndCallback != null) {
+            if (EndCallback != null) {
                 EndCallback();
             }
 
@@ -294,7 +299,7 @@ namespace Game
                 return speedMultipler;
             }
             set {
-                if(value <= 0.0f) {
+                if (value <= 0.0f) {
                     throw new ArgumentException("SpeedMultiplier <= 0.0f");
                 }
                 speedMultipler = value;

@@ -11,17 +11,17 @@ namespace Game.UI
     {
         private static Image.Type DEFAULT_IMAGE_TYPE = Image.Type.Simple;
 
-        public static void SetText(GameObject parent, string textGameObjectName, LString text, Color? color = null)
+        public static void SetText(GameObject parent, string textGameObjectName, LString text, Color? color = null, float? fontSize = null)
         {
-            SetTextObject(parent, null, textGameObjectName, text, color);
+            SetTextObject(parent, null, textGameObjectName, text, color, fontSize);
         }
 
-        public static void SetText(string parentGameObjectName, string textGameObjectName, LString text, Color? color = null)
+        public static void SetText(string parentGameObjectName, string textGameObjectName, LString text, Color? color = null, float? fontSize = null)
         {
-            SetTextObject(null, parentGameObjectName, textGameObjectName, text, color);
+            SetTextObject(null, parentGameObjectName, textGameObjectName, text, color, fontSize);
         }
 
-        private static void SetTextObject(GameObject parent, string parentGameObjectName, string textGameObjectName, LString text, Color? color)
+        private static void SetTextObject(GameObject parent, string parentGameObjectName, string textGameObjectName, LString text, Color? color, float? fontSize)
         {
             //Find GameObject
             GameObject textGameObject = parent != null ? GameObjectHelper.Find(parent, textGameObjectName) : GameObjectHelper.Find(parentGameObjectName, textGameObjectName);
@@ -40,6 +40,9 @@ namespace Game.UI
             textComponent.text = text;
             if (color.HasValue) {
                 textComponent.faceColor = color.Value;
+            }
+            if (fontSize.HasValue) {
+                textComponent.fontSize = fontSize.Value;
             }
         }
 
@@ -136,6 +139,11 @@ namespace Game.UI
                 imageComponent.pixelsPerUnitMultiplier = spriteData.PixelsPerUnitMultiplier.Value;
             }
             imageComponent.type = spriteData.ImageType.HasValue ? spriteData.ImageType.Value : DEFAULT_IMAGE_TYPE;
+
+            //Color
+            if (spriteData.Color.HasValue) {
+                imageComponent.color = spriteData.Color.Value;
+            }
         }
     }
 }

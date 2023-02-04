@@ -14,6 +14,7 @@ namespace Game.UI.Components
         public string GameObjectName { get; private set; }
         public string ElementText { get; private set; }
         public Color? TextColor { get; set; }
+        public float? FontSize { get; set; }
         public CustomButton.OnClick OnClick { get; private set; }
         public UISpriteData SpriteData { get; private set; }
 
@@ -36,12 +37,13 @@ namespace Game.UI.Components
         /// <summary>
         /// Basic ui element constructor
         /// </summary>
-        private UIElementData(ElementType type, string gameObjectName, string text, Color? textColor, CustomButton.OnClick onClick, UISpriteData spriteData)
+        private UIElementData(ElementType type, string gameObjectName, string text, Color? textColor, float? fontSize, CustomButton.OnClick onClick, UISpriteData spriteData)
         {
             Type = type;
             GameObjectName = gameObjectName;
             ElementText = text;
             TextColor = textColor;
+            FontSize = fontSize;
             OnClick = onClick;
             SpriteData = new UISpriteData(spriteData);
         }
@@ -76,39 +78,44 @@ namespace Game.UI.Components
             SliderInputType = sliderInputType;
         }
 
-        public static UIElementData Text(string gameObjectName, string text, Color? textColor)
+        public static UIElementData Text(string gameObjectName, string text, Color? textColor = null, float? fontSize = null)
         {
-            return new UIElementData(ElementType.Text, gameObjectName, text, textColor, null, new UISpriteData());
+            return new UIElementData(ElementType.Text, gameObjectName, text, textColor, fontSize, null, new UISpriteData());
+        }
+
+        public static UIElementData Button(string gameObjectName, CustomButton.OnClick onClick)
+        {
+            return new UIElementData(ElementType.Button, gameObjectName, null, null, null, onClick, new UISpriteData());
         }
 
         public static UIElementData Button(string gameObjectName, string text, Color? textColor, CustomButton.OnClick onClick)
         {
-            return new UIElementData(ElementType.Button, gameObjectName, text, textColor, onClick, new UISpriteData());
+            return new UIElementData(ElementType.Button, gameObjectName, text, textColor, null, onClick, new UISpriteData());
         }
 
         public static UIElementData Button(string gameObjectName, string text, Color? textColor, CustomButton.OnClick onClick, UISpriteData spriteData)
         {
-            return new UIElementData(ElementType.Button, gameObjectName, text, textColor, onClick, spriteData);
+            return new UIElementData(ElementType.Button, gameObjectName, text, textColor, null, onClick, spriteData);
         }
 
         public static UIElementData Image(string gameObjectName, UISpriteData spriteData)
         {
-            return new UIElementData(ElementType.Image, gameObjectName, null, null, null, spriteData);
+            return new UIElementData(ElementType.Image, gameObjectName, null, null, null, null, spriteData);
         }
 
         public static UIElementData Button(string gameObjectName, string text, Color? textColor, CustomButton.OnClick onClick, SpriteData spriteData)
         {
-            return new UIElementData(ElementType.Button, gameObjectName, text, textColor, onClick, new UISpriteData(spriteData));
+            return new UIElementData(ElementType.Button, gameObjectName, text, textColor, null, onClick, new UISpriteData(spriteData));
         }
 
         public static UIElementData Image(string gameObjectName, SpriteData spriteData)
         {
-            return new UIElementData(ElementType.Image, gameObjectName, null, null, null, new UISpriteData(spriteData));
+            return new UIElementData(ElementType.Image, gameObjectName, null, null, null, null, new UISpriteData(spriteData));
         }
 
         public static UIElementData Tooltip(string gameObjectName, LString tooltip)
         {
-            return new UIElementData(ElementType.Tooltip, gameObjectName, tooltip, null, null, new UISpriteData());
+            return new UIElementData(ElementType.Tooltip, gameObjectName, tooltip, null, null, null, new UISpriteData());
         }
 
         public static UIElementData TextInput(string gameObjectName, CustomInputField.OnChange onChange, string defaultValue, LString placeholder = null, int maxLenght = int.MaxValue,
@@ -138,7 +145,7 @@ namespace Game.UI.Components
         {
             switch (Type) {
                 case ElementType.Text:
-                    UIHelper.SetText(parentGameObject, GameObjectName, ElementText, TextColor);
+                    UIHelper.SetText(parentGameObject, GameObjectName, ElementText, TextColor, FontSize);
                     break;
                 case ElementType.Button:
                     UIHelper.SetButton(parentGameObject, GameObjectName, ElementText, OnClick);
