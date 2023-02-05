@@ -10,12 +10,13 @@ namespace Game
         public IHasStats Parent { get; private set; } = null;
         public bool IsPrototype { get { return Parent == null; } }
         public float MinValue { get; private set; } = float.MinValue;
+        public List<Stat> List { get { return stats; } }
 
         public Stat Strength { get { return Get(Stat.Strength); } set { Set(Stat.Strength, value); } }
         public Stat Dexterity { get { return Get(Stat.Dexterity); } set { Set(Stat.Dexterity, value); } }
-        public Stat TestStat { get { return Get(Stat.TestStat); } set { Set(Stat.TestStat, value); } }
-        public Stat Movement { get { return Get(Stat.Movement); } set { Set(Stat.Movement, value); } }
+
         public Stat HP { get { return Get(Stat.HP); } set { Set(Stat.HP, value); } }
+        public Stat HPRegen { get { return Get(Stat.HPRegen); } set { Set(Stat.HPRegen, value); } }
 
         private List<Stat> stats;
 
@@ -68,6 +69,11 @@ namespace Game
             this.stats = stats.stats.Select(stat => new Stat(stat, stat.Value, this)).ToList();
         }
 
+        public Stats(Stats stats)
+        {
+            this.stats = stats.stats.Select(stat => new Stat(stat, stat.Value, this)).ToList();
+        }
+
         private void Initialize(List<Stat> stats, float? minValue = null)
         {
             this.stats = stats == null ? new List<Stat>() : stats.Select(stat => new Stat(stat, 0.0f, this)).ToList();
@@ -108,7 +114,7 @@ namespace Game
         public void Set(Stat searchStat, float value)
         {
             Stat statData = stats.FirstOrDefault(stat => stat.TypeId == searchStat.TypeId);
-            if(statData != null) {
+            if (statData != null) {
                 if (statData.IsResource) {
                     statData.Amount = value;
                 } else {
@@ -116,6 +122,13 @@ namespace Game
                 }
             } else {
                 stats.Add(new Stat(searchStat, value, this));
+            }
+        }
+
+        public void Add(Stats stats)
+        {
+            foreach (Stat stat in stats.stats) {
+                Set(stat, Get(stat) + stat);
             }
         }
 
@@ -131,13 +144,13 @@ namespace Game
             }
             IHasStatModifiers parent = Parent as IHasStatModifiers;
             List<StatModifier> modifiers = parent.GetStatModifiers();
-            foreach(Stat stat in stats) {
+            foreach (Stat stat in stats) {
                 stat.Modifiers.Clear();
                 stat.Recalculate();
             }
             foreach (StatModifier modifier in modifiers) {
                 Stat stat = stats.FirstOrDefault(s => s.TypeId == modifier.Stat.TypeId);
-                if(stat != null) {
+                if (stat != null) {
                     stat.Modifiers.Add(modifier);
                 }
             }
@@ -146,7 +159,7 @@ namespace Game
         public float Scale(Dictionary<Stat, float> multipliers)
         {
             float sum = 0.0f;
-            foreach(KeyValuePair<Stat, float> pair in multipliers) {
+            foreach (KeyValuePair<Stat, float> pair in multipliers) {
                 sum += pair.Value * Get(pair.Key).Value;
             }
             return sum;
@@ -154,7 +167,7 @@ namespace Game
 
         public void Refill()
         {
-            foreach(Stat stat in stats) {
+            foreach (Stat stat in stats) {
                 if (stat.IsResource) {
                     stat.Refill();
                 }
@@ -167,13 +180,15 @@ namespace Game
         }
     }
 
-    public class Stat
+    public partial class Stat
     {
         public enum Type { Stat, DerivedStat, ResourceStat, DerivedResourceStat }
+        public enum Category { BaseStat, DerivedStat, ResourceStat, RegenStat }
         /// <summary>
         /// Determines how resource stat's Amount is changed when stat gets Recalculate():ed
         /// </summary>
-        public enum ResourceRecalculateType {
+        public enum ResourceRecalculateType
+        {
             /// <summary>
             /// Amount does not change
             /// </summary>
@@ -190,16 +205,25 @@ namespace Game
 
         private static Dictionary<long, Stat> prototypes = new Dictionary<long, Stat>();
 
-        public static Stat Strength { get { return GetPrototype(0, "Strength"); } }
-        public static Stat Dexterity { get { return GetPrototype(1, "Dexterity"); } }
-        public static Stat Movement { get { return GetPrototype(2, "Movement", null, ResourceRecalculateType.Clamp); } }
+        public static List<Stat> Prototypes { get { InitializePrototypes(); return prototypes.Select(pair => pair.Value).ToList(); } }
 
-        public static Stat TestStat { get { return GetPrototype(3, "TestStat", new Dictionary<Stat, float>() { { Strength, 0.75f }, { Dexterity, 0.25f } }); } }
-        public static Stat HP { get { return GetPrototype(4, "HP", new Dictionary<Stat, float>() { { Strength, 10.0f } }, ResourceRecalculateType.Relative); } }
+        //Base stats
+        public static Stat Strength { get { return GetPrototype(0); } }
+        public static Stat Dexterity { get { return GetPrototype(1); } }
+
+        //Resource stats
+        public static Stat Movement { get { return GetPrototype(100); } }
+
+        public static Stat HP { get { return GetPrototype(1000); } }
+        public static Stat HPRegen { get { return GetPrototype(1001); } }
 
         public long TypeId { get; private set; }
         public Type StatType { get { return IsDerived ? (IsResource ? Type.DerivedResourceStat : Type.DerivedStat) : (IsResource ? Type.ResourceStat : Type.Stat); } }
         public LString Name { get; private set; }
+        public LString UIShortText { get; private set; }
+        public LString Abbreviation { get; private set; }
+        public long UIOrder { get; private set; }
+        public SpriteData Sprite { get; private set; }
         public Stats Collection { get; private set; } = null;
         public bool IsPrototype { get { return Collection == null; } }
         public List<StatModifier> Modifiers { get; set; } = new List<StatModifier>();
@@ -207,50 +231,71 @@ namespace Game
         public bool IsDerived { get { return Scaling != null && Scaling.Count != 0; } }
         public bool IsResource { get { return ResourceRecalculate.HasValue; } }
         public ResourceRecalculateType? ResourceRecalculate { get; private set; } = null;
+        public SubCategory UISubCategory { get; private set; } = null;
 
         private float baseValue = 0.0f;
         private float? oldValue = null;
         private float? value = null;
         private float amount = 0.0f;
+        private Stat regenStat = null;
+        private Category? category = null;
 
         /// <summary>
         /// Prototype constructor
         /// </summary>
-        private Stat(long id, LString name, ResourceRecalculateType? resourceRecalculateType = null)
+        private Stat(long id, LString name, LString abbreviation, LString uiShortText, long uiOrder, SubCategory uiCategory, SpriteData sprite, ResourceRecalculateType? resourceRecalculateType = null, Stat regen = null)
         {
             TypeId = id;
             Name = name;
+            Abbreviation = abbreviation;
+            UIShortText = uiShortText;
+            UIOrder = uiOrder;
+            UISubCategory = uiCategory;
+            Sprite = sprite == null ? new SpriteData() : sprite.Copy;
             ResourceRecalculate = resourceRecalculateType;
+            Regen = regen;
         }
 
 
         /// <summary>
         /// Prototype constructor
         /// </summary>
-        private Stat(long id, LString name, Dictionary<Stat, float> scaling, ResourceRecalculateType? resourceRecalculateType = null)
+        private Stat(long id, LString name, LString abbreviated, LString uiShortText, long uiOrder, SubCategory uiCategory, SpriteData sprite, Dictionary<Stat, float> scaling, ResourceRecalculateType? resourceRecalculateType = null, Stat regen = null)
         {
             TypeId = id;
             Name = name;
+            Abbreviation = abbreviated;
+            UIShortText = uiShortText;
+            UIOrder = uiOrder;
+            UISubCategory = uiCategory;
+            Sprite = sprite == null ? new SpriteData() : sprite.Copy;
             Scaling = new Dictionary<Stat, float>();
             foreach (KeyValuePair<Stat, float> pair in scaling) {
                 Scaling.Add(pair.Key, pair.Value);
             }
             ResourceRecalculate = resourceRecalculateType;
+            Regen = regen;
         }
 
         public Stat(Stat stat, float value, Stats collection)
         {
             TypeId = stat.TypeId;
             Name = stat.Name;
+            Abbreviation = stat.Abbreviation;
+            UIShortText = stat.UIShortText;
+            UIOrder = stat.UIOrder;
+            UISubCategory = stat.UISubCategory;
+            Sprite = stat.Sprite.Copy;
             ResourceRecalculate = stat.ResourceRecalculate;
+            Regen = stat.Regen;
             Value = value;
             if (IsResource) {
                 Amount = value;
             }
             Collection = collection;
-            if(stat.Scaling != null) {
+            if (stat.Scaling != null) {
                 Scaling = new Dictionary<Stat, float>();
-                foreach(KeyValuePair<Stat, float> pair in stat.Scaling) {
+                foreach (KeyValuePair<Stat, float> pair in stat.Scaling) {
                     Scaling.Add(pair.Key, pair.Value);
                 }
             } else {
@@ -277,7 +322,8 @@ namespace Game
         /// instead of base value. This can lead to an unexpected new base value. Using these operations to target the Stat-object itself will use base value instead. (for example Stats.Strength += 1.0f;)
         /// Alternatively you can also use BaseValue-property. (for example Stats.Strength.BaseValue += 1.0f;)
         /// </summary>
-        public float Value {
+        public float Value
+        {
             get {
                 if (value.HasValue) {
                     return value.Value;
@@ -292,8 +338,8 @@ namespace Game
                 float newValue = BaseValue;
 
                 //Add derived stat scaling
-                if(IsDerived) {
-                    foreach(KeyValuePair<Stat, float> pair in Scaling) {
+                if (IsDerived) {
+                    foreach (KeyValuePair<Stat, float> pair in Scaling) {
                         newValue += pair.Value * Collection.Get(pair.Key).Value;
                     }
                 }
@@ -316,7 +362,7 @@ namespace Game
                     //Resource amount
                     switch (ResourceRecalculate) {
                         case ResourceRecalculateType.Relative:
-                            if(oldValue.Value == 0.0f) {
+                            if (oldValue.Value == 0.0f) {
                                 amount = 0.0f;
                             } else {
                                 amount = (amount / oldValue.Value) * value.Value;
@@ -360,6 +406,31 @@ namespace Game
         public void Refill()
         {
             Amount = Value;
+        }
+
+        public Stat Regen
+        {
+            get {
+                return regenStat != null && Collection != null ? Collection.Get(regenStat) : regenStat;
+            }
+            set {
+                regenStat = value;
+            }
+        }
+
+        public Category StatCategory
+        {
+            get {
+                if (category.HasValue) {
+                    return category.Value;
+                }
+                return StatType == Type.ResourceStat || StatType == Type.DerivedResourceStat ? Category.ResourceStat :
+                    (StatType == Type.DerivedStat ? (prototypes.Any(stat => stat.Value.Regen != null && stat.Value.Regen.TypeId == TypeId) ? Category.RegenStat : Category.DerivedStat)
+                    : Category.BaseStat);
+            }
+            private set {
+                category = value;
+            }
         }
 
         public override string ToString()
@@ -412,22 +483,33 @@ namespace Game
             return stat == null ? 0.0f : (stat.IsResource ? stat.Amount : stat.Value);
         }
 
-        private static Stat GetPrototype(long id, LString name, Dictionary<Stat, float> scaling = null, ResourceRecalculateType? resourceRecalculateType = null)
+        private static Stat GetPrototype(long id)
         {
-            if (!prototypes.ContainsKey(id)) {
-                if(scaling == null) {
-                    prototypes.Add(id, new Stat(id, name, resourceRecalculateType));
-                } else {
-                    prototypes.Add(id, new Stat(id, name, scaling, resourceRecalculateType));
-                }
-            }
+            InitializePrototypes();
             return prototypes[id];
+        }
+
+        public class SubCategory
+        {
+            public long Id { get; private set; }
+            public LString Name { get; private set; }
+
+            public SubCategory(long id, LString name)
+            {
+                Id = id;
+                Name = name;
+            }
+
+            public static SubCategory Defence { get { return new SubCategory(0, "test"); } }
+            public static SubCategory Accuracy { get { return new SubCategory(1, "test 2"); } }
+            public static SubCategory Evasion { get { return new SubCategory(2, "test 3"); } }
         }
     }
 
     public class StatModifier
     {
         public enum ModificationOrder { FlatFirst, MultiplierFirst }
+        public enum StatModifierCategory { Equipment, StatusEffects }
 
         public Stat Stat { get; private set; }
         public float FlatValue { get; private set; }
@@ -438,13 +520,15 @@ namespace Game
         public ModificationOrder Order { get; private set; }
         public LString Name { get; set; } = null;
         public LString Description { get; set; } = null;
+        public StatModifierCategory? Category { get; set; } = null;
 
-        public StatModifier(Stat stat, float flatValue, float multiplier = 1.0f, ModificationOrder order = ModificationOrder.FlatFirst)
+        public StatModifier(Stat stat, float flatValue, float multiplier = 1.0f, ModificationOrder order = ModificationOrder.FlatFirst, StatModifierCategory? category = null)
         {
             Stat = stat;
             FlatValue = flatValue;
             Multiplier = multiplier;
             Order = order;
+            Category = category;
         }
 
         public StatModifier(Stat stat, float flatValue, float multiplier, LString name, LString description, ModificationOrder order = ModificationOrder.FlatFirst)

@@ -24,7 +24,7 @@ namespace Game.Objects
                 CustomLogger.Error("{PrototypeDoesNotExist}", typeof(PrototypeType).Name, internalName);
                 return default(PrototypeType);
             }
-            return prototype;
+            return (PrototypeType)prototype.Clone;
         }
     }
 }

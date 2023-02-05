@@ -101,6 +101,7 @@ namespace Game.UI
 
         public class TestClass : IDropdownOption
         {
+            public string InternalName { get; set; }
             public LString DropdownText { get; set; }
             public SpriteData DropdownSprite { get { return null; } }
         }

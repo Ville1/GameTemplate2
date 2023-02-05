@@ -190,6 +190,10 @@ MonoBehaviour:
     m_Localized: Filter settings
     m_Metadata:
       m_Items: []
+  - m_Id: 88818164746776576
+    m_Localized: Stat prototype with id '{0}' is already created
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
