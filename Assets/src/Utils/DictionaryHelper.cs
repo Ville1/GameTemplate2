@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Utils
 {
@@ -41,7 +42,7 @@ namespace Game.Utils
         public static Dictionary<TKey, TValue> Copy<TKey, TValue>(Dictionary<TKey, TValue> original, Func<TKey, TValue, TValue> valueCreatorCallback)
         {
             Dictionary<TKey, TValue> copy = new Dictionary<TKey, TValue>();
-            foreach(KeyValuePair<TKey, TValue> originalPair in original) {
+            foreach (KeyValuePair<TKey, TValue> originalPair in original) {
                 copy.Add(originalPair.Key, valueCreatorCallback(originalPair.Key, originalPair.Value));
             }
             return copy;
@@ -53,6 +54,40 @@ namespace Game.Utils
                 dictionary[key] = value;
             } else {
                 dictionary.Add(key, value);
+            }
+        }
+
+        public static void Plus<TKey>(Dictionary<TKey, float> dictionary, TKey key, float amount)
+        {
+            if (dictionary.ContainsKey(key)) {
+                dictionary[key] += amount;
+            } else {
+                dictionary.Add(key, amount);
+            }
+        }
+
+        public static void Plus<TKey>(Dictionary<TKey, float> dictionary, float amount)
+        {
+            List<TKey> keys = dictionary.Keys.Select(key => key).ToList();
+            foreach (TKey key in keys) {
+                dictionary[key] += amount;
+            }
+        }
+
+        public static void Minus<TKey>(Dictionary<TKey, float> dictionary, TKey key, float amount)
+        {
+            if (dictionary.ContainsKey(key)) {
+                dictionary[key] -= amount;
+            } else {
+                dictionary.Add(key, (-1.0f) * amount);
+            }
+        }
+
+        public static void Minus<TKey>(Dictionary<TKey, float> dictionary, float amount)
+        {
+            List<TKey> keys = dictionary.Keys.Select(key => key).ToList();
+            foreach (TKey key in keys) {
+                dictionary[key] -= amount;
             }
         }
     }
