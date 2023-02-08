@@ -66,12 +66,12 @@ namespace Game
         public Stats(IHasStats parent, Stats stats)
         {
             Parent = parent;
-            this.stats = stats.stats.Select(stat => new Stat(stat, stat.Value, this)).ToList();
+            this.stats = stats.stats.Select(stat => new Stat(stat, stat.BaseValue, this)).ToList();
         }
 
         public Stats(Stats stats)
         {
-            this.stats = stats.stats.Select(stat => new Stat(stat, stat.Value, this)).ToList();
+            this.stats = stats.stats.Select(stat => new Stat(stat, stat.BaseValue, this)).ToList();
         }
 
         private void Initialize(List<Stat> stats, float? minValue = null)
@@ -128,7 +128,7 @@ namespace Game
         public void Add(Stats stats)
         {
             foreach (Stat stat in stats.stats) {
-                Set(stat, Get(stat) + stat);
+                Set(stat, Get(stat).BaseValue + stat.BaseValue);
             }
         }
 
