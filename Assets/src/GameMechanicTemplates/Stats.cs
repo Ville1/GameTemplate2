@@ -349,8 +349,7 @@ namespace Game
                 newValue += Modifiers.Where(modifier => modifier.Order == StatModifier.ModificationOrder.FlatFirst).Select(modifier => modifier.FlatValue).Sum();
 
                 //Multiply
-                float multiplier = 1.0f + Modifiers.Select(modifier => modifier.Multiplier - 1.0f).Sum();
-                newValue *= multiplier;
+                newValue *= MultiplierTotal;
 
                 //Multiply first
                 newValue += Modifiers.Where(modifier => modifier.Order == StatModifier.ModificationOrder.MultiplierFirst).Select(modifier => modifier.FlatValue).Sum();
@@ -378,6 +377,44 @@ namespace Game
             }
             set {
                 BaseValue = value;
+            }
+        }
+
+        public float CalculateMultiplier()
+        {
+            return CalculateMultiplier(Modifiers.Where(modifier => modifier.Multiplier != 1.0f).ToList());
+        }
+
+        public float CalculateMultiplier(StatModifier.StatModifierCategory? category)
+        {
+            return CalculateMultiplier(Modifiers.Where(modifier => modifier.Multiplier != 1.0f && modifier.Category == category).ToList());
+        }
+
+        private float CalculateMultiplier(List<StatModifier> modifiers)
+        {
+            float multiplier = 1.0f + modifiers.Where(modifier => modifier.MultiplierType == StatModifier.MultiplierCombinationType.Additive)
+                .Select(modifier => modifier.Multiplier - 1.0f).Sum();
+
+            foreach (StatModifier modifier in modifiers.Where(modifier => modifier.MultiplierType == StatModifier.MultiplierCombinationType.Multiplicative)) {
+                multiplier *= modifier.Multiplier;
+            }
+
+            foreach (IGrouping<StatModifier.StatModifierCategory?, StatModifier> additiveCategory in modifiers.Where(modifier => modifier.MultiplierType == StatModifier.MultiplierCombinationType.AdditiveCategory)
+                .GroupBy(modifier => modifier.Category)) {
+                float categoryMultiplier = 1.0f;
+                foreach (StatModifier modifier in additiveCategory) {
+                    categoryMultiplier += (modifier.Multiplier - 1.0f);
+                }
+                multiplier *= categoryMultiplier;
+            }
+
+            return multiplier;
+        }
+
+        public float MultiplierTotal
+        {
+            get {
+                return CalculateMultiplier();
             }
         }
 
@@ -510,6 +547,7 @@ namespace Game
     {
         public enum ModificationOrder { FlatFirst, MultiplierFirst }
         public enum StatModifierCategory { Equipment, StatusEffects }
+        public enum MultiplierCombinationType { Additive, Multiplicative, AdditiveCategory }
 
         public Stat Stat { get; private set; }
         public float FlatValue { get; private set; }
@@ -517,21 +555,25 @@ namespace Game
         /// 1 = no change
         /// </summary>
         public float Multiplier { get; private set; }
-        public ModificationOrder Order { get; private set; }
+        public ModificationOrder Order { get; set; }
+        public MultiplierCombinationType MultiplierType { get; set; }
         public LString Name { get; set; } = null;
         public LString Description { get; set; } = null;
         public StatModifierCategory? Category { get; set; } = null;
 
-        public StatModifier(Stat stat, float flatValue, float multiplier = 1.0f, ModificationOrder order = ModificationOrder.FlatFirst, StatModifierCategory? category = null)
+        public StatModifier(Stat stat, float flatValue, float multiplier = 1.0f, ModificationOrder order = ModificationOrder.FlatFirst, MultiplierCombinationType multiplierType = MultiplierCombinationType.Additive,
+            StatModifierCategory? category = null)
         {
             Stat = stat;
             FlatValue = flatValue;
             Multiplier = multiplier;
             Order = order;
+            MultiplierType = multiplierType;
             Category = category;
         }
 
-        public StatModifier(Stat stat, float flatValue, float multiplier, LString name, LString description, ModificationOrder order = ModificationOrder.FlatFirst)
+        public StatModifier(Stat stat, float flatValue, float multiplier, LString name, LString description, ModificationOrder order = ModificationOrder.FlatFirst,
+            MultiplierCombinationType multiplierType = MultiplierCombinationType.Additive)
         {
             Stat = stat;
             FlatValue = flatValue;
@@ -539,6 +581,19 @@ namespace Game
             Name = name;
             Description = description;
             Order = order;
+            MultiplierType = multiplierType;
+        }
+
+        public StatModifier(StatModifier prototype)
+        {
+            Stat = prototype.Stat;
+            FlatValue = prototype.FlatValue;
+            Multiplier = prototype.Multiplier;
+            Name = prototype.Name;
+            Description = prototype.Description;
+            Order = prototype.Order;
+            Category = prototype.Category;
+            MultiplierType = prototype.MultiplierType;
         }
     }
 
