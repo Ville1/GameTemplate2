@@ -294,6 +294,14 @@ MonoBehaviour:
     m_Localized: GameObject "{0}" has no {1} component.
     m_Metadata:
       m_Items: []
+  - m_Id: 94327075511824384
+    m_Localized: 'Object is not initialized: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94327100522459136
+    m_Localized: 'Object is already initialized: {0}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -126,7 +126,7 @@ namespace Game
             State = State.Loading;
             WorldMap = WorldMap ?? Map.Instantiate("WorldMap", 1, 1);
             if(PlayerCharacter != null) {
-                PlayerCharacter.Destroy();
+                PlayerCharacter.DestroyGameObject();
                 PlayerCharacter = null;
             }
             List<ISaveable> saveables = new List<ISaveable>() {
@@ -153,7 +153,7 @@ namespace Game
             if(State == State.Running) {
                 WorldMap.Clear();
                 State = State.MainMenu;
-                PlayerCharacter.Destroy();
+                PlayerCharacter.DestroyGameObject();
                 PlayerCharacter = null;
                 MainMenu.Instance.Active = true;
             }

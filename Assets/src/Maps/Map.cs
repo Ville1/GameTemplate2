@@ -194,7 +194,7 @@ namespace Game.Maps
             if (State == MapState.Ready) {
                 //If map already has tiles, clear old tiles
                 foreach (Tile tile in this) {
-                    tile.Destroy();
+                    tile.DestroyGameObject();
                 }
                 Tiles.Clear();
             }

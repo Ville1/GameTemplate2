@@ -69,7 +69,7 @@ namespace Game
             }
 
             Effect2D effect = activeEffects[effectId];
-            effect.Destroy();
+            effect.DestroyGameObject();
             activeEffects.Remove(effectId);
 
             return true;
@@ -78,7 +78,7 @@ namespace Game
         public void RemoveAll()
         {
             foreach(KeyValuePair<Guid, Effect2D> pair in activeEffects) {
-                pair.Value.Destroy();
+                pair.Value.DestroyGameObject();
             }
             activeEffects.Clear();
         }

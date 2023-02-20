@@ -156,10 +156,10 @@ namespace Game.Maps
             }
         }
 
-        public override void Destroy()
+        public override void DestroyGameObject()
         {
             UnregisterDragEventListeners();
-            base.Destroy();
+            base.DestroyGameObject();
         }
 
         public static Tile Load(Map map, Saving.Data.Tile saveData)

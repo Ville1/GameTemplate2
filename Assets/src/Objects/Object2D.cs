@@ -17,7 +17,8 @@ namespace Game.Objects
         public RectTransform RectTransform { get; private set; }
         public SpriteRenderer Renderer { get; private set; }
         public BoxCollider Collider { get; private set; }
-        public bool IsPrototype { get { return gameObject == null; } }
+        public bool IsPrototype { get { return isPrototype; } }
+        public bool IsInitialized { get { return gameObject != null; } }
         public MouseEventData MouseEventData { get { return clickListenerData; } }
         public bool IsClickable { get { return clickListenerData != null; } }
         public float MovementSpeed { get; set; }
@@ -30,12 +31,12 @@ namespace Game.Objects
         public bool AnimationIsPaused { get { return currentAnimation != null && currentAnimation.IsPaused; } }
         public string CurrentAnimation { get { return IsPlayingAnimation ? currentAnimation.Name : null; } }
 
+        private bool isPrototype = false;
         protected Object2DListener updateListener = null;
         private GameObject gameObject = null;
         private string prefabName = null;
         private string name = null;
         private SpriteData spriteData = null;
-        private bool isDestroyed = false;
         private bool spriteDirectoryChanged = false;
         protected MouseEventData clickListenerData;
         protected Vector3? oldPosition = null;
@@ -51,7 +52,32 @@ namespace Game.Objects
         protected List<QueuedAnimation> animationQueue = new List<QueuedAnimation>();
 
         /// <summary>
-        /// GameObject constructor (prototype)
+        /// Prototype constructor
+        /// </summary>
+        public Object2D(string objectName, SpriteData spriteData, List<SpriteAnimation> animations, float movementSpeed, MouseEventData clickListenerData = null)
+        {
+            isPrototype = true;
+            name = objectName;
+            this.spriteData = spriteData ?? new SpriteData();
+            this.animations = animations == null ? new List<SpriteAnimation>() : animations;
+            MovementSpeed = movementSpeed;
+            this.clickListenerData = clickListenerData;
+        }
+
+        /// <summary>
+        /// Constructor for object without GameObject (uninitialized object)
+        /// </summary>
+        public Object2D(Object2D prototype, string objectName)
+        {
+            Initialize(prototype.prefabName, objectName, false, Vector3.zero, null, prototype.spriteData, prototype.clickListenerData, prototype.MovementSpeed);
+            OnMovementStart = prototype.OnMovementStart.Copy();
+            OnMovement = prototype.OnMovement.Copy();
+            OnMovementEnd = prototype.OnMovementEnd.Copy();
+            animations = prototype.animations.Select(animation => new SpriteAnimation(animation)).ToList();
+        }
+
+        /// <summary>
+        /// GameObject constructor (based on prototype)
         /// </summary>
         public Object2D(Object2D prototype, string objectName, bool active, Vector3 position, Transform parent)
         {
@@ -71,7 +97,7 @@ namespace Game.Objects
         }
 
         /// <summary>
-        /// GameObject constructor (prefab)
+        /// GameObject constructor (based on prefab)
         /// </summary>
         public Object2D(string prefabName, string objectName, bool active, Vector3 position, Transform parent, SpriteData spriteData, MouseEventData clickListenerData = null,
             float movementSpeed = 0.0f)
@@ -91,6 +117,15 @@ namespace Game.Objects
             MovementSpeed = movementSpeed;
         }
 
+        public void InitializeObject(bool active, Vector3 position, Transform parent)
+        {
+            if (IsInitialized) {
+                CustomLogger.Warning("{ObjectAlreadyInitialized}", string.IsNullOrEmpty(name) ? "Unnamed" : name);
+                return;
+            }
+            Initialize(prefabName, name, active, position, parent, SpriteData, clickListenerData, MovementSpeed);
+        }
+
         public virtual bool Active
         {
             get {
@@ -99,6 +134,8 @@ namespace Game.Objects
             set {
                 if (IsPrototype) {
                     CustomLogger.Error("{ObjectIsPrototype}", string.IsNullOrEmpty(name) ? "Unnamed" : name);
+                } else if (!IsInitialized) {
+                    CustomLogger.Error("{ObjectIsNotInitialized}", string.IsNullOrEmpty(name) ? "Unnamed" : name);
                 } else {
                     gameObject.SetActive(value);
                 }
@@ -125,6 +162,19 @@ namespace Game.Objects
             }
         }
 
+        public SpriteData SpriteData
+        {
+            get {
+                return new SpriteData(spriteData);
+            }
+            set {
+                spriteData = new SpriteData(value);
+                if (Renderer != null) {
+                    UpdateSprite();
+                }
+            }
+        }
+
         public string Sprite
         {
             get {
@@ -132,7 +182,7 @@ namespace Game.Objects
             }
             set {
                 spriteData.Sprite = value;
-                if(Renderer != null) {
+                if (Renderer != null) {
                     UpdateSprite();
                 }
             }
@@ -144,7 +194,7 @@ namespace Game.Objects
                 return spriteData.SpriteDirectory;
             }
             set {
-                if(spriteData.SpriteDirectory != value) {
+                if (spriteData.SpriteDirectory != value) {
                     spriteData.SpriteDirectory = value;
                     spriteDirectoryChanged = true;
                     if (Renderer != null) {
@@ -195,18 +245,23 @@ namespace Game.Objects
         public void PlayAnimation(string name, AnimationQueue queue = AnimationQueue.StopCurrent, SpriteAnimation.AnimationDelegate callback = null, bool canStopMovementAnimation = true)
         {
             if (IsPrototype) {
-                CustomLogger.Error("{ObjectIsPrototype}", name);
+                CustomLogger.Error("{ObjectIsPrototype}", string.IsNullOrEmpty(this.name) ? "Unnamed" : this.name);
                 return;
             }
+            if (!IsInitialized) {
+                CustomLogger.Error("{ObjectIsNotInitialized}", string.IsNullOrEmpty(this.name) ? "Unnamed" : this.name);
+                return;
+            }
+
             SpriteAnimation animation = animations.FirstOrDefault(animation => animation.Name == name);
             if (animation == null) {
                 CustomLogger.Warning("{AnimationNotFound}", this.name, name);
                 return;
             }
-            if(currentAnimation != null) {
+            if (currentAnimation != null) {
                 switch (queue) {
                     case AnimationQueue.StopCurrent:
-                        if(IsMoving && hasMovementAnimation && !canStopMovementAnimation) {
+                        if (IsMoving && hasMovementAnimation && !canStopMovementAnimation) {
                             return;
                         }
                         currentAnimation.Stop();
@@ -269,7 +324,8 @@ namespace Game.Objects
             }
         }
 
-        public virtual void Update() {
+        public virtual void Update()
+        {
             movedThisFrame = false;
             if (IsMoving) {
                 if (CanMove) {
@@ -287,12 +343,12 @@ namespace Game.Objects
                     //This object can no longer move
                     EndMovement();
                 }
-            } else if(lingeringMovementAnimation) {
+            } else if (lingeringMovementAnimation) {
                 //Have movement animation linger for one frame for seamless animation
                 StopAnimation(false);
             }
 
-            if(currentAnimation != null && currentAnimation.IsPlaying) {
+            if (currentAnimation != null && currentAnimation.IsPlaying) {
                 if (currentAnimation.Update() && !currentAnimation.IsPlaying) {
                     //Animation has stopped
                     currentAnimation = null;
@@ -303,14 +359,21 @@ namespace Game.Objects
             movedLastFrame = movedThisFrame;
         }
 
-        public virtual void Destroy()
+        /// <summary>
+        /// Returns object back to uninitialized state
+        /// </summary>
+        public virtual void DestroyGameObject()
         {
-            if (isDestroyed) {
-                CustomLogger.Error("{ObjectIsDestroyed}", name);
-            } else {
-                GameObject.Destroy(gameObject);
-                isDestroyed = true;
+            if (!IsInitialized) {
+                CustomLogger.Error("{ObjectIsNotInitialized}", string.IsNullOrEmpty(name) ? "Unnamed" : name);
+                return;
             }
+            updateListener = null;
+            RectTransform = null;
+            Renderer = null;
+            Collider = null;
+            GameObject.Destroy(gameObject);
+            gameObject = null;
         }
 
         public override string ToString()
@@ -340,7 +403,7 @@ namespace Game.Objects
                 //Already moving or can't move
                 return false;
             }
-            if(Position.x == target.x && Position.y == target.y && Position.z == target.z) {
+            if (Position.x == target.x && Position.y == target.y && Position.z == target.z) {
                 //Same position
                 return false;
             }
@@ -355,7 +418,7 @@ namespace Game.Objects
                 hasMovementAnimation = true;
             }
 
-            foreach(EventListenerDelegate eventListener in OnMovementStart) {
+            foreach (EventListenerDelegate eventListener in OnMovementStart) {
                 eventListener();
             }
             return true;
@@ -404,6 +467,10 @@ namespace Game.Objects
             this.spriteData = spriteData.Copy;
             this.clickListenerData = clickListenerData;
             MovementSpeed = movementSpeed;
+
+            if (parent == null) {
+                return;
+            }
 
             //Instantiate GameObject
             if (string.IsNullOrEmpty(prefabName)) {
@@ -464,7 +531,7 @@ namespace Game.Objects
 
         private void UpdateSprite()
         {
-            if(((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged &&
+            if (((Renderer.sprite != null && Renderer.sprite.name == spriteData.Sprite) && Renderer.sortingOrder == spriteData.Order && !spriteDirectoryChanged &&
                 spriteData.FlipX == Renderer.flipX && spriteData.FlipY == Renderer.flipY) || (Renderer.sprite == null && spriteData.IsEmpty)) {
                 //No change
                 return;

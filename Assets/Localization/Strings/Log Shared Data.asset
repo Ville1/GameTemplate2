@@ -283,6 +283,14 @@ MonoBehaviour:
     m_Key: ComponentNotFound
     m_Metadata:
       m_Items: []
+  - m_Id: 94327075511824384
+    m_Key: ObjectIsNotInitialized
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94327100522459136
+    m_Key: ObjectAlreadyInitialized
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
