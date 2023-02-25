@@ -24,12 +24,14 @@ namespace Game.Input
         private Dictionary<MouseButton, MouseClickEventListener> mouseClickEvents = DictionaryHelper.CreateNewFromEnum((MouseButton button) => { return new MouseClickEventListener(button); });
         private Dictionary<MouseButton, MouseNothingClickEventListener> mouseNothingClickEvents = DictionaryHelper.CreateNewFromEnum((MouseButton button) => { return new MouseNothingClickEventListener(button); });
         private Dictionary<MouseButton, Dictionary<MouseDragEventType, MouseDragEventListener>> mouseDragEvents = new Dictionary<MouseButton, Dictionary<MouseDragEventType, MouseDragEventListener>>();
+        private Dictionary<MouseOverEventType, MouseOverEventListener> mouseOverEvents = DictionaryHelper.CreateNewFromEnum((MouseOverEventType type) => { return new MouseOverEventListener(type); });
         private Dictionary<MouseButton, bool> buttonsDownLastFrame = DictionaryHelper.CreateNewFromEnum<MouseButton, bool>(false);
         private Dictionary<MouseButton, bool> buttonsHeldLastFrame = DictionaryHelper.CreateNewFromEnum<MouseButton, bool>(false);
         private Dictionary<MouseButton, GameObject> draggedObjects = DictionaryHelper.CreateNewFromEnum<MouseButton, GameObject>((MouseButton b) => { return null; });
         private Vector2 mouseScreenPositionLastFrame = new Vector2(0.0f, 0.0f);
         private Vector3 mouseWorldPositionLastFrame = new Vector3(0.0f, 0.0f, 0.0f);
         private UnityEngine.UI.GraphicRaycaster uiRaycaster;
+        private GameObject lastFrameMouseOverObject = null;
 
         /// <summary>
         /// Initializiation
@@ -73,6 +75,7 @@ namespace Game.Input
 
             //Raycast
             RaycastHit hit;
+            bool hasHit = false;
             if (Physics.Raycast(CameraManager.Instance.Camera.ScreenPointToRay(UnityEngine.Input.mousePosition), out hit)) {
                 foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                     if (buttonsDownThisFrame[button]) {
@@ -82,6 +85,7 @@ namespace Game.Input
                     }
                     rayCastHits[button] = hit.transform.gameObject;
                 }
+                hasHit = true;
             } else {
                 //Clicked nothing
                 foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
@@ -148,6 +152,26 @@ namespace Game.Input
                     }
                 }
             }
+
+            //Mouse over events
+            if (hasHit) {
+                if(lastFrameMouseOverObject == null) {
+                    mouseOverEvents[MouseOverEventType.Enter].Activate(hit.transform.gameObject);
+                } else {
+                    if(lastFrameMouseOverObject == hit.transform.gameObject) {
+                        Vector3 difference = mouseWorldPositionLastFrame - MouseWorldPosition;
+                        if (difference.x != 0.0f || difference.y != 0.0f || difference.z != 0.0f) {
+                            mouseOverEvents[MouseOverEventType.Over].Activate(hit.transform.gameObject);
+                        }
+                    } else {
+                        mouseOverEvents[MouseOverEventType.Exit].Activate(lastFrameMouseOverObject);
+                        mouseOverEvents[MouseOverEventType.Enter].Activate(hit.transform.gameObject);
+                    }
+                }
+            } else if(!hasHit && lastFrameMouseOverObject != null) {
+                mouseOverEvents[MouseOverEventType.Exit].Activate(lastFrameMouseOverObject);
+            }
+            lastFrameMouseOverObject = hasHit ? hit.transform.gameObject : null;
 
             //Update last frame data
             mouseScreenPositionLastFrame = mouseScreenPosition;
@@ -218,6 +242,22 @@ namespace Game.Input
         public bool RemoveEventListener(MouseButton button, MouseDragEventType dragEventType, Guid dragEventId)
         {
             return mouseDragEvents[button][dragEventType].Remove(dragEventId);
+        }
+
+        public Guid AddEventListener(MouseOverEventType mouseOverEventType, MouseOverEvent mouseEvent)
+        {
+            mouseOverEvents[mouseOverEventType].Add(mouseEvent);
+            return mouseEvent.Id;
+        }
+
+        public bool RemoveEventListener(MouseOverEventType mouseOverEventType, MouseOverEvent mouseEvent)
+        {
+            return mouseOverEvents[mouseOverEventType].Remove(mouseEvent.Id);
+        }
+
+        public bool RemoveEventListener(MouseOverEventType mouseOverEventType, Guid eventId)
+        {
+            return mouseOverEvents[mouseOverEventType].Remove(eventId);
         }
 
         public Vector3 MouseWorldPosition
@@ -436,6 +476,46 @@ namespace Game.Input
             public bool Remove(Guid eventId)
             {
                 if(Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
+                    Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private class MouseOverEventListener
+        {
+            public MouseOverEventType Type { get; set; }
+            public List<MouseOverEvent> Events { get; set; }
+
+            public MouseOverEventListener(MouseOverEventType type)
+            {
+                Events = new List<MouseOverEvent>();
+                Type = type;
+            }
+
+            public void Activate(GameObject target)
+            {
+                if (Events.Count != 0) {
+                    foreach (MouseOverEvent mouseEvent in Events) {
+                        //Loop through all event listeners
+                        if ((target == mouseEvent.Target || mouseEvent.Target == null) && UIManager.Instance.CanFire(mouseEvent.EventData, target, null)) {
+                            //Call event listener
+                            mouseEvent.Listener(target);
+                        }
+                    }
+                }
+            }
+
+            public void Add(MouseOverEvent mouseEvent)
+            {
+                Events.Add(mouseEvent);
+                Events = Events.OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
+            }
+
+            public bool Remove(Guid eventId)
+            {
+                if (Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
                     Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
                     return true;
                 }

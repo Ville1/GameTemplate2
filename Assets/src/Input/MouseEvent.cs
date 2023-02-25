@@ -22,6 +22,10 @@ namespace Game.Input
         public delegate void OnClickDelegate(GameObject target);
 
         public Guid Id { get; private set; }
+        /// <summary>
+        /// Mouse events can be created with an optional GameObject target. If it is specified, event will only fire when that object is clicked, if it is null event will always fire, when
+        /// any GameObject is clicked and clicked object can be accessed from OnClickDelegate's target-parameter.
+        /// </summary>
         public GameObject Target { get; private set; }
         public OnClickDelegate Listener { get; private set; }
         public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
@@ -182,6 +186,53 @@ namespace Game.Input
             }
             Id = Guid.NewGuid();
             TargetlessListener = listener;
+            EventData = new MouseEventData(priority, tags, isBlockedByUI);
+        }
+    }
+
+    public class MouseOverEvent
+    {
+        public delegate void OnMouseOverDelegate(GameObject target);
+
+        public Guid Id { get; private set; }
+        public GameObject Target { get; private set; }
+        public OnMouseOverDelegate Listener { get; private set; }
+        public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
+        public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
+        /// <summary>
+        /// TODO: This and MouseEventTag.IgnoreUI are both used for similar stuff, maybe one of these needs to be removed
+        /// </summary>
+        public bool IsBlockedByUI { get { return EventData == null ? true : EventData.IsBlockedByUI; } }
+        public MouseEventData EventData { get; private set; }
+
+        public MouseOverEvent(IClickListener target, OnMouseOverDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            if (target == null || listener == null) {
+                throw new NullReferenceException();
+            }
+            Initialize(target.GameObject, listener, priority, tags, isBlockedByUI);
+        }
+
+        public MouseOverEvent(GameObject target, OnMouseOverDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Initialize(target, listener, priority, tags, isBlockedByUI);
+        }
+
+        public MouseOverEvent(OnMouseOverDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Initialize(null, listener, priority, tags, isBlockedByUI);
+        }
+
+        public MouseOverEvent(OnMouseOverDelegate listener, int priority, MouseEventTag tag, bool isBlockedByUI = true)
+        {
+            Initialize(null, listener, priority, new List<MouseEventTag>() { tag }, isBlockedByUI);
+        }
+
+        private void Initialize(GameObject target, OnMouseOverDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Id = Guid.NewGuid();
+            Target = target;
+            Listener = listener;
             EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
     }

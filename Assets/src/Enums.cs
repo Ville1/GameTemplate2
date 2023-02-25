@@ -20,6 +20,7 @@ namespace Game
     public enum WindowEvent { Close, Accept, Cancel }
     public enum MouseButton { Left = 0, Middle = 2, Right = 1 }//Int value should match parameter of Input.GetMouseButton - methods
     public enum MouseDragEventType { Start, Move, End }
+    public enum MouseOverEventType { Enter, Over, Exit }
 
     public enum AnimationQueue
     {

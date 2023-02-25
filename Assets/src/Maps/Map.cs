@@ -259,6 +259,16 @@ namespace Game.Maps
             tile.RegisterDragEventListener(MouseDragEventType.Start, StartDragging);
             tile.RegisterDragEventListener(MouseDragEventType.Move, Drag);
             tile.RegisterDragEventListener(MouseDragEventType.End, EndDragging);
+            tile.RegisterMouseOverEventListener(MouseOverEventType.Enter, (GameObject t) => {
+                //Note: Event listener is registered with this tile as target, so parameter t is always tile's GameObject
+                Utils.CustomLogger.Debug("Mouse enter: " + tile.ToString());
+            });
+            tile.RegisterMouseOverEventListener(MouseOverEventType.Over, (GameObject t) => {
+                //Utils.CustomLogger.Debug("Mouse over: " + tile.ToString());
+            });
+            tile.RegisterMouseOverEventListener(MouseOverEventType.Exit, (GameObject t) => {
+                Utils.CustomLogger.Debug("Mouse exit: " + tile.ToString());
+            });
         }
 
         private void EndGeneration()

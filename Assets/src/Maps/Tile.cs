@@ -26,6 +26,7 @@ namespace Game.Maps
         private GameObject rectangleGameObject = null;
         private bool rectangleNotFound = false;
         private Dictionary<MouseDragEventType, List<Guid>> dragEvents = DictionaryHelper.CreateNewFromEnum((MouseDragEventType type) => { return new List<Guid>(); });
+        private Dictionary<MouseOverEventType, List<Guid>> mouseOverEvents = DictionaryHelper.CreateNewFromEnum((MouseOverEventType type) => { return new List<Guid>(); });
 
         public Tile(Map map, int x, int y, Tile prototype) : base(
             prototype,
@@ -156,9 +157,27 @@ namespace Game.Maps
             }
         }
 
+        public void RegisterMouseOverEventListener(MouseOverEventType mouseOverEventType, MouseOverEvent.OnMouseOverDelegate listener)
+        {
+            MouseOverEvent overEvent = new MouseOverEvent(this, listener);
+            MouseManager.Instance.AddEventListener(mouseOverEventType, overEvent);
+            mouseOverEvents[mouseOverEventType].Add(overEvent.Id);
+        }
+
+        public void UnregisterMouseOverEventListeners()
+        {
+            foreach (KeyValuePair<MouseOverEventType, List<Guid>> pair in mouseOverEvents) {
+                foreach (Guid id in pair.Value) {
+                    MouseManager.Instance.RemoveEventListener(pair.Key, id);
+                }
+                pair.Value.Clear();
+            }
+        }
+
         public override void DestroyGameObject()
         {
             UnregisterDragEventListeners();
+            UnregisterMouseOverEventListeners();
             base.DestroyGameObject();
         }
 
