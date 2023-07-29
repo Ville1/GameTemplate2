@@ -22,11 +22,12 @@ namespace Game.UI
             MainMenu,
             /// <summary>
             /// Does not get closed by UIManager.CloseWindows unless specificly targeted by with include-parameter or
-            /// WindowEvent.Close in default event handling (in virtual base.HandleWindowEvent)
+            /// WindowEvents Close, Accept and Cancel in default event handling (in virtual base.HandleWindowEvent)
             /// </summary>
             ProgressBar,
             /// <summary>
-            /// Does not get closed by UIManager.CloseWindows unless specificly targeted by with include-parameter
+            /// Does not get closed by UIManager.CloseWindows unless specificly targeted by with include-parameter or
+            /// WindowEvents Close, Accept and Cancel in default event handling (in virtual base.HandleWindowEvent)
             /// </summary>
             StaysOpen,
             /// <summary>
@@ -263,7 +264,8 @@ namespace Game.UI
         /// </summary>
         public virtual bool HandleWindowEvent(WindowEvent windowEvent)
         {
-            if ((windowEvent == WindowEvent.Close || windowEvent == WindowEvent.Accept || windowEvent == WindowEvent.Cancel) && !Tags.Contains(Tag.ProgressBar)) {
+            if ((windowEvent == WindowEvent.Close || windowEvent == WindowEvent.Accept || windowEvent == WindowEvent.Cancel) && !Tags.Contains(Tag.ProgressBar) && !Tags.Contains(Tag.StaysOpen)
+                && !Tags.Contains(Tag.HUD)) {
                 switch (windowEvent) {
                     case WindowEvent.Close:
                         OnClose();
