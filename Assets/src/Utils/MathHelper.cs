@@ -9,7 +9,7 @@ namespace Game.Utils
     {
         public static float WeightedAverage(List<Tuple<float, float>> values)
         {
-            return WeightedAverage(new List<Tuple<float, float>>(values));
+            return WeightedAverage(new WeightedFloats(values));
         }
 
         //Can be used with collection initializer: MathHelper.WeightedAverage(new WeightedFloats() { { 10.0f, 1.0f }, { 3.0f, 2.0f } })
