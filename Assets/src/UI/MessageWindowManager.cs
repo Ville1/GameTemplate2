@@ -67,7 +67,7 @@ namespace Game.UI
             Active = true;
             Text.text = text;
             Width = width ?? defaultWidth;
-            Height = height ?? defaultHeight;
+            Height = height ?? Text.preferredHeight;
         }
 
         public void Close()
