@@ -363,7 +363,8 @@ namespace Game.Input
                             }
                             onClickProced = true;
                         }
-                        if ((target == mouseEvent.Target || mouseEvent.Target == null) && UIManager.Instance.CanFire(mouseEvent.EventData, target, otherUIEventHits)) {
+                        if ((mouseEvent.Target == null || mouseEvent.Target == target) && (mouseEvent.TargetType == null || mouseEvent.TargetType == target.GetType() || (listener != null && mouseEvent.TargetType == listener.GetType()))
+                                && UIManager.Instance.CanFire(mouseEvent.EventData, target, otherUIEventHits)) {
                             //Call event listener
                             mouseEvent.Listener(target);
                         }

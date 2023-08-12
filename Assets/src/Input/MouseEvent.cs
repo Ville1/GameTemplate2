@@ -27,6 +27,10 @@ namespace Game.Input
         /// any GameObject is clicked and clicked object can be accessed from OnClickDelegate's target-parameter.
         /// </summary>
         public GameObject Target { get; private set; }
+        /// <summary>
+        /// Alternative to Target. If specified, event will only fire when object of this type or object with IClickListenerComponent with listener of this type is clicked
+        /// </summary>
+        public Type TargetType { get; private set; }
         public OnClickDelegate Listener { get; private set; }
         public int Priority { get { return EventData == null ? 0 : EventData.Priority; } }
         public List<MouseEventTag> Tags { get { return EventData == null ? null : EventData.Tags; } }
@@ -41,28 +45,34 @@ namespace Game.Input
             if (target == null || listener == null) {
                 throw new NullReferenceException();
             }
-            Initialize(target.GameObject, listener, priority, tags, isBlockedByUI);
+            Initialize(target.GameObject, null, listener, priority, tags, isBlockedByUI);
         }
 
         public MouseEvent(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
-            Initialize(target, listener, priority, tags, isBlockedByUI);
+            Initialize(target, null, listener, priority, tags, isBlockedByUI);
+        }
+
+        public MouseEvent(Type targetType, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        {
+            Initialize(null, targetType, listener, priority, tags, isBlockedByUI);
         }
 
         public MouseEvent(OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
-            Initialize(null, listener, priority, tags, isBlockedByUI);
+            Initialize(null, null, listener, priority, tags, isBlockedByUI);
         }
 
         public MouseEvent(OnClickDelegate listener, int priority, MouseEventTag tag, bool isBlockedByUI = true)
         {
-            Initialize(null, listener, priority, new List<MouseEventTag>() { tag }, isBlockedByUI);
+            Initialize(null, null, listener, priority, new List<MouseEventTag>() { tag }, isBlockedByUI);
         }
 
-        private void Initialize(GameObject target, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
+        private void Initialize(GameObject target, Type targetType, OnClickDelegate listener, int priority = 0, List<MouseEventTag> tags = null, bool isBlockedByUI = true)
         {
             Id = Guid.NewGuid();
             Target = target;
+            TargetType = targetType;
             Listener = listener;
             EventData = new MouseEventData(priority, tags, isBlockedByUI);
         }
