@@ -189,6 +189,149 @@ namespace Game.Maps
             return Tiles[y][x];
         }
 
+        public List<Tile> GetAdjacentTiles(Coordinates coordinates)
+        {
+            return GetTilesInRectangle(coordinates, 1).Where(tile => tile.Coordinates != coordinates).ToList();
+        }
+
+        public List<Tile> GetTilesInRectangle(Coordinates centerCoordinates, int size)
+        {
+            List<Tile> tiles = new List<Tile>();
+            for (int x = centerCoordinates.X - size; x <= centerCoordinates.X + size; x++) {
+                for (int y = centerCoordinates.Y - size; y <= centerCoordinates.Y + size; y++) {
+                    Tile tile = GetTileAt(x, y);
+                    if (tile != null) {
+                        tiles.Add(tile);
+                    }
+                }
+            }
+            return tiles;
+        }
+
+        public List<Tile> GetTilesInLine(Coordinates coordinates1, Coordinates coordinates2)
+        {
+            List<Tile> tiles = new List<Tile>();
+
+            //Add starting tile
+            Tile startingTile = GetTileAt(coordinates1);
+            if (startingTile == null) {
+                //Starting tile is outside of the map
+                return null;
+            }
+
+            //Calculate difference in coordinates
+            int deltaX = coordinates2.X - coordinates1.X;
+            int deltaY = coordinates2.Y - coordinates1.Y;
+
+            if (deltaX == 0 || deltaY == 0 || Math.Abs(deltaX) == Math.Abs(deltaY)) {
+                //Straight line
+                Direction direction;
+                if (deltaX == 0 || deltaY == 0) {
+                    //Nondiagonal line
+                    if (deltaX > 0) {
+                        direction = Direction.East;
+                    } else if (deltaX < 0) {
+                        direction = Direction.West;
+                    } else if (deltaY > 0) {
+                        direction = Direction.North;
+                    } else {
+                        direction = Direction.South;
+                    }
+                } else {
+                    //Diagonal line
+                    if (deltaX > 0 && deltaY > 0) {
+                        direction = Direction.NorthEast;
+                    } else if (deltaX > 0 && deltaY < 0) {
+                        direction = Direction.SouthEast;
+                    } else if (deltaX < 0 && deltaY < 0) {
+                        direction = Direction.SouthWest;
+                    } else {
+                        direction = Direction.NorthWest;
+                    }
+                }
+                Coordinates nextCoordinates = new Coordinates(coordinates1).Move(direction);
+                Tile newTile = GetTileAt(nextCoordinates);
+                while (newTile != null && nextCoordinates != coordinates2) {
+                    tiles.Add(newTile);
+                    nextCoordinates = nextCoordinates.Move(direction);
+                    newTile = GetTileAt(nextCoordinates);
+                }
+                return tiles;
+            } else {
+                //Select larger delta to be the "main" direction
+                bool mainIsHorizontal;
+                Direction mainDirection;
+                Direction secondaryDirection;
+                int mainDistance;
+                int secondaryDistance;
+                if (Math.Abs(deltaX) > Math.Abs(deltaY)) {
+                    if (deltaX > 0) {
+                        mainDirection = Direction.East;
+                    } else {
+                        mainDirection = Direction.West;
+                    }
+                    if (deltaY > 0) {
+                        secondaryDirection = Direction.North;
+                    } else {
+                        secondaryDirection = Direction.South;
+                    }
+                    mainIsHorizontal = true;
+                    mainDistance = Math.Abs(deltaX);
+                    secondaryDistance = Math.Abs(deltaY);
+                } else {
+                    if (deltaY > 0) {
+                        mainDirection = Direction.North;
+                    } else {
+                        mainDirection = Direction.South;
+                    }
+                    if (deltaX > 0) {
+                        secondaryDirection = Direction.East;
+                    } else {
+                        secondaryDirection = Direction.West;
+                    }
+                    mainIsHorizontal = false;
+                    mainDistance = Math.Abs(deltaY);
+                    secondaryDistance = Math.Abs(deltaX);
+                }
+                Coordinates coordinates = new Coordinates(coordinates1);
+                int currentStep = 0;
+                int secondaryDistanceMoved = 0;
+                do {
+                    if (currentStep > (mainDistance + 1)) {
+                        throw new Exception("Finding line failed: line has overshot the target");
+                    }
+
+                    if (coordinates.IsAdjacent(coordinates2)) {
+                        //Next to the target, go to it next
+                        coordinates = new Coordinates(coordinates2);
+                    } else {
+                        //Move towards the main direction
+                        coordinates = coordinates.Move(mainDirection);
+
+                        //Check if we still need to move in the secondary direction
+                        if ((mainIsHorizontal && coordinates.Y != coordinates2.Y) || (!mainIsHorizontal && coordinates.X != coordinates2.X)) {
+                            int targetDelta = Mathf.RoundToInt((currentStep / (float)(mainDistance + 1)) * secondaryDistance);
+                            if (targetDelta > secondaryDistanceMoved) {
+                                //Move in secondary direction
+                                coordinates = coordinates.Move(secondaryDirection);
+                                secondaryDistanceMoved++;
+                            }
+                        }
+                    }
+
+                    Tile tile = GetTileAt(coordinates);
+                    if (tile == null) {
+                        //Out of map
+                        break;
+                    }
+                    tiles.Add(tile);
+                    currentStep++;
+                } while (coordinates != coordinates2);
+            }
+
+            return tiles;
+        }
+
         public void Clear()
         {
             if (State == MapState.Ready) {
