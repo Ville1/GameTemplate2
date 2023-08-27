@@ -1,4 +1,5 @@
 using Game.Input;
+using Game.Maps;
 using Game.Utils;
 using System;
 using System.Collections.Generic;
@@ -249,6 +250,11 @@ namespace Game.UI
             commands.Add(new Command("togglePlayerMovement", null, "Changes players movement type (DELETE THIS: TEMPLATE PROJECT DEBUGGING ONLY)", (List<string> parameters) => {
                 Main.Instance.PlayerCharacter.Movement = Main.Instance.PlayerCharacter.Movement.Shift(1);
                 return Main.Instance.PlayerCharacter.Movement.ToString();
+            }));
+            commands.Add(new Command("testFloatingText", null, "Shows a floating text on a random tile (DELETE THIS: TEMPLATE PROJECT DEBUGGING ONLY)", (List<string> parameters) => {
+                Tile tile = Main.Instance.WorldMap.Tiles[RNG.Range(0, Main.Instance.WorldMap.Height - 1)][RNG.Range(0, Main.Instance.WorldMap.Width - 1)];
+                FloatingTextManager.Instance.Show(new FloatingText(tile.GameObject, tile.ToString()));
+                return null;
             }));
 
             commands.Add(new Command("test1", null, "Test command 1", (List<string> parameters) => {
