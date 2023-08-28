@@ -12,7 +12,8 @@ namespace Game
     {
         public static FloatingTextManager Instance;
 
-        private List<FloatingText> currentTexts;
+        public List<FloatingText> CurrentTexts { get; private set; }
+        public List<FloatingText> TextsInQueue { get; private set; }
 
         /// <summary>
         /// Initializiation
@@ -24,7 +25,8 @@ namespace Game
                 return;
             }
             Instance = this;
-            currentTexts = new List<FloatingText>();
+            CurrentTexts = new List<FloatingText>();
+            TextsInQueue = new List<FloatingText>();
         }
 
         /// <summary>
@@ -32,23 +34,35 @@ namespace Game
         /// </summary>
         private void Update()
         {
-
+            //Process queue
+            List<FloatingText> newTexts = new List<FloatingText>();
+            foreach (FloatingText floatingText in TextsInQueue) {
+                if (floatingText.TryStart()) {
+                    newTexts.Add(floatingText);
+                    CurrentTexts.Add(floatingText);
+                }
+            }
+            TextsInQueue = TextsInQueue.Where(queuedText => !newTexts.Any(newText => newText.Id == queuedText.Id)).ToList();
         }
 
         public void Show(FloatingText text)
         {
-            if (currentTexts.Any(t => t.Id == text.Id)) {
+            if (CurrentTexts.Any(t => t.Id == text.Id)) {
                 //This text is already being displayed
                 throw new Exception(string.Format("FloatingText \"{0}\" is already being displayed", text.Id));
             }
             text.Start(OnTextDestroyed);
-            currentTexts.Add(text);
+            if (text.IsInQueue) {
+                TextsInQueue.Add(text);
+            } else {
+                CurrentTexts.Add(text);
+            }
         }
 
         private void OnTextDestroyed(Guid id)
         {
             //Remove text from currentTexts
-            currentTexts = currentTexts.Where(text => text.Id != id).ToList();
+            CurrentTexts = CurrentTexts.Where(text => text.Id != id).ToList();
         }
     }
 
@@ -59,6 +73,7 @@ namespace Game
         private static readonly int SPRITE_SORTING_ORDER = 100;
         private static readonly int DEFAULT_FONT_SIZE = 2;
         private static readonly float DEFAULT_PADDING = 0.1f;
+        private static readonly float OVERLAP_MARGIN = 0.025f;
 
         public Guid Id { get; private set; }
         public LString Text { get; private set; }
@@ -71,8 +86,10 @@ namespace Game
         public Color? BackgroundColor { get; set; } = null;
         public int FontSize { get; set; } = DEFAULT_FONT_SIZE;
         public Vector2 Padding { get; set; } = new Vector2(DEFAULT_PADDING, DEFAULT_PADDING);
+        public bool CanOverlap { get; set; } = false;
 
         public float TimeLeft { get; private set; }
+        public bool IsInQueue { get; private set; }
 
         private Action<Guid> onDestroy;
 
@@ -116,11 +133,38 @@ namespace Game
             textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newSize.y);
             Renderer.drawMode = SpriteDrawMode.Sliced;
             Renderer.size = new Vector2(Width, Height);
+
+            if (!CanOverlap) {
+                //Check if this text overlaps with any texts that are currently visible
+                if (Movement.z != 0.0f) {
+                    //TODO: Implement this for 3d environments
+                    throw new NotImplementedException("FloatingText overlap check is not implemented for 3d environments");
+                }
+                if (IsOverlapping()) {
+                    IsInQueue = true;
+                    GameObject.SetActive(false);
+                }
+            }
+        }
+
+        public bool TryStart()
+        {
+            if (!IsOverlapping()) {
+                IsInQueue = false;
+                GameObject.SetActive(true);
+                return true;
+            }
+            return false;
         }
 
         public override void Update()
         {
             base.Update();
+            if (IsInQueue) {
+                //Update should not get called when text is in queue, as it's GameObject would not be active, but just in case this gets called return here
+                //Could also put an exception here?
+                return;
+            }
             if (TimeLeft > 0.0f) {
                 float deltaTime = UnityEngine.Time.deltaTime;
 
@@ -138,6 +182,32 @@ namespace Game
                 DestroyGameObject();
                 onDestroy(Id);
             }
+        }
+
+        /// <summary>
+        /// Check if this text overlaps with any currently visile texts
+        /// </summary>
+        /// <returns></returns>
+        private bool IsOverlapping()
+        {
+            Rect worldRect = new Rect(
+                RectTransform.localPosition.x - OVERLAP_MARGIN - (RectTransform.rect.width * RectTransform.localScale.x) / 2.0f,
+                RectTransform.localPosition.y - OVERLAP_MARGIN - (RectTransform.rect.height * RectTransform.localScale.y) / 2.0f,
+                RectTransform.rect.width * RectTransform.localScale.x + OVERLAP_MARGIN * 2.0f,
+                RectTransform.rect.height * RectTransform.localScale.y + OVERLAP_MARGIN * 2.0f
+            );
+            foreach (FloatingText floatingText in FloatingTextManager.Instance.CurrentTexts) {
+                Rect otherWorldRect = new Rect(
+                    floatingText.RectTransform.localPosition.x - (floatingText.RectTransform.rect.width * floatingText.RectTransform.localScale.x) / 2.0f,
+                    floatingText.RectTransform.localPosition.y - (floatingText.RectTransform.rect.height * floatingText.RectTransform.localScale.y) / 2.0f,
+                    floatingText.RectTransform.rect.width * floatingText.RectTransform.localScale.x,
+                    floatingText.RectTransform.rect.height * floatingText.RectTransform.localScale.y
+                );
+                if (worldRect.Overlaps(otherWorldRect)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
