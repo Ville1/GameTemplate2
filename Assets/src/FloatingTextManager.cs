@@ -14,6 +14,7 @@ namespace Game
 
         public List<FloatingText> CurrentTexts { get; private set; }
         public List<FloatingText> TextsInQueue { get; private set; }
+        public List<Guid> TextIdHistory { get; private set; }
 
         /// <summary>
         /// Initializiation
@@ -27,6 +28,7 @@ namespace Game
             Instance = this;
             CurrentTexts = new List<FloatingText>();
             TextsInQueue = new List<FloatingText>();
+            TextIdHistory = new List<Guid>();
         }
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace Game
                 if (floatingText.TryStart()) {
                     newTexts.Add(floatingText);
                     CurrentTexts.Add(floatingText);
+                    TextIdHistory.Add(floatingText.Id);
                 }
             }
             TextsInQueue = TextsInQueue.Where(queuedText => !newTexts.Any(newText => newText.Id == queuedText.Id)).ToList();
@@ -56,6 +59,7 @@ namespace Game
                 TextsInQueue.Add(text);
             } else {
                 CurrentTexts.Add(text);
+                TextIdHistory.Add(text.Id);
             }
         }
 
@@ -87,6 +91,10 @@ namespace Game
         public int FontSize { get; set; } = DEFAULT_FONT_SIZE;
         public Vector2 Padding { get; set; } = new Vector2(DEFAULT_PADDING, DEFAULT_PADDING);
         public bool CanOverlap { get; set; } = false;
+        /// <summary>
+        /// Id of a FloatingText that needs to be displayed before this one
+        /// </summary>
+        public Guid? LinkedTextId { get; set; } = null;
 
         public float TimeLeft { get; private set; }
         public bool IsInQueue { get; private set; }
@@ -134,7 +142,16 @@ namespace Game
             Renderer.drawMode = SpriteDrawMode.Sliced;
             Renderer.size = new Vector2(Width, Height);
 
-            if (!CanOverlap) {
+            if (LinkedTextId.HasValue) {
+                //Check that a text with this id has already been displayed
+                if (!FloatingTextManager.Instance.TextIdHistory.Contains(LinkedTextId.Value)) {
+                    //We need to wait for text with this id to be displayed first
+                    IsInQueue = true;
+                    GameObject.SetActive(false);
+                }
+            }
+
+            if (!CanOverlap && !IsInQueue) {
                 //Check if this text overlaps with any texts that are currently visible
                 if (Movement.z != 0.0f) {
                     //TODO: Implement this for 3d environments
@@ -149,7 +166,7 @@ namespace Game
 
         public bool TryStart()
         {
-            if (!IsOverlapping()) {
+            if (!IsOverlapping() && (!LinkedTextId.HasValue || FloatingTextManager.Instance.TextIdHistory.Contains(LinkedTextId.Value))) {
                 IsInQueue = false;
                 GameObject.SetActive(true);
                 return true;
