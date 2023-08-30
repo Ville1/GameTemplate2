@@ -5,7 +5,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Game.UI {
+namespace Game.UI
+{
     public class UIManager : MonoBehaviour
     {
         public static UIManager Instance;
@@ -68,7 +69,7 @@ namespace Game.UI {
             include = include ?? new List<WindowBase.Tag>();
             exclude = exclude ?? new List<WindowBase.Tag>();
             foreach (WindowBase window in windows) {
-                if(window.Active &&
+                if (window.Active &&
                     (!window.Tags.Contains(WindowBase.Tag.ProgressBar) || include.Contains(WindowBase.Tag.ProgressBar)) &&
                     (!window.Tags.Contains(WindowBase.Tag.StaysOpen) || include.Contains(WindowBase.Tag.StaysOpen)) &&
                     (!window.Tags.Contains(WindowBase.Tag.HUD) || include.Contains(WindowBase.Tag.HUD)) &&
@@ -110,6 +111,13 @@ namespace Game.UI {
             ) && !IsBlockedByWindow(eventData);
         }
 
+        /// <summary>
+        /// NOTE: This check is for UI elements!
+        /// </summary>
+        /// <param name="eventData"></param>
+        /// <param name="uiElement"></param>
+        /// <param name="otherUIEventHits"></param>
+        /// <returns></returns>
         public bool CanFire(MouseEventData eventData, GameObject uiElement, List<GameObject> otherUIEventHits)
         {
             bool isBlockedByWindow = IsBlockedByWindow(eventData);
@@ -119,7 +127,7 @@ namespace Game.UI {
             }
 
             //eventData.IsBlockedByUI = true => Check otherUIEventHits for ui elements, that are not children of uiElement
-            if(otherUIEventHits != null) {
+            if (otherUIEventHits != null) {
                 foreach (GameObject gameObject in otherUIEventHits) {//Layer 2 = Ignore raycast
                     if (gameObject != uiElement && gameObject.layer != 2 && !GameObjectHelper.IsChild(uiElement, gameObject)) {
                         return false;

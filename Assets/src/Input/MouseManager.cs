@@ -44,7 +44,7 @@ namespace Game.Input
             }
             Instance = this;
 
-            foreach(MouseButton button in Enum.GetValues(typeof(MouseButton))) {
+            foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                 mouseDragEvents.Add(button, DictionaryHelper.CreateNewFromEnum((MouseDragEventType drag) => { return new MouseDragEventListener(button, drag); }));
             }
             uiRaycaster = Canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>();
@@ -155,10 +155,10 @@ namespace Game.Input
 
             //Mouse over events
             if (hasHit) {
-                if(lastFrameMouseOverObject == null) {
+                if (lastFrameMouseOverObject == null) {
                     mouseOverEvents[MouseOverEventType.Enter].Activate(hit.transform.gameObject);
                 } else {
-                    if(lastFrameMouseOverObject == hit.transform.gameObject) {
+                    if (lastFrameMouseOverObject == hit.transform.gameObject) {
                         Vector3 difference = mouseWorldPositionLastFrame - MouseWorldPosition;
                         if (difference.x != 0.0f || difference.y != 0.0f || difference.z != 0.0f) {
                             mouseOverEvents[MouseOverEventType.Over].Activate(hit.transform.gameObject);
@@ -168,7 +168,7 @@ namespace Game.Input
                         mouseOverEvents[MouseOverEventType.Enter].Activate(hit.transform.gameObject);
                     }
                 }
-            } else if(!hasHit && lastFrameMouseOverObject != null) {
+            } else if (!hasHit && lastFrameMouseOverObject != null) {
                 mouseOverEvents[MouseOverEventType.Exit].Activate(lastFrameMouseOverObject);
             }
             lastFrameMouseOverObject = hasHit ? hit.transform.gameObject : null;
@@ -182,7 +182,7 @@ namespace Game.Input
 
         public Guid AddEventListener(MouseEvent mouseEvent)
         {
-            foreach(MouseButton button in Enum.GetValues(typeof(MouseButton))) {
+            foreach (MouseButton button in Enum.GetValues(typeof(MouseButton))) {
                 AddEventListener(button, mouseEvent);
             }
             return mouseEvent.Id;
@@ -275,7 +275,7 @@ namespace Game.Input
         {
             get {
                 int count = 0;
-                foreach(KeyValuePair<MouseButton, MouseClickEventListener> pair in mouseClickEvents) {
+                foreach (KeyValuePair<MouseButton, MouseClickEventListener> pair in mouseClickEvents) {
                     count += pair.Value.Events.Count;
                 }
                 return count;
@@ -298,7 +298,7 @@ namespace Game.Input
             get {
                 int count = 0;
                 foreach (KeyValuePair<MouseButton, Dictionary<MouseDragEventType, MouseDragEventListener>> pair in mouseDragEvents) {
-                    foreach(KeyValuePair<MouseDragEventType, MouseDragEventListener> pair2 in pair.Value) {
+                    foreach (KeyValuePair<MouseDragEventType, MouseDragEventListener> pair2 in pair.Value) {
                         count += pair2.Value.Events.Count;
                     }
                 }
@@ -315,7 +315,7 @@ namespace Game.Input
 
         private void Log(string message, params object[] arguments)
         {
-            if(DebugLogLevel >= LogLevel.Basic) {
+            if (DebugLogLevel >= LogLevel.Basic) {
                 CustomLogger.Debug(string.Format(message, arguments));
             }
         }
@@ -346,6 +346,7 @@ namespace Game.Input
             {
                 IClickListenerComponent component = target.GetComponent<IClickListenerComponent>();
                 IClickListener listener = component != null ? component.Listener : null;
+                bool isUICheck = otherUIEventHits != null;
                 if (Events.Count == 0) {
                     //No event listeners
                     if (listener != null && UIManager.Instance.CanFire(listener.MouseEventData)) {
@@ -363,8 +364,9 @@ namespace Game.Input
                             }
                             onClickProced = true;
                         }
-                        if ((mouseEvent.Target == null || mouseEvent.Target == target) && (mouseEvent.TargetType == null || mouseEvent.TargetType == target.GetType() || (listener != null && mouseEvent.TargetType == listener.GetType()))
-                                && UIManager.Instance.CanFire(mouseEvent.EventData, target, otherUIEventHits)) {
+                        if ((mouseEvent.Target == null || mouseEvent.Target == target) &&
+                            (mouseEvent.TargetType == null || mouseEvent.TargetType == target.GetType() || (listener != null && mouseEvent.TargetType == listener.GetType())) &&
+                            ((isUICheck && UIManager.Instance.CanFire(mouseEvent.EventData, target, otherUIEventHits)) || (!isUICheck && UIManager.Instance.CanFire(mouseEvent.EventData)))) {
                             //Call event listener
                             mouseEvent.Listener(target);
                         }
@@ -384,7 +386,7 @@ namespace Game.Input
 
             public bool Remove(Guid eventId)
             {
-                if(Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
+                if (Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
                     Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
                     return true;
                 }
@@ -449,7 +451,7 @@ namespace Game.Input
                 IClickListener targetListener = targetComponent != null ? targetComponent.Listener : null;
 
                 foreach (MouseDragEvent dragEvent in Events) {
-                    if(UIManager.Instance.CanFire(dragEvent.EventData) && dragEvent.GameObjectTarget == draggedObject) {
+                    if (UIManager.Instance.CanFire(dragEvent.EventData) && dragEvent.GameObjectTarget == draggedObject) {
                         if (dragEvent.Targeting == MouseDragEvent.TargetType.ClickListener && draggedListener != null) {
                             dragEvent.ClickableListener(vector, draggedListener, targetListener);
                         } else if (dragEvent.Targeting == MouseDragEvent.TargetType.GameObject) {
@@ -476,7 +478,7 @@ namespace Game.Input
 
             public bool Remove(Guid eventId)
             {
-                if(Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
+                if (Events.Any(mouseEvent => mouseEvent.Id == eventId)) {
                     Events = Events.Where(mouseEvent => mouseEvent.Id != eventId).OrderByDescending(mouseEvent => mouseEvent.Priority).ToList();
                     return true;
                 }
