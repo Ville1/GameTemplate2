@@ -144,7 +144,17 @@ namespace Game
         {
             switch (deltaType) {
                 case DeltaType.NewSegments:
-                    segments.AddRange(damage.segments);
+                    foreach (DamageSegment newSegment in damage.segments) {
+                        DamageSegment identicalSegment = segments.FirstOrDefault(s => s.TypeString == newSegment.TypeString);
+                        if (identicalSegment != null) {
+                            identicalSegment.Amount += newSegment.Amount;
+                        } else {
+                            segments.Add(new DamageSegment() {
+                                Amount = newSegment.Amount,
+                                Types = newSegment.Types.Copy()
+                            });
+                        }
+                    }
                     break;
                 case DeltaType.Full:
                     foreach(DamageSegment segment in segments) {
@@ -306,6 +316,13 @@ namespace Game
     {
         public float Amount { get; set; }
         public List<DamageType> Types { get; set; }
+
+        public string TypeString
+        {
+            get {
+                return string.Join(",", Types.Select(t => (int)t).OrderBy(t => t));
+            }
+        }
 
         public string ParseString(LString typelessText)
         {
