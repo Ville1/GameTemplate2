@@ -147,6 +147,10 @@ namespace Game.UI.Components
             ScrollRect.scrollSensitivity = parameters.ScrollSensitivity.HasValue ? parameters.ScrollSensitivity.Value : DEFAULT_SENSITIVITY;
 
             //Visibility
+            if(parameters.VerticalScrollbarVisibility.HasValue || parameters.HorizontalScrollbarVisibility.HasValue) {
+                //TODO: Fix this
+                throw new NotImplementedException("ScrollbarVisibility parameters don't work currently, you should set them in Unity Editor instead of setting them with this");
+            }
             ScrollRect.verticalScrollbarVisibility = parameters.VerticalScrollbarVisibility.HasValue ? parameters.VerticalScrollbarVisibility.Value : ScrollRect.verticalScrollbarVisibility;
             ScrollRect.horizontalScrollbarVisibility = parameters.HorizontalScrollbarVisibility.HasValue ? parameters.HorizontalScrollbarVisibility.Value : ScrollRect.horizontalScrollbarVisibility;
 
