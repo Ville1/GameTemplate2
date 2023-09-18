@@ -146,13 +146,15 @@ namespace Game
             List<StatModifier> modifiers = parent.GetStatModifiers();
             foreach (Stat stat in stats) {
                 stat.Modifiers.Clear();
-                stat.Recalculate();
             }
             foreach (StatModifier modifier in modifiers) {
                 Stat stat = stats.FirstOrDefault(s => s.TypeId == modifier.Stat.TypeId);
                 if (stat != null) {
                     stat.Modifiers.Add(modifier);
                 }
+            }
+            foreach (Stat stat in stats) {
+                stat.Recalculate();
             }
         }
 
