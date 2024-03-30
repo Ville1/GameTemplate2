@@ -238,15 +238,17 @@ namespace Game
             }
         }
 
-        public void ClampSegments(float min)
+        public void ClampSegments(float min, List<DamageType> damageTypeFilter = null)
         {
-            ClampSegments(min, float.MaxValue);
+            ClampSegments(min, float.MaxValue, damageTypeFilter);
         }
 
-        public void ClampSegments(float min, float max)
+        public void ClampSegments(float min, float max, List<DamageType> damageTypeFilter = null)
         {
             foreach (DamageSegment segment in segments) {
-                segment.Amount = Math.Clamp(segment.Amount, min, max);
+                if (damageTypeFilter == null || damageTypeFilter.Count == 0 || segment.Types.Any(x => damageTypeFilter.Contains(x))) {
+                    segment.Amount = Math.Clamp(segment.Amount, min, max);
+                }
             }
             SortCalculateRelativeAmounts();
         }
@@ -336,16 +338,19 @@ namespace Game
 
         public Dictionary<DamageType, float> Flat { get; set; } = new Dictionary<DamageType, float>();
         public Dictionary<DamageType, float> Multipliers { get; set; } = new Dictionary<DamageType, float>();
-        public bool AllowNegativeResults { get; set; } = true;
+        public bool AllowNegativeFinalResults { get; set; } = true;
+        public bool AllowNegativeFlatResults { get; set; } = false;
         public CalculationOrder Order { get; set; } = CalculationOrder.FlatFirst;
 
         public DamageModification() { }
 
-        public DamageModification(Dictionary<DamageType, float> flat, Dictionary<DamageType, float> multipliers, bool allowNegativeResults = true, CalculationOrder order = CalculationOrder.FlatFirst)
+        public DamageModification(Dictionary<DamageType, float> flat, Dictionary<DamageType, float> multipliers, bool allowNegativeFinalResults = true, bool allowNegativeFlatResults = false,
+            CalculationOrder order = CalculationOrder.FlatFirst)
         {
             Flat = flat == null ? new Dictionary<DamageType, float>() : DictionaryHelper.Copy(flat);
             Multipliers = multipliers == null ? new Dictionary<DamageType, float>() : DictionaryHelper.Copy(multipliers);
-            AllowNegativeResults = allowNegativeResults;
+            AllowNegativeFinalResults = allowNegativeFinalResults;
+            AllowNegativeFlatResults = allowNegativeFlatResults;
             Order = order;
         }
 
@@ -353,7 +358,8 @@ namespace Game
         {
             Flat = DictionaryHelper.Copy(modification.Flat);
             Multipliers = DictionaryHelper.Copy(modification.Multipliers);
-            AllowNegativeResults = modification.AllowNegativeResults;
+            AllowNegativeFinalResults = modification.AllowNegativeFinalResults;
+            AllowNegativeFlatResults = modification.AllowNegativeFlatResults;
             Order = modification.Order;
         }
 
@@ -371,6 +377,9 @@ namespace Game
                 default:
                     throw new NotImplementedException(Order.ToString());
             }
+            if (!AllowNegativeFinalResults) {
+                damage.ClampSegments(0.0f);
+            }
         }
 
         private void ApplyFlat(Damage damage)
@@ -378,8 +387,8 @@ namespace Game
             foreach (KeyValuePair<DamageType, float> pair in Flat) {
                 damage.Add(new Damage(pair.Value, pair.Key));
             }
-            if (!AllowNegativeResults) {
-                damage.ClampSegments(0.0f);
+            if (!AllowNegativeFlatResults) {
+                damage.ClampSegments(0.0f, Flat.Keys.ToList());
             }
         }
 
