@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace Game.UI
 {
+    /// <summary>
+    /// UI background manager. Note: As this is an UI element, it will hide game world behind it if active
+    /// </summary>
     public class BackgroundManager : MonoBehaviour
     {
         public static BackgroundManager Instance;
