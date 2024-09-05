@@ -19,6 +19,8 @@ namespace Game
 
         private SaveManager<Saving.Data.SaveData> saveManager = null;
         private State state;
+        private float? lastScreenWidth = null;
+        private float? lastScreenHeight = null;
 
         /// <summary>
         /// Initializiation
@@ -85,6 +87,16 @@ namespace Game
                         throw new NotImplementedException(saveManager.State.ToString());
                 }
             }
+
+            //Check for screen size changes
+            float screenWidth = Screen.width;
+            float screenHeight = Screen.height;
+            if (lastScreenWidth.HasValue && lastScreenHeight.HasValue && (lastScreenWidth.Value != screenWidth || lastScreenHeight.Value != screenHeight) &&
+                CameraBackground.Instance != null && CameraBackground.Instance.Active) {
+                CameraBackground.Instance.UpdateSprite();
+            }
+            lastScreenWidth = screenWidth;
+            lastScreenHeight = screenHeight;
         }
 
         public State State

@@ -36,6 +36,15 @@ namespace Game
             KeyboardManager.Instance.AddKeyHeldEventListener(KeyCode.D, MoveRight, KeyEventTag.Camera);
 
             MouseManager.Instance.AddEventListener(MouseButton.Middle, MouseDragEventType.Move, new MouseDragEvent(Move));
+
+            //Create CameraBackground
+            //TODO: Add support for multiple cameras?
+            GameObject background = new GameObject("Background");
+            background.AddComponent<SpriteRenderer>();
+            background.AddComponent<CameraBackground>();
+            background.AddComponent<RectTransform>();
+            background.GetComponent<RectTransform>().position = new Vector3(CurrentCamera.transform.position.x, CurrentCamera.transform.position.y, CurrentCamera.transform.position.z + CameraBackground.DISTANCE);
+            background.GetComponent<RectTransform>().SetParent(CurrentCamera.transform);
         }
 
         /// <summary>
