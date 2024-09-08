@@ -104,10 +104,7 @@ namespace Game.UI
                 CloseTooltip();
             } else if (currentTooltip != null && newTooltip != null && currentTooltip.Target == newTooltip.Target) {
                 //Same tooltip
-                if (currentTooltipPanel.activeSelf) {
-                    //Tooltip is open, update position
-                    currentTooltipPanel.transform.position = tooltipPosition;
-                } else {
+                if(!currentTooltipPanel.activeSelf) {
                     if (timeLeft > 0.0f) {
                         //Tooltip is not yet visible, reduce timeLeft
                         timeLeft = Math.Max(timeLeft - Time.deltaTime, 0.0f);
@@ -188,6 +185,27 @@ namespace Game.UI
                 if(currentTooltipPanel.layer != 2) {
                     CustomLogger.Warning("{CustomTooltipLayerWarning}", tooltip.CustomTooltipPanel.name);
                 }
+            }
+
+            //Check if tooltip is off screen
+            RectTransform currentRectTransform = currentTooltipPanel.GetComponent<RectTransform>();
+            if (currentRectTransform != null) {
+                Vector3 position = new Vector3(currentTooltipPanel.transform.position.x, currentTooltipPanel.transform.position.y, currentTooltipPanel.transform.position.z);
+                if (currentMousePosition.y < currentRectTransform.rect.height && currentRectTransform.anchorMin.y == 1.0f && currentRectTransform.anchorMax.y == 1.0f) {
+                    //Too low
+                    position.y += currentRectTransform.rect.height - currentMousePosition.y;
+                } else if (currentMousePosition.y + currentRectTransform.rect.height > Screen.height && currentRectTransform.anchorMin.y == 0.0f && currentRectTransform.anchorMax.y == 0.0f) {
+                    //Too high
+                    position.y -= currentMousePosition.y + currentRectTransform.rect.height - Screen.height;
+                }
+                if (currentMousePosition.x < currentRectTransform.rect.width && currentRectTransform.anchorMin.x == 1.0f && currentRectTransform.anchorMax.x == 1.0f) {
+                    //Too much to the right
+                    position.x += currentRectTransform.rect.width - currentMousePosition.x;
+                } else if (currentMousePosition.x + currentRectTransform.rect.width > Screen.width && currentRectTransform.anchorMin.x == 0.0f && currentRectTransform.anchorMax.x == 0.0f) {
+                    //Too much to the left
+                    position.x -= currentRectTransform.rect.width + currentMousePosition.x - Screen.width;
+                }
+                currentTooltipPanel.transform.position = position;
             }
         }
     }
