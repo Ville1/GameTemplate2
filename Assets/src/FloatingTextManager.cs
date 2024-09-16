@@ -78,6 +78,7 @@ namespace Game
         private static readonly int DEFAULT_FONT_SIZE = 2;
         private static readonly float DEFAULT_PADDING = 0.1f;
         private static readonly float OVERLAP_MARGIN = 0.025f;
+        private static readonly float? SCALE_MODIFIER = null;
 
         public Guid Id { get; private set; }
         public LString Text { get; private set; }
@@ -130,6 +131,7 @@ namespace Game
             TMP_Text text = textGameObject.GetComponent<TMP_Text>();
             RectTransform textRectTransform = textGameObject.GetComponent<RectTransform>();
             textGameObject.GetComponent<MeshRenderer>().sortingOrder = SPRITE_SORTING_ORDER + 1;
+            Renderer.sortingOrder = SPRITE_SORTING_ORDER;
             text.text = Text;
             text.fontSize = FontSize;
 
@@ -141,6 +143,10 @@ namespace Game
             textRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newSize.y);
             Renderer.drawMode = SpriteDrawMode.Sliced;
             Renderer.size = new Vector2(Width, Height);
+
+            if (SCALE_MODIFIER.HasValue) {
+                RectTransform.localScale = new Vector3(RectTransform.localScale.x * SCALE_MODIFIER.Value, RectTransform.localScale.y * SCALE_MODIFIER.Value, 1.0f);
+            }
 
             if (LinkedTextId.HasValue) {
                 //Check that a text with this id has already been displayed
