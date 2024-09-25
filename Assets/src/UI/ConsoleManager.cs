@@ -510,7 +510,7 @@ namespace Game.UI
             }
 
             if(parameters == null || parameters.Count != output.Parameters.Count) {
-                errorMessage = new LString("ConsoleCommandInvalidArgumentCount", LTables.Game, 1);//TODO: Should console localization be in Game table?
+                errorMessage = new LString("ConsoleCommandInvalidArgumentCount", LTables.Game, output.Parameters.Count);//TODO: Should console localization be in Game table?
                 return false;
             }
 
