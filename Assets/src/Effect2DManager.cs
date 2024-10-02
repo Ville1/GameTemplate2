@@ -53,7 +53,7 @@ namespace Game
         {
             Effect2D prototype = prototypes.FirstOrDefault(effect => effect.Name == effectName || (!CASE_SENSITIVE_NAMES && effect.Name.ToLower() == effectName.ToLower()));
             if(prototype == null) {
-                CustomLogger.Warning("EffectNotFound", effectName);
+                CustomLogger.Warning("{EffectNotFound}", effectName);
                 return Guid.Empty;
             }
             Guid id = Guid.NewGuid();

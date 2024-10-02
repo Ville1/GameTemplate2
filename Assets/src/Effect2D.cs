@@ -40,7 +40,7 @@ namespace Game
             DurationRemaining = null;
             if(Duration.HasValue && !animation.IsLooping) {
                 Duration = null;
-                CustomLogger.Warning("EffectRequiresLoopingAnimation");
+                CustomLogger.Warning("{EffectRequiresLoopingAnimation}");
             }
         }
 

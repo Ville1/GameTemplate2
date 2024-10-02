@@ -23,7 +23,7 @@ namespace Game.Input
             Initialize();
             KeyBinding binding = bindings.FirstOrDefault(b => b.InternalName == internalName);
             if(binding == null) {
-                CustomLogger.Error("KeyBindingNotFound", internalName);
+                CustomLogger.Error("{KeyBindingNotFound}", internalName);
                 return null;
             }
             return binding;
