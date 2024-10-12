@@ -182,7 +182,8 @@ namespace Game.UI
                 );
                 currentTooltipPanel.name = CUSTOM_PANEL_NAME;
                 currentTooltipPanel.SetActive(true);
-                if(currentTooltipPanel.layer != 2) {
+                currentTooltipPanel.transform.position = currentMousePosition;
+                if (currentTooltipPanel.layer != 2) {
                     CustomLogger.Warning("{CustomTooltipLayerWarning}", tooltip.CustomTooltipPanel.name);
                 }
             }
